@@ -79,7 +79,7 @@ npm run icons          # re-render the placeholder PWA icons (needs Chromium)
 
 ## 4. Demo access
 
-- Deployed URL: **Pending.** The shell has not been deployed yet.
+- Deployed URL: https://foodoo-d5h.pages.dev (Cloudflare Pages, deployed from `main`). It currently serves the placeholder shell only. The end-to-end smoke test passes against it, including a reload with the network off.
 - Load demo data: not available yet (planned for F2).
 - Reset demo data: not available yet (planned for F2).
 
@@ -151,8 +151,7 @@ Per the competition rules, material AI assistance is disclosed here with the too
 ## 9. Known limitations
 
 - There are no product screens yet. The domain logic, demo generator and backtest exist, but nothing in the app calls them. Rows not marked `Done` or `In progress` in the status table are not built.
-- The shell is not deployed yet, so there is no deployed URL.
-- The CI workflow has been written but has not run on GitHub yet.
+- The deployed site is the placeholder shell; there is no product flow to demo yet.
 - There is no `LICENSE` file yet.
 - PWA icons are temporary placeholders, not the final brand icons.
 - Only Chromium is covered by end-to-end tests.

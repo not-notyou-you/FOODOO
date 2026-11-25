@@ -88,7 +88,7 @@ All versions are exact and in the lockfile. Where we are not on the newest relea
 
 - **Decision:** Cloudflare Pages, as the team chose. Build command `npm run build`, output directory `dist`, Node version taken from `.nvmrc`. `public/_headers` sets no-cache on `index.html`, `sw.js` and the manifest, and long immutable caching on hashed assets and fonts.
 - **No `_redirects`:** Cloudflare Pages serves single-page apps automatically when there is no top-level `404.html`, so a rewrite rule is unnecessary.
-- **Status:** not deployed. The team creates the project and logs in.
+- **Status:** deployed at https://foodoo-d5h.pages.dev, connected to the GitHub repository so each push to `main` deploys. The Playwright smoke test (service worker and offline reload) passes against that URL, `sw.js` is served with `Cache-Control: no-cache`, and a deep link returns 200 (single-page fallback).
 
 ### D-013 Placeholder shell, routing and i18n baseline (Vassel, Sonny)
 
