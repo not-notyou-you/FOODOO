@@ -190,9 +190,7 @@ describe("Close", () => {
     expect(within(tomorrow).getAllByRole("listitem")).toHaveLength(4);
     expect(within(tomorrow).getAllByText("suggested portions")).toHaveLength(4);
 
-    fireEvent.click(
-      within(dialog).getByRole("button", { name: "Confirm and close day" }),
-    );
+    fireEvent.click(within(dialog).getByRole("button", { name: "Save all" }));
     expect(
       await screen.findByRole("heading", { name: "Today is closed" }),
     ).toBeTruthy();
@@ -237,9 +235,7 @@ describe("Close", () => {
         "Marked as an unusual day: kept, but not used for suggestions.",
       ),
     ).toBeTruthy();
-    fireEvent.click(
-      within(dialog).getByRole("button", { name: "Confirm and close day" }),
-    );
+    fireEvent.click(within(dialog).getByRole("button", { name: "Save all" }));
     expect(
       await screen.findByRole("heading", { name: "Today is closed" }),
     ).toBeTruthy();
@@ -323,9 +319,7 @@ describe("Close", () => {
         name: /Tomorrow's suggestions/,
       }),
     ).toBeNull();
-    fireEvent.click(
-      within(dialog).getByRole("button", { name: "Confirm and close day" }),
-    );
+    fireEvent.click(within(dialog).getByRole("button", { name: "Save all" }));
     expect(
       await screen.findByRole("heading", { level: 1, name: "Today" }),
     ).toBeTruthy();

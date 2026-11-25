@@ -108,6 +108,7 @@ At the cutoff: record the final commit, fill in the README "Final Day log" (star
 | BT | Backtest report | Core | Done |
 | WS | Weekly summary + history | Should | Done |
 | DM-3/4 | Export / import | Should | Done |
+| REG | Register mode, auto sell-out, sales-linked close, 7-day correction | Should | Done |
 | UX-FIX | Top usability fix from owner testing | Should | Reserved for Final Day |
 
 Allowed status values: `Not started`, `In progress`, `Done`, `Reserved for Final Day`, `Simulated` (works on demo data only).

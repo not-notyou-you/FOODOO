@@ -4,205 +4,76 @@ Daily portion planning that counts the customers a sold-out menu hides.
 
 Team **Calon Mantu Idaman** (Samuel Matthew, Vassel Goleyu, Hakim Ulinnuha, Sonny Ferdinand), STACK 2026 by GDGoC ITB, Case 2: Stronger Communities and Everyday Services.
 
-> **Current state: product-improvement build (CHECKPOINT F3), ready for the Final Day.** The whole daily loop works on the device, online or offline: one-time setup, the morning plan with a reason per menu, one-tap sell-outs with undo, and the night close with leftovers, missed sell-out times and an unusual-day flag, ending with tomorrow's suggestions. It runs in English and Bahasa Indonesia and can load a clearly labelled demo stall. A "How FOODOO calculates" page shows the estimate and suggestion rules on a worked example computed by the app's own code. The weekly summary, export/import and the owner-testing fix are reserved for the Final Day (see `FINAL_DAY.md`). See the status table for the exact state.
-
 ## 1. Overview
 
-**Problem.** Small food stalls (_warung_) cook each menu once a morning and decide portions by feel. Leftovers waste money. Cooking too little makes popular menus sell out early, and that second loss is invisible: a sold-out day records sales, not how many people wanted to buy.
-
-**Users.** Owners of small warung in residential neighbourhoods who cook in morning batches and record sales in a notebook or not at all. They use an Android phone, often with limited mobile data, and have a few seconds at a time during service.
-
-**Core loop (all four steps are built).**
-
-1. One-time setup: menus, prices, costs, and busy hours.
-2. Each morning: accept or edit a suggested portion count, each with a reason.
-3. During service: one tap records when a menu sells out.
-4. At night: enter leftovers and confirm any missed sell-out time.
-
-FOODOO then estimates true demand on sold-out days from the sell-out time and the busy-hour profile, and suggests the next quantity by weighing margin against cost. All rules are deterministic TypeScript. No AI or machine-learning model is used inside the product.
+- **Problem.** Small food stalls (_warung_) decide portions by feel. Leftovers waste money; sold-out menus hide how many people wanted to buy.
+- **Users.** Warung owners on an Android phone, often with little mobile data and a few seconds at a time.
+- **Core loop.** Setup once (menus, prices, costs, busy hours) → each morning accept or edit suggested portions, each with a reason → during service tap when a menu sells out (or ring up sales in the optional Register mode) → at night enter leftovers and confirm missed sell-out times. FOODOO then estimates true demand on sold-out days and suggests tomorrow's portions.
+- **Rules only.** Deterministic TypeScript. No AI or ML model inside the product. Works offline, English and Bahasa Indonesia.
 
 ## 2. Feature status
 
-Single source of truth is `PLAN.md` section 4. This table is kept identical.
+Single source of truth is `PLAN.md` section 4. Acceptance criteria are in `SPEC.md`; evidence per feature is in `docs/DECISIONS.md` and `tests/`.
 
-| ID       | Feature                                          | Priority | Status                 |
-| -------- | ------------------------------------------------ | -------- | ---------------------- |
-| ON       | Onboarding and setup                             | Core     | Done                   |
-| TD       | Today screen (loop view)                         | Core     | Done                   |
-| PL       | Morning plan with reasons                        | Core     | Done                   |
-| SV       | Service: one-tap sold out + undo                 | Core     | Done                   |
-| CL       | Night close + missed sell-out + unusual day      | Core     | Done                   |
-| EST      | Demand estimation + suggestion logic             | Core     | Done                   |
-| DEMO     | Demo stall generator + labels                    | Core     | Done                   |
-| PWA      | Offline + installable                            | Core     | Done                   |
-| I18N     | English / Bahasa Indonesia                       | Core     | Done                   |
-| DM-1/2/5 | Delete all, demo load/remove, persistent storage | Core     | Done                   |
-| BT       | Backtest report                                  | Core     | Done                   |
-| WS       | Weekly summary + history                         | Should   | Done                   |
-| DM-3/4   | Export / import                                  | Should   | Done                   |
-| UX-FIX   | Top usability fix from owner testing             | Should   | Reserved for Final Day |
+| ID       | Feature                                                            | Priority | Status                 |
+| -------- | ------------------------------------------------------------------ | -------- | ---------------------- |
+| ON       | Onboarding and setup                                               | Core     | Done                   |
+| TD       | Today screen (loop view)                                           | Core     | Done                   |
+| PL       | Morning plan with reasons                                          | Core     | Done                   |
+| SV       | Service: one-tap sold out + undo                                   | Core     | Done                   |
+| CL       | Night close + missed sell-out + unusual day                        | Core     | Done                   |
+| EST      | Demand estimation + suggestion logic                               | Core     | Done                   |
+| DEMO     | Demo stall generator + labels                                      | Core     | Done                   |
+| PWA      | Offline + installable                                              | Core     | Done                   |
+| I18N     | English / Bahasa Indonesia                                         | Core     | Done                   |
+| DM-1/2/5 | Delete all, demo load/remove, persistent storage                   | Core     | Done                   |
+| BT       | Backtest report                                                    | Core     | Done                   |
+| WS       | Weekly summary + history                                           | Should   | Done                   |
+| DM-3/4   | Export / import                                                    | Should   | Done                   |
+| REG      | Register mode, auto sell-out, sales-linked close, 7-day correction | Should   | Done                   |
+| UX-FIX   | Top usability fix from owner testing                               | Should   | Reserved for Final Day |
 
 Allowed status values: `Not started`, `In progress`, `Done`, `Reserved for Final Day`, `Simulated` (works on demo data only).
 
-`EST` is Done because test cases T1 to T16 from `SPEC.md` section 6.6 pass with 100% coverage of `src/domain` (re-verified in the F1 review on 2026-11-25). `BT` is Done because `npm run backtest` regenerates `docs/BACKTEST.md` and the README block below byte-for-byte on every run (checked by file hash on two consecutive runs). `ON` is Done because the three acceptance criteria in `SPEC.md` section 5.1 pass as component tests (`tests/screens/onboarding.test.tsx`): Welcome shows both options with no data, a cost at or above the price shows an inline error and blocks saving, and a finished setup reopens on Today. ON-5 ("setup in under 3 minutes for 4 menus") is a timing target that code cannot measure; it has **not** been timed with an owner yet.
-
-`TD` is Done:
-
-- TD-1 to TD-3 are tested in `tests/screens/today.test.tsx` and `tests/domain/phase.test.ts`: the loop view, the phase from the clock and stored state, one primary action, and today's counts.
-- The primary action now opens working Plan, Service and Close screens.
-- Today also lists past days that were planned but never closed (CL-6).
-
-`PL` is Done:
-
-- PL-1 to PL-5 and both acceptance criteria in `SPEC.md` section 5.2 pass in `tests/screens/plan.test.tsx` and `tests/db/dayFlow.test.ts`.
-- Each card shows the number and reason produced by `suggestQty`.
-- Steppers step by one, repeat while held, and stay within 0 to 999.
-- **Accept all** saves with one tap.
-- Changing a suggestion N to N + 3 stores `suggestedQty = N` and `cookedQty = N + 3`, and the card shows "Edited".
-- The plan locks after the first sell-out.
-
-`SV` is Done:
-
-- SV-1 to SV-4 and both acceptance criteria in `SPEC.md` section 5.3 pass in `tests/screens/service.test.tsx` and `tests/app/toast.test.tsx`.
-- A tap at 10:32 shows "Sold out 10:32" and stores `"10:32"`.
-- **Undo** returns `soldOutAt` to `null`, and the toast lasts exactly 10 seconds.
-- A long press or **Edit time** changes the time.
-- SV-5 (works fully offline) is shown by the offline end-to-end run below.
-
-`CL` is Done:
-
-- CL-1 to CL-6 and both acceptance criteria in `SPEC.md` section 5.4 pass in `tests/screens/close.test.tsx`, `tests/domain/close.test.ts` and `tests/db/dayFlow.test.ts`.
-- Ayam Goreng cooked 31 with leftover 3 stores demand 28, not an estimate.
-- Nasi Uduk cooked 42, sold out at 10:30, stores 81, shown as "≈ 81 (estimate)".
-- The same 81 is checked in the real UI by the end-to-end test.
-
-`DEMO` is Done:
-
-- The demo loads from the Welcome screen or Settings.
-- Every screen shows the "Demo data" sticker.
-- Every estimated demand reads "≈ N (estimate)".
-
-`PWA` is Done:
-
-- `e2e/coreLoop.spec.ts` runs the full PLAN F2 item 7 loop against the production build, once online and once with the network cut after the first load. The loop is: load demo, edit one plan value, mark sold out, undo, mark again, close with a leftover and a missed sell-out time, see tomorrow's suggestions, reload, check the data persists.
-- Chromium reports no installability errors (`e2e/smoke.spec.ts`).
-- Installation on a physical phone has **not** been tested yet.
-
-`I18N` is Done: every visible string is in `src/i18n/en.ts` and `src/i18n/id.ts` with identical keys and placeholders (checked by tests), the language toggle is in Settings and on the Welcome screen, and the choice persists across restarts (tested).
-
-`DM-1/2/5` is Done: delete all (with a confirmation sheet), load, reset and remove the demo stall are tested in `tests/db/repositories.test.ts` and `tests/screens/settings.test.tsx`. Persistent storage is requested with `navigator.storage.persist()` after setup finishes or the demo loads; the browser decides whether to grant it. Settings → Data shows whether the browser protects the data and offers **Keep my data** to ask again (tested with a stubbed storage manager).
-
-**Added in F3 (no separate status row):**
-
-- **How FOODOO calculates** (`/how`, linked from Settings → About and the Close summary): the worked example "sold out at 10:30 → about 52% had arrived → ≈ 81 (estimate)" and the suggestion of 34 for an example menu, computed by `src/domain/explain.ts` with the same functions the app uses (`tests/domain/explain.test.ts`).
-- **Data survives an app update:** `tests/db/migration.test.ts` fills a v1 database through the real repositories, upgrades it to a v2 schema and checks every row is unchanged.
-- **Edge cases:** no menus, all menus archived, a day left unclosed, and the clock past closing time are tested in `tests/screens/edgeCases.test.tsx`; one gap found there was fixed (decision D-066).
-- **Local fallback:** `e2e/noNetwork.spec.ts` walks every screen with all non-local requests blocked and checks that none was attempted.
-- **Measured quality:** bundle size (`npm run size`) and Lighthouse scores (`npm run lighthouse`), in section 12.
-- **Owner testing (PLAN F3 item 1): not done.** The team had no findings from owners yet; none are invented.
-
-`WS` is Done (built early by team decision, D-083; it is no longer Final Day work):
-
-- WS-1: Today and the new **History** screen show the last 7 days from stored data: leftover portions, sell-out events, estimated lost sales (labelled "estimate") and the share of plans accepted without edit (`tests/screens/today.test.tsx`).
-- WS-2: History shows a per-menu table (cooked, sold, leftover, demand with the estimate label) computed by `menuTotals` in `src/domain/metrics.ts` (`tests/screens/history.test.tsx`).
-- WS-3: History draws a bar chart of cooked vs demand per day for a chosen menu, with the number above each bar; estimated demand bars are dashed, and the legend uses shape and text.
-- WS-4: History lists every past day (newest first, 14 at a time) and opens a read-only day view with the cooked, suggested, sell-out time, leftover, demand and reason for each menu. An unclosed day links to its close screen.
-- The core-loop end-to-end test opens History and the day just closed.
-
-`DM-3/4` is Done (built early by team decision, D-083):
-
-- Export in **JSON** (full backup), **CSV** (one row per menu per day) or **XLSX** (full backup in four sheets: Stall, Menus, Days, MenuDays) from Settings → Data.
-- Import from Settings → Data or from the Welcome screen. JSON and XLSX replace all data after a confirmation; CSV adds or updates daily records for menus that already exist. Every field is checked with the same rules as setup; nothing is written unless the whole file is valid, and the problems are listed.
-- `tests/db/exportImport.test.ts` covers round trips, each kind of invalid file and spreadsheet-edited values. `e2e/exportImport.spec.ts` runs export → delete all → import for JSON and XLSX and checks the re-exported file is byte-identical (the `PLAN.md` F4 criterion).
-
-Foundation work that exists but does not meet any row's acceptance criteria on its own: build tooling, lint, unit-test and end-to-end test setup, CI workflow, self-hosted fonts, design tokens and shared components.
-
 ## 3. Setup
 
-**Supported environment**
-
-- Node.js 22.12.0 or a later 22.x release (pinned in `.nvmrc`; `engines` rejects other majors).
-- npm 10 or later.
-- Browsers: current Chrome and Edge (primary, including Android Chrome), Firefox, and Safari. End-to-end tests run on Chromium only.
-
-**Commands**
-
-```
-npm ci
-npm run dev            # development server
-npm run lint           # ESLint (zero warnings) and Prettier check
-npm test               # unit tests (Vitest)
-npm run test:coverage  # unit tests with the 100% gate on src/domain
-npm run build          # type-check and production build into dist/
-npm run preview        # serve the production build on http://localhost:4173
-npx playwright install chromium   # once, before the first e2e run
-npm run e2e            # end-to-end tests against the production build
-npm run backtest       # simulate both policies; rewrites docs/BACKTEST.md and the README table
-npm run seed           # rewrites docs/DEMO_SCENARIOS.md from the four demo scenarios
-npm run icons          # re-render the placeholder PWA icons (needs Chromium)
-npm run size           # gzip size of the production JavaScript; fails above 250 KB
-npm run lighthouse     # with npm run preview running: Lighthouse scores into docs/LIGHTHOUSE.md and section 12
-```
-
-**Windows note.** Run the test commands from a terminal whose path starts with an upper-case drive letter (`D:\...`, the default in PowerShell and VS Code). From a shell that reports `d:/...`, the coverage report lists every file twice and the 100% gate fails even though the tests pass. Linux and macOS are not affected, and CI runs on Linux.
-
-**Demo setting.** `VITE_DEMO` turns the demo stalls on or off. Copy `.env.example` to `.env` and set it to `off` (no demo button anywhere) or `on`. A missing or empty value means `on`. The value is fixed at build time, so rebuild after changing it; any other value stops the build with an error. Unit and end-to-end tests always use `on`. On Cloudflare Pages, set the same variable in the project's environment variables. `.env` is git-ignored and holds no secrets.
-
-**Dependencies.** Runtime and development dependencies are listed with versions and licences in section 7. All versions are pinned exactly and the lockfile is committed.
+- **Environment:** Node.js 22.12.0 or a later 22.x (`.nvmrc`), npm 10+. Chrome, Edge, Firefox, Safari (e2e on Chromium only).
+- **Install and run:** `npm ci`, then `npm run dev`.
+- **Checks:** `npm run check` (types, lint, unit tests, build). `npm run e2e` runs Playwright (once: `npx playwright install chromium`).
+- **Other scripts:** `npm run backtest` (rewrites `docs/BACKTEST.md` and section 11), `npm run seed`, `npm run size`, `npm run lighthouse`.
+- **Demo switch:** `VITE_DEMO=off` in `.env` (copy `.env.example`) hides the demo stalls; the value is fixed at build time.
+- **Dependencies:** pinned exactly, listed with licences in section 7.
 
 ## 4. Demo access
 
-- Deployed URL: https://foodoo-d5h.pages.dev (Cloudflare Pages, deployed automatically from `main`). It serves the last pushed commit. Until the team commits and pushes the F2 and F3 work, it still shows the earlier build, where Plan, Service and Close say "Coming soon".
-- Walk the loop: **Try demo stall** → **Plan today's portions** → **Accept all** or **Save plan** → **Service**, tap a menu when it sells out (**Undo** for 10 seconds) → **Close**, enter leftovers → **Close day** → **Confirm and close day**. Tomorrow's suggestions are then shown on the Close screen. **How is this worked out?** there, or **Settings → About → How FOODOO calculates**, opens the explanation page.
-- Load demo data: on the first screen, press **Try demo stall** and pick one of four made-up stalls. Each card shows the hours, the length of the history and a short description. Each stall has 4 menus and synthetic history from a fixed seed. Details and generated numbers: `docs/DEMO_SCENARIOS.md`.
-
-  | Demo stall               | Hours          | What it shows                                                                   |
-  | ------------------------ | -------------- | ------------------------------------------------------------------------------- |
-  | Warung Demo              | 06:00 to 14:00 | Two rush hours; Nasi Uduk sells out most days, so demand is corrected (56 days) |
-  | Demo Warung Makan Kantor | 10:00 to 15:00 | Lunch peak, quiet weekends; suggestions differ by weekday (56 days)             |
-  | Demo Angkringan Malam    | 18:00 to 02:00 | Night stall whose day crosses midnight (56 days)                                |
-  | Demo Warung Baru Buka    | 07:00 to 13:00 | New stall with 4 days of history: cold-start suggestions, a salvage value       |
-
-- Dates always follow today: the history ends the day before the current stall day. When the app is opened on a later day, the demo is generated again with the same stall, so the content stays the same and only the dates move. A short message says so. Anything tried in the demo on an earlier day is replaced.
-- Reset demo data: **Settings → Data → Reset demo data** reloads the same demo stall from scratch. **Choose another demo stall** opens the same choice of four. **Remove demo stall** deletes it and returns to the first screen.
-- The demo cannot be loaded over an owner's own data; Settings explains that the own data must be deleted first.
-
-All synthetic data carries a yellow **Demo data** sticker in the header of every screen.
+- **URL:** https://foodoo-d5h.pages.dev (Cloudflare Pages, from `main`; it shows the last pushed commit).
+- **Load demo data:** first screen → **Try demo stall** → pick one of four made-up stalls (synthetic history from a fixed seed). Every screen shows a yellow **Demo data** sticker.
+- **Reset:** Settings → Data → **Reset demo data**, **Choose another demo stall**, or **Remove demo stall**. Dates always follow today.
+- **Register mode:** Settings → Sales mode → Register, then plan today and open the Sales tab.
+- Demo data cannot be loaded over the owner's own data.
 
 ## 5. Local fallback
-
-Run the production build locally, with no network after the install:
 
 ```
 npm ci
 npm run build
-npm run preview
+npm run preview   # http://localhost:4173
 ```
 
-Open http://localhost:4173. The preview server runs on the laptop itself, and the app loads nothing from the internet: fonts and icons are self-hosted and there is no backend. After the first load the service worker also serves the app with no server at all.
-
-How this is verified:
-
-- `e2e/noNetwork.spec.ts` blocks every request that is not to the local server, walks Welcome, demo, Plan, Service, Close, How FOODOO calculates and Settings, and checks that no request was blocked.
-- `e2e/coreLoop.spec.ts` runs the whole core loop twice: once online and once with the network cut after the first load.
-- The production bundle contains no external URL that the app fetches. A search of `dist/` finds only XML namespace strings, library error-message links and the README link in Settings.
-- On 2026-11-25 the uncommitted working tree was copied without `node_modules` and `dist`, then `npm ci`, `npm run build` and `npm run preview` ran in the copy, and the e2e suite passed against it (`E2E_BASE_URL`). The install needs the npm registry once; nothing after it does.
-- **Not done by the AI:** a run with the laptop's network adapter switched off. The team should rehearse this once before the Final Day (`FINAL_DAY.md` section 5).
+Fonts and icons are self-hosted and there is no backend, so after install nothing needs the internet; after the first load the service worker also works with no server. Verified by `e2e/noNetwork.spec.ts` (all external requests blocked) and `e2e/coreLoop.spec.ts` (online and offline). Not done: a run with the laptop's network adapter switched off; rehearse it before the Final Day (`FINAL_DAY.md`).
 
 ## 6. Data and privacy
 
-- No account, no server, no backend, no analytics. The app makes no network request for data.
-- All stall data stays on the owner's device in IndexedDB (database `foodoo`, via Dexie): the stall (optional name, opening hours, busy-hour profile, a demo flag), the menus (name, price, cost, leftover value, usual portions), and per day and menu the planned and cooked quantities, sell-out time, leftovers and the estimated demand.
-- No customer data is collected or stored.
-- The language choice is kept in the browser's `localStorage` (`foodoo.language`). It is a device preference, so **Delete all data** keeps it.
-- **Settings → Data → Delete all data** removes every stored record after a confirmation.
-- **Settings → Data → Export** saves a file on the device only (JSON, CSV or XLSX); nothing is uploaded. **Import** reads a file the owner picks and validates it on the device before anything is written.
-- The app asks the browser for persistent storage so data is not evicted under storage pressure; the browser may refuse. Settings → Data shows the browser's answer.
+- No account, server, backend or analytics. No customer data.
+- Stall data stays on the device in IndexedDB (`foodoo`, via Dexie): stall settings, menus, per-day plans, sell-outs, leftovers and, in Register mode, sales (menu, quantity, price, payment label).
+- The language choice is kept in `localStorage` (`foodoo.language`) and survives **Delete all data**.
+- Settings → Data: **Delete all data** (with confirmation), **Export** (JSON, CSV, XLSX; saved on the device only) and **Import** (validated before anything is written).
+- The app asks the browser for persistent storage; the browser may refuse and Settings shows its answer.
 - No API keys or credentials exist in this project.
 
 ## 7. Third-party resources
 
-Licences below were read from each package's own `package.json` and font licence file.
+Licences read from each package's `package.json` and font licence file.
 
 | Resource                                                       | Version        | Use                                                                            | Licence                   |
 | -------------------------------------------------------------- | -------------- | ------------------------------------------------------------------------------ | ------------------------- |
@@ -231,15 +102,11 @@ Licences below were read from each package's own `package.json` and font licence
 | Space Grotesk (latin subset, self-hosted)                      | v22            | UI typeface, `public/fonts/`                                                   | SIL Open Font License 1.1 |
 | Rubik Mono One (glyph outlines F, D, O)                        | v20            | Logo and app-icon letters, converted to SVG paths; font not loaded at runtime  | SIL Open Font License 1.1 |
 
-The ZIP and XLSX file handling (`src/db/zip.ts`, `src/db/xlsx.ts`) and CSV handling (`src/db/csv.ts`) were written for this project and use no library; compression uses the browser's built-in `CompressionStream` / `DecompressionStream` (decision D-086).
-
-Icons: the UI icons (`src/components/icons/`), the logo, the app icon and the PWA icons were drawn for this project as SVG; the PWA PNGs are rendered from `public/icons/icon.svg` by `scripts/makeIcons.ts`. The logo and app icon follow the team's own brand sheet (`docs/brand/FOODOO_logo.png`): letter sizes, positions and the loop shape were measured from it, and the letters are Rubik Mono One outlines (the OFL text stays in `public/fonts/OFL-RubikMonoOne.txt`). No icon set or dataset is used.
-
-Licence of this project: **pending team decision.** No `LICENSE` file has been added.
+ZIP, XLSX and CSV handling are written for this project (no library; browser `CompressionStream`). UI icons, logo and PWA icons were drawn for this project as SVG. Licence of this project: **pending team decision** (no `LICENSE` file yet).
 
 ## 8. AI assistance
 
-Per the competition rules, material AI assistance is disclosed here with the tool and its role. The team owns and must be able to explain every module.
+Material AI assistance is disclosed here. The team owns and must be able to explain every module.
 
 | Date       | Tool                            | Module                                                                                                                                                                                                             | What the AI did                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Reviewed by                                                             |
 | ---------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
@@ -257,35 +124,22 @@ Per the competition rules, material AI assistance is disclosed here with the too
 | 2026-11-25 | Claude Code (Claude Opus 5.5)   | Demo scenarios: `src/demo/`, `src/app/demoConfig.ts`, `src/screens/Welcome.tsx`, `src/screens/Settings.tsx`, `scripts/seed.ts`, config, tests                                                                      | At the team's request, added three more synthetic demo stalls (office lunch, night stall, new stall) and the `VITE_DEMO_SCENARIO` setting (`off`, 1 to 4); made `npm run seed` write `docs/DEMO_SCENARIOS.md`; kept scenario 1 and the backtest byte-identical; added tests; decision D-082. Not committed.                                                                                                                                                                                                                                    | Pending owner review (Hakim, Vassel)                                    |
 | 2026-11-25 | Claude Code (Claude Opus 5.5)   | History, analytics and export/import: `src/domain/metrics.ts`, `src/db/` (exportImport, csv, xlsx, zip), `src/screens/` (Today, History, DayDetail, Settings, Welcome), `src/components/`, `src/i18n/`, tests, e2e | At the team's request, built WS and DM-3/4 before the Final Day tag: last-7-days metrics on Today; the History screen (per-menu table, cooked vs demand chart, past-day list) and a read-only day view; export to JSON, CSV and XLSX and import from all three with full validation, on Settings and Welcome; a dependency-free ZIP/XLSX codec; unit, component and e2e tests; updated SPEC, DESIGN, PLAN, FINAL_DAY and this README; decisions D-083 to D-086; then a layout pass on these screens after team review (D-087). Not committed.  | Pending owner review (Hakim, assigned by the team for all of this work) |
 | 2026-11-25 | Claude Code (Claude Opus 5.5)   | Demo stall picker: `src/demo/catalog.ts`, `src/components/DemoPicker.tsx`, `src/app/useDemoRefresh.ts`, `src/db/`, `src/screens/Welcome.tsx`, `src/screens/Settings.tsx`, `src/i18n/`, tests, e2e                  | At the team's request, replaced the build-time scenario number with an in-app choice of the four demo stalls (EN and ID descriptions), moved demo dates to the current day on each new day, reduced the setting to `VITE_DEMO=on/off`, carried the demo marker through export and import (D-088); made import on the first screen a button beside Start setup and Try demo stall that opens a modal (D-089). Not committed.                                                                                                                    | Pending owner review (Hakim, Vassel)                                    |
+| 2026-11-25 | Claude Code (Claude Sonnet 5.5) | Domain tests: `tests/domain/simulation.test.ts`, `package.json` scripts                                                                                                                                            | Added a simulation test (4 demo scenarios, every menu, 20 seeds x 120 days) for estimator bias and FOODOO profit, plus a 1000-case fuzz of the estimator and suggestion range; added `typecheck` and `check` scripts; decision D-090. Did not change any formula. Not committed.                                                                                                                                                                                                                                                               | Pending owner review (Hakim)                                            |
+| 2026-11-25 | Claude Code (Claude Sonnet 5.5) | Stage 3: register mode and sales-linked close (`src/domain/pos.ts`, `src/db/`, `src/screens/Register.tsx`, Close, Settings)                                                                                        | At the owner's request, wrote the SPEC section 5.10 change, the Sale type and schema v2, `recordSale`, `voidLastSale`, mode switch and 7-day correction in the repositories; the Register screen, cart sheet, tile and sale list; the Close changes (prefill, neutral note, Don't remember, Some left over, correction); the reason text with numbers; unit, database, screen, tap-count and two-day integration tests; decision D-091. Not committed.                                                                                         | Pending owner review (Vassel, Hakim, Samuel)                            |
 
 ## 9. Known limitations
 
-- The weekly summary and export/import were built on 2026-11-25, before the `final-day-start` tag, by team decision (D-083). Replacement Final Day tasks have not been chosen yet. UX-FIX (the owner-testing fix) is still reserved and not built.
-- Export/import: XLSX and CSV files use plain cells with no formatting. Formulas in an edited XLSX file are not recalculated (the stored value is read). CSV import only adds or updates daily records for menus that already exist; it cannot create menus or change settings. Importing needs a browser with `DecompressionStream` (Chrome 103+, Safari 16.4+, Firefox 113+).
-- The History chart shows the last 7 days only.
-- The deployed site serves the earlier build until the F2 and F3 work is committed and pushed. The e2e suite has therefore only run against the local preview for this build, not against the deployed URL.
-- **Owner testing has not happened yet** (PLAN F3 item 1). No owner-testing fixes exist, and R3 (the top usability fix) depends on real findings.
-- A closed day cannot be reopened or corrected yet. A past day that was never closed can be closed later from the "Days not closed" card on Today.
-- Night stalls that close after midnight are supported, but only the domain rules and unit tests cover them. No end-to-end test runs a night stall, and no night-stall owner has tried it.
-- The **Undo** toast covers only the latest sell-out tap. An earlier tap is corrected with **Edit time** or **Not sold out**.
-- Menu cards have a photo placeholder only; photos cannot be added.
-- The app has not been tested with real warung owners yet. ON-5 (setup in under 3 minutes) and the under-one-minute daily input target have not been timed with an owner.
-- Installation has been checked with Chromium's installability report only, not on a physical Android phone.
-- The end-to-end suite runs the Warung Demo stall only; the other three demo stalls are covered by unit, database and screen tests.
-- When a demo stall is opened on a later day it is generated again, so plans and closes tried in the demo on earlier days are not kept. Demand depends on the weekday, so the numbers shift slightly with the date.
-- A demo restored from an older backup file (without the demo stall marker) keeps its dates and is not moved.
-- With `VITE_DEMO=off`, a demo stall stored earlier on a device stays until it is removed in Settings; it is no longer reset, switched or moved to today.
-- There is no `LICENSE` file yet.
-- The app icon and logo are redrawn from the brand sheet as plain shapes; the team should confirm they match the intended mark.
-- Only Chromium is covered by end-to-end tests.
-- Lighthouse scores (section 12) come from one machine, with Lighthouse's simulated throttling. They vary between runs and devices. They were not measured on a real low-end phone.
-- On a cold first visit with simulated Slow 4G, largest contentful paint is about 2.03 s, just above the 2 s target in `PLAN.md` F3; first contentful paint is about 1.49 s (decision D-069).
-- A plan where every menu is set to 0 portions cannot be closed; Today stays on Plan for that day (decision D-066).
-- All backtest and demo figures are simulated. They show how the rules behave under stated assumptions and are not evidence of benefit to real stalls; see the limitations in `docs/BACKTEST.md`.
-- In the backtest, FOODOO has more sell-out menu-days than the baseline in total, and per menu it is worse than the baseline on some single metrics (see "Results by menu" in `docs/BACKTEST.md`). Compared with the same rule without the sell-out correction, FOODOO has more leftovers. All of this is reported as it came out.
-- The backtest's FOODOO owner accepts every suggestion without editing; real owners will edit some.
-- Weekly metrics (`src/domain/metrics.ts`) exist, including per menu, but no screen shows them yet; the weekly summary screen is reserved for Final Day.
-- `npm run test:coverage` needs a terminal path with an upper-case drive letter on Windows (see Setup).
+- Not tested with real warung owners; ON-5 (setup under 3 minutes) and the under-one-minute daily input target are untimed. UX-FIX is reserved for the Final Day.
+- All backtest and demo figures are simulated; they show how the rules behave under stated assumptions, not benefit to real stalls (`docs/BACKTEST.md`).
+- Register mode (D-091): cash and QRIS are labels only (no payments, receipts or ingredients). Sales and the sales mode are not in the export, and a replacing import removes them and resets the mode to simple. Only the latest transaction of a day can be voided.
+- A closed day can be corrected for 7 days; after that it is read-only.
+- Export/import: XLSX/CSV have no formatting; formulas are not recalculated; CSV import only updates days of existing menus; import needs `DecompressionStream` (Chrome 103+, Safari 16.4+, Firefox 113+).
+- Night stalls (closing after midnight) are covered by domain and unit tests only, not by an end-to-end test or an owner.
+- The Undo toast covers only the latest sell-out tap. Menu cards have no photos.
+- A plan with every menu at 0 portions cannot be closed (D-066).
+- Installability was checked with Chromium's report only, not on a physical phone. Only Chromium is covered by e2e.
+- Lighthouse numbers (section 12) come from one machine with simulated throttling; cold-start LCP is about 2 s on simulated Slow 4G (D-069).
+- The deployed site serves the last pushed commit, so it may lag this branch.
 
 ## 10. Final Day log
 
@@ -332,7 +186,7 @@ Estimator check (mean absolute error in portions, lower is better):
 
 ## 12. Lighthouse and bundle size
 
-Generated by `npm run lighthouse` (scores) with the preview server running; never typed by hand. Bundle size comes from `npm run size`.
+Generated by `npm run lighthouse` with the preview server running; never typed by hand. Bundle size: `npm run size`.
 
 <!-- lighthouse:start -->
 

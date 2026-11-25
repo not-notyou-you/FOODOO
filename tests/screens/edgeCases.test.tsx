@@ -129,9 +129,7 @@ describe("edge case: all menus archived", () => {
         "No active menus. Add or restore a menu in Settings.",
       ),
     ).toBeTruthy();
-    fireEvent.click(
-      within(dialog).getByRole("button", { name: "Confirm and close day" }),
-    );
+    fireEvent.click(within(dialog).getByRole("button", { name: "Save all" }));
     expect(
       await screen.findByRole("heading", { name: "Today is closed" }),
     ).toBeTruthy();

@@ -1,12 +1,13 @@
 // src/db/hooks.ts
 import { useLiveQuery } from "dexie-react-hooks";
 import { createContext, useContext } from "react";
-import type { ISODate, Menu } from "../domain/types.ts";
+import type { ISODate, Menu, Sale } from "../domain/types.ts";
 import {
   getHistory,
   getStall,
   getTodayState,
   listMenus,
+  listSales,
   type History,
   type TodayState,
 } from "./repositories.ts";
@@ -40,4 +41,9 @@ export function useHistory(): History | undefined {
 export function useTodayState(date: ISODate): TodayState | undefined {
   const db = useDb();
   return useLiveQuery(() => getTodayState(db, date), [db, date]);
+}
+
+export function useSales(date: ISODate): Sale[] | undefined {
+  const db = useDb();
+  return useLiveQuery(() => listSales(db, date), [db, date]);
 }

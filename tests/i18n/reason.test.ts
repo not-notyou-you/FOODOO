@@ -65,20 +65,20 @@ describe("renderReason", () => {
     expect(
       renderReason(
         tr("en"),
-        reason({ ...cold, code: "cold-start-up" }),
+        reason({ ...cold, code: "cold-start-up", delta: 4 }),
         monday,
       ),
     ).toBe(
-      "Not enough history yet. Starting from your usual 40, sold out last time",
+      "Not enough history yet. Starting from your usual 40, sold out last time → +4",
     );
     expect(
       renderReason(
         tr("id"),
-        reason({ ...cold, code: "cold-start-down" }),
+        reason({ ...cold, code: "cold-start-down", delta: -4 }),
         monday,
       ),
     ).toBe(
-      "Riwayat belum cukup. Mulai dari porsi biasa Anda, 40, terakhir kali ada sisa",
+      "Riwayat belum cukup. Mulai dari porsi biasa Anda, 40, terakhir kali ada sisa → −4",
     );
   });
 

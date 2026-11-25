@@ -27,8 +27,8 @@ const Layout = lazy(() =>
 const Plan = lazy(() =>
   import("../screens/Plan.tsx").then((m) => ({ default: m.Plan })),
 );
-const Service = lazy(() =>
-  import("../screens/Service.tsx").then((m) => ({ default: m.Service })),
+const Sales = lazy(() =>
+  import("../screens/Sales.tsx").then((m) => ({ default: m.Sales })),
 );
 const Today = lazy(() =>
   import("../screens/Today.tsx").then((m) => ({ default: m.Today })),
@@ -93,7 +93,7 @@ export function App() {
           <Route element={<Layout />}>
             <Route path="/today" element={<Today />} />
             <Route path="/plan" element={<Plan />} />
-            <Route path="/service" element={<Service />} />
+            <Route path="/service" element={<Sales />} />
             <Route path="/close" element={<Close />} />
             <Route path="/close/:date" element={<Close />} />
             <Route path="/history" element={<History />} />

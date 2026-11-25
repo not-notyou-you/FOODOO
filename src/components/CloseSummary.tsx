@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import type { TomorrowPlan } from "../domain/close.ts";
 import { isCooked } from "../domain/plan.ts";
 import type { Menu, MenuDay } from "../domain/types.ts";
-import { formatLongDate } from "../i18n/format.ts";
+import { formatLongDate, formatRupiah } from "../i18n/format.ts";
 import { useI18n } from "../i18n/index.ts";
 import { renderReason } from "../i18n/reason.ts";
 import { EstimateValue } from "./EstimateValue.tsx";
@@ -13,9 +13,15 @@ interface CloseSummaryProps {
   rows: readonly MenuDay[];
   menus: readonly Menu[];
   tomorrow: TomorrowPlan | null;
+  revenue?: number;
 }
 
-export function CloseSummary({ rows, menus, tomorrow }: CloseSummaryProps) {
+export function CloseSummary({
+  rows,
+  menus,
+  tomorrow,
+  revenue,
+}: CloseSummaryProps) {
   const { t, language } = useI18n();
   const todayId = useId();
   const tomorrowId = useId();
@@ -42,6 +48,11 @@ export function CloseSummary({ rows, menus, tomorrow }: CloseSummaryProps) {
             </li>
           ))}
         </ul>
+        {revenue === undefined ? null : (
+          <p className="num">
+            {t("close.revenue", { amount: formatRupiah(revenue) })}
+          </p>
+        )}
         <p>
           <Link className="link-target" to="/how">
             {t("close.howLink")}

@@ -1,6 +1,7 @@
 // src/domain/close.ts
 import { estimateDemand } from "./estimate.ts";
 import { isCooked, suggestAll } from "./plan.ts";
+import { markSoldOut } from "./pos.ts";
 import {
   addDays,
   closeMinute,
@@ -15,6 +16,7 @@ import type {
   ISODate,
   Menu,
   MenuDay,
+  SoldOutSource,
   StallSettings,
   Suggestion,
 } from "./types.ts";
@@ -23,6 +25,7 @@ export interface CloseEntry {
   menuId: string;
   leftover: number | null;
   soldOutAt: HHMM | null;
+  soldOutSource?: SoldOutSource;
 }
 
 export interface ClosedDay {
@@ -86,8 +89,7 @@ export function closeMenuDay(
 ): MenuDay {
   if (!isCooked(menuDay)) {
     return {
-      ...menuDay,
-      soldOutAt: null,
+      ...markSoldOut(menuDay, null, "manual"),
       leftover: 0,
       estimatedDemand: null,
       demandIsEstimate: false,
@@ -110,8 +112,11 @@ export function closeMenuDay(
     throw new RangeError(`Missing leftover for ${menuDay.menuId}`);
   }
   return {
-    ...menuDay,
-    soldOutAt,
+    ...markSoldOut(
+      menuDay,
+      soldOutAt,
+      entry.soldOutSource ?? menuDay.soldOutSource ?? "manual",
+    ),
     leftover,
     estimatedDemand: estimate.demand,
     demandIsEstimate: estimate.isEstimate,

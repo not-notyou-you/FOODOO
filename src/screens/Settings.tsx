@@ -8,6 +8,7 @@ import { Button } from "../components/Button.tsx";
 import { DemoPicker } from "../components/DemoPicker.tsx";
 import { HoursEditor } from "../components/HoursEditor.tsx";
 import { LanguageSwitch } from "../components/LanguageSwitch.tsx";
+import { ModeSwitch } from "../components/ModeSwitch.tsx";
 import { ExportImportPanel } from "../components/ExportImportPanel.tsx";
 import { MenuManager } from "../components/MenuManager.tsx";
 import { Screen } from "../components/Screen.tsx";
@@ -28,9 +29,11 @@ import {
   removeDemo,
   saveHours,
   saveStallName,
+  setMode,
   STALL_NAME_MAX_LENGTH,
   type Hours,
 } from "../db/repositories.ts";
+import { modeOf } from "../domain/pos.ts";
 import { validateHours, type HoursErrors } from "../domain/setup.ts";
 import { useT } from "../i18n/index.ts";
 
@@ -152,6 +155,23 @@ export function Settings() {
             {t("settings.hours.save")}
           </Button>
         </form>
+      </section>
+
+      <section className="card settings-section" aria-labelledby="set-mode">
+        <h2 id="set-mode">{t("settings.mode.title")}</h2>
+        <ModeSwitch
+          value={modeOf(stall.settings)}
+          onChange={(mode) => {
+            setMode(db, mode).then(
+              () => {
+                toast.show(t("settings.mode.saved"));
+              },
+              () => {
+                toast.show(t("common.saveFailed"));
+              },
+            );
+          }}
+        />
       </section>
 
       <section className="card settings-section" aria-labelledby="set-lang">

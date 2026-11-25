@@ -13,11 +13,28 @@ export interface Menu {
   archived: boolean;
 }
 
+export type SalesMode = "simple" | "pos";
+export type SoldOutSource = "manual" | "auto_pos" | "unknown_time";
+export type PayMethod = "cash" | "qris";
+
 export interface StallSettings {
   openAt: HHMM;
   closeAt: HHMM;
   busyProfile: Record<string, BusyLevel>;
   isDemo: boolean;
+  mode?: SalesMode;
+}
+
+export interface Sale {
+  id: string;
+  date: ISODate;
+  time: HHMM;
+  createdAt: number;
+  groupId: string;
+  menuId: string;
+  qty: number;
+  unitPrice: number;
+  method: PayMethod;
 }
 
 export interface DayRecord {
@@ -48,6 +65,7 @@ export interface MenuDay {
   reason: Reason | null;
   cookedQty: number;
   soldOutAt: HHMM | null;
+  soldOutSource?: SoldOutSource;
   leftover: number | null;
   estimatedDemand: number | null;
   demandIsEstimate: boolean;

@@ -31,6 +31,7 @@ interface RenderOptions {
   db: FoodooDb;
   path?: string;
   at?: Date;
+  now?: () => Date;
   storage?: Storage;
 }
 
@@ -38,9 +39,10 @@ export function renderApp({
   db,
   path = "/",
   at = MONDAY_9AM,
+  now: clock,
   storage = memoryStorage(),
 }: RenderOptions): RenderResult {
-  const now = () => new Date(at.getTime());
+  const now = clock ?? (() => new Date(at.getTime()));
   return render(
     <MemoryRouter
       initialEntries={[path]}

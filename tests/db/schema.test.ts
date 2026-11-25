@@ -21,10 +21,10 @@ describe("schema v1", () => {
     expect(db.name).toBe(DB_NAME);
   });
 
-  it("declares exactly the v1 tables, keys and indexes", async () => {
+  it("declares exactly the v2 tables, keys and indexes", async () => {
     db = makeTestDb();
     await db.open();
-    expect(db.verno).toBe(1);
+    expect(db.verno).toBe(2);
     const shape = Object.fromEntries(
       db.tables.map((table) => [
         table.name,
@@ -39,6 +39,7 @@ describe("schema v1", () => {
       menus: { primaryKey: "id", indexes: [] },
       days: { primaryKey: "date", indexes: [] },
       menuDays: { primaryKey: "[date+menuId]", indexes: ["date", "menuId"] },
+      sales: { primaryKey: "id", indexes: ["date", "groupId"] },
     });
   });
 
@@ -61,7 +62,7 @@ describe("schema v1", () => {
     db = createDb(name, [
       ...SCHEMA_VERSIONS,
       {
-        version: 2,
+        version: 3,
         stores: {},
         upgrade: async (transaction) => {
           await transaction
@@ -72,7 +73,7 @@ describe("schema v1", () => {
       },
     ]);
     await db.open();
-    expect(db.verno).toBe(2);
+    expect(db.verno).toBe(3);
     const stored = await db.menuDays.get(["2026-03-02", "nasi-uduk"]);
     expect(stored?.cookedQty).toBe(99);
   });

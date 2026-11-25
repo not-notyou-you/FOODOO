@@ -6,6 +6,7 @@ import type {
   ISODate,
   Menu,
   MenuDay,
+  Sale,
   StallSettings,
 } from "../domain/types.ts";
 
@@ -32,6 +33,7 @@ export type FoodooDb = Dexie & {
   menus: EntityTable<Menu, "id">;
   days: EntityTable<DayRecord, "date">;
   menuDays: Table<MenuDay, MenuDayKey>;
+  sales: EntityTable<Sale, "id">;
 };
 
 export interface SchemaVersion {
@@ -48,6 +50,16 @@ export const SCHEMA_VERSIONS: readonly SchemaVersion[] = [
       menus: "id",
       days: "date",
       menuDays: "[date+menuId], date, menuId",
+    },
+  },
+  {
+    version: 2,
+    stores: {
+      stall: "id",
+      menus: "id",
+      days: "date",
+      menuDays: "[date+menuId], date, menuId",
+      sales: "id, date, groupId",
     },
   },
 ];

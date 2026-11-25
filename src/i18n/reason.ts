@@ -23,9 +23,9 @@ export function renderReason(
     case "cold-start":
       return t("reason.coldStart", { usualQty: context.usualQty });
     case "cold-start-up":
-      return t("reason.coldStartUp", { usualQty: context.usualQty });
+      return t("reason.coldStartUp", { usualQty: context.usualQty, delta });
     case "cold-start-down":
-      return t("reason.coldStartDown", { usualQty: context.usualQty });
+      return t("reason.coldStartDown", { usualQty: context.usualQty, delta });
     case "history":
       if (reason.soldOutDays > 0) {
         return reason.scope === "weekday"

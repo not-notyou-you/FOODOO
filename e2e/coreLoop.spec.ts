@@ -116,7 +116,7 @@ async function runCoreLoop(page: Page, testInfo: TestInfo) {
   await expect(tomorrow.getByRole("listitem")).toHaveCount(4);
   const preview = await tomorrow.innerText();
   await snap(page, testInfo, "4-close-sheet");
-  await dialog.getByRole("button", { name: "Confirm and close day" }).click();
+  await dialog.getByRole("button", { name: "Save all" }).click();
 
   const closed = page.getByRole("heading", { name: "Today is closed" });
   const stored = page.getByRole("region", {
@@ -147,7 +147,7 @@ async function runCoreLoop(page: Page, testInfo: TestInfo) {
       .getByText("Menus sold out")
       .locator("xpath=following-sibling::dd[1]"),
   ).toHaveText("2");
-  await page.getByRole("link", { name: "Service", exact: true }).click();
+  await page.getByRole("link", { name: "Sales", exact: true }).click();
   await expect(soldOut).toBeVisible();
   await expect(soldOut).toBeDisabled();
 

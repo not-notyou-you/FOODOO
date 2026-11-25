@@ -14,22 +14,31 @@ import {
   useDb,
   useHistory,
   useMenus,
+  useSales,
   useStall,
   useTodayState,
 } from "../db/hooks.ts";
-import { closeDay, setSoldOut } from "../db/repositories.ts";
+import { canCorrect, closeDay, setSoldOut } from "../db/repositories.ts";
 import {
   closeDayRecords,
   incompleteDays,
-  missingLeftovers,
   tomorrowPlan,
   validateSoldOutTime,
   withClosedDay,
   type CloseEntry,
 } from "../domain/close.ts";
 import { isCooked } from "../domain/plan.ts";
+import {
+  dayRevenue,
+  leftoverGap,
+  modeOf,
+  overPlanQty,
+  remainingQty,
+  CORRECTION_DAYS,
+} from "../domain/pos.ts";
+import { addDays } from "../domain/time.ts";
 import type { HHMM, MenuDay } from "../domain/types.ts";
-import { formatLongDate } from "../i18n/format.ts";
+import { formatDelta, formatLongDate } from "../i18n/format.ts";
 import { useI18n, type MessageKey } from "../i18n/index.ts";
 
 export function Close() {
@@ -44,6 +53,7 @@ export function Close() {
   const menus = useMenus();
   const today = useTodayState(date);
   const history = useHistory();
+  const sales = useSales(date);
   const unusualId = useId();
   const [leftovers, setLeftovers] = useState<Record<string, number>>({});
   const [missed, setMissed] = useState<Record<string, HHMM>>({});
@@ -52,12 +62,17 @@ export function Close() {
   const [confirming, setConfirming] = useState(false);
   const [editing, setEditing] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [correcting, setCorrecting] = useState(false);
+  const [cancelled, setCancelled] = useState<Record<string, boolean>>({});
+  const [unknown, setUnknown] = useState<Record<string, boolean>>({});
+  const [timeEdits, setTimeEdits] = useState<Record<string, HHMM>>({});
 
   if (
     !stall ||
     menus === undefined ||
     today === undefined ||
-    history === undefined
+    history === undefined ||
+    sales === undefined
   ) {
     return (
       <Screen title={t("close.title")}>
@@ -69,8 +84,10 @@ export function Close() {
   if (pastDate !== undefined && !isPast) {
     return <Navigate to="/close" replace />;
   }
+  const isClosed = today.day?.closed === true;
   if (
     isPast &&
+    !(isClosed && canCorrect(date, stamp.date)) &&
     !incompleteDays(history.days, history.menuDays, stamp.date).includes(date)
   ) {
     return <Navigate to="/today" replace />;
@@ -96,59 +113,163 @@ export function Close() {
     );
   }
 
-  if (today.day?.closed === true) {
+  const mode = modeOf(settings);
+  if (isClosed && !correcting) {
+    const correctable = canCorrect(date, stamp.date);
     return (
       <Screen title={t("close.title")}>
         <section className="card" aria-labelledby="close-done">
           <h2 id="close-done">{t("close.closedTitle")}</h2>
-          {today.day.unusual ? (
+          {today.day?.unusual === true ? (
             <p className="note note--info">{t("close.unusualNote")}</p>
           ) : null}
           <CloseSummary
             rows={rows}
             menus={menus}
             tomorrow={tomorrowPlan(date, menus, history.menuDays, history.days)}
+            revenue={dayRevenue(mode, rows, menus, sales)}
           />
           <p>{t("close.tomorrowNote")}</p>
+          {correctable ? (
+            <>
+              <p className="field__hint">
+                {t("close.correctNote", {
+                  date: formatLongDate(
+                    addDays(date, CORRECTION_DAYS),
+                    language,
+                  ),
+                })}
+              </p>
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setUnusual(today.day?.unusual === true);
+                  setCorrecting(true);
+                }}
+              >
+                {t("close.correct")}
+              </Button>
+            </>
+          ) : null}
         </section>
       </Screen>
     );
   }
 
-  const leftoverOf = (row: MenuDay) => leftovers[row.menuId] ?? null;
+  const soldOutOf = (row: MenuDay): HHMM | null =>
+    timeEdits[row.menuId] ??
+    (cancelled[row.menuId] === true ? null : row.soldOutAt);
+  const prefillOf = (row: MenuDay): number | null => {
+    if (isClosed) {
+      return row.leftover;
+    }
+    return mode === "pos" ? remainingQty(row, sales) : null;
+  };
+  const leftoverOf = (row: MenuDay) => leftovers[row.menuId] ?? prefillOf(row);
   const missedOf = (row: MenuDay) => missed[row.menuId] ?? settings.closeAt;
   const entries: CloseEntry[] = rows.map((row) => {
-    if (row.soldOutAt !== null) {
-      return { menuId: row.menuId, leftover: 0, soldOutAt: row.soldOutAt };
+    const soldOutAt = soldOutOf(row);
+    if (soldOutAt !== null) {
+      return {
+        menuId: row.menuId,
+        leftover: 0,
+        soldOutAt,
+        soldOutSource:
+          timeEdits[row.menuId] === undefined ? row.soldOutSource : "manual",
+      };
     }
     const leftover = leftoverOf(row);
-    return {
-      menuId: row.menuId,
-      leftover,
-      soldOutAt: leftover === 0 ? missedOf(row) : null,
-    };
+    if (leftover !== 0) {
+      return { menuId: row.menuId, leftover, soldOutAt: null };
+    }
+    return unknown[row.menuId] === true
+      ? {
+          menuId: row.menuId,
+          leftover,
+          soldOutAt: settings.closeAt,
+          soldOutSource: "unknown_time",
+        }
+      : {
+          menuId: row.menuId,
+          leftover,
+          soldOutAt: missedOf(row),
+          soldOutSource: "manual",
+        };
   });
-  const missing = new Set(missingLeftovers(rows, leftovers));
+  const missing = new Set(
+    rows
+      .filter((row) => soldOutOf(row) === null && leftoverOf(row) === null)
+      .map((row) => row.menuId),
+  );
   const errors = new Map(
     rows.flatMap((row) => {
-      if (row.soldOutAt !== null || leftoverOf(row) !== 0) {
+      if (
+        soldOutOf(row) !== null ||
+        leftoverOf(row) !== 0 ||
+        unknown[row.menuId] === true
+      ) {
         return [];
       }
       const error = validateSoldOutTime(missedOf(row), settings);
       return error === null ? [] : [[row.menuId, error] as const];
     }),
   );
+  const notesOf = (row: MenuDay): string[] => {
+    const notes: string[] = [];
+    const entered = leftoverOf(row);
+    if (mode === "pos" && soldOutOf(row) === null && entered !== null) {
+      const remaining = remainingQty(row, sales);
+      if (entered !== remaining) {
+        notes.push(
+          t("close.posNote", {
+            remaining,
+            entered,
+            gap: formatDelta(leftoverGap(entered, remaining)),
+          }),
+        );
+      }
+    }
+    const over = overPlanQty(row, sales);
+    if (over > 0) {
+      notes.push(t("close.posOver", { qty: over }));
+    }
+    return notes;
+  };
   const editRow = rows.find((row) => row.menuId === editing);
   const todayRows = today.menuDays;
   const historyMenuDays = history.menuDays;
   const historyDays = history.days;
   const menuList = menus;
 
+  function cancelSoldOut(menuId: string) {
+    const row = rows.find((item) => item.menuId === menuId);
+    setCancelled((current) => ({ ...current, [menuId]: true }));
+    setTimeEdits((current) => {
+      const next = { ...current };
+      delete next[menuId];
+      return next;
+    });
+    setLeftovers((current) => ({
+      ...current,
+      [menuId]: Math.max(1, row === undefined ? 0 : (prefillOf(row) ?? 0)),
+    }));
+  }
+
+  function restoreSoldOut(menuId: string) {
+    setCancelled((current) => ({ ...current, [menuId]: false }));
+    setLeftovers((current) => {
+      const next = { ...current };
+      delete next[menuId];
+      return next;
+    });
+  }
+
   function preview() {
     const closed = closeDayRecords(date, unusual, todayRows, entries, settings);
     const merged = withClosedDay(historyMenuDays, historyDays, closed);
     return {
       rows: closed.menuDays,
+      revenue: dayRevenue(mode, closed.menuDays, menuList, sales ?? []),
       tomorrow: tomorrowPlan(date, menuList, merged.menuDays, merged.days),
     };
   }
@@ -156,10 +277,20 @@ export function Close() {
   async function confirm() {
     setBusy(true);
     try {
-      await closeDay(db, date, { unusual, entries });
+      await closeDay(
+        db,
+        date,
+        { unusual, entries },
+        isClosed ? stamp.date : undefined,
+      );
       setConfirming(false);
+      setCorrecting(false);
       toast.show(
-        isPast ? t("close.pastClosed", { date: longDate }) : t("close.closed"),
+        isClosed
+          ? t("close.corrected")
+          : isPast
+            ? t("close.pastClosed", { date: longDate })
+            : t("close.closed"),
       );
     } catch {
       toast.show(t("common.saveFailed"));
@@ -174,7 +305,13 @@ export function Close() {
     message: MessageKey,
   ) {
     try {
-      await setSoldOut(db, date, menuId, time);
+      if (!isClosed) {
+        await setSoldOut(db, date, menuId, time);
+      } else if (time === null) {
+        cancelSoldOut(menuId);
+      } else {
+        setTimeEdits((current) => ({ ...current, [menuId]: time }));
+      }
       setEditing(null);
       toast.show(t(message));
     } catch {
@@ -200,7 +337,7 @@ export function Close() {
               key={row.menuId}
               name={nameOf(row.menuId)}
               cooked={row.cookedQty}
-              soldOutAt={row.soldOutAt}
+              soldOutAt={soldOutOf(row)}
               leftover={leftoverOf(row)}
               leftoverError={
                 submitted && missing.has(row.menuId)
@@ -222,8 +359,20 @@ export function Close() {
                   [row.menuId]: value,
                 }));
               }}
+              unknownTime={unknown[row.menuId] === true}
+              cancelled={cancelled[row.menuId] === true}
+              notes={notesOf(row)}
               onMissedTime={(value) => {
                 setMissed((current) => ({ ...current, [row.menuId]: value }));
+              }}
+              onUnknownTime={(value) => {
+                setUnknown((current) => ({ ...current, [row.menuId]: value }));
+              }}
+              onCancelSoldOut={() => {
+                cancelSoldOut(row.menuId);
+              }}
+              onRestoreSoldOut={() => {
+                restoreSoldOut(row.menuId);
               }}
               onEditTime={() => {
                 setEditing(row.menuId);
@@ -284,6 +433,7 @@ export function Close() {
             rows={sheet.rows}
             menus={menus}
             tomorrow={isPast ? null : sheet.tomorrow}
+            revenue={sheet.revenue}
           />
           <div className="form__actions">
             <Button
@@ -305,10 +455,10 @@ export function Close() {
           </div>
         </Sheet>
       )}
-      {editRow === undefined || editRow.soldOutAt === null ? null : (
+      {editRow === undefined || soldOutOf(editRow) === null ? null : (
         <SoldOutTimeSheet
           menuName={nameOf(editRow.menuId)}
-          initial={editRow.soldOutAt}
+          initial={soldOutOf(editRow) ?? settings.closeAt}
           settings={settings}
           onSave={(time) => {
             void writeTime(editRow.menuId, time, "service.timeSaved");

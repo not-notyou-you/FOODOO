@@ -13,8 +13,14 @@ interface CloseRowProps {
   leftoverError?: string | undefined;
   missedTime: HHMM;
   missedError: string | undefined;
+  unknownTime: boolean;
+  cancelled: boolean;
+  notes: readonly string[];
   onLeftover: (value: number) => void;
   onMissedTime: (value: HHMM) => void;
+  onUnknownTime: (value: boolean) => void;
+  onCancelSoldOut: () => void;
+  onRestoreSoldOut: () => void;
   onEditTime: () => void;
 }
 
@@ -26,8 +32,14 @@ export function CloseRow({
   leftoverError,
   missedTime,
   missedError,
+  unknownTime,
+  cancelled,
+  notes,
   onLeftover,
   onMissedTime,
+  onUnknownTime,
+  onCancelSoldOut,
+  onRestoreSoldOut,
   onEditTime,
 }: CloseRowProps) {
   const t = useT();
@@ -41,6 +53,9 @@ export function CloseRow({
       </div>
       {soldOutAt === null ? (
         <>
+          {cancelled ? (
+            <p className="note note--info">{t("close.cancelledNote")}</p>
+          ) : null}
           <Stepper
             label={t("close.leftoverLabel", { name })}
             decreaseLabel={t("plan.decrease", { name })}
@@ -54,14 +69,49 @@ export function CloseRow({
           />
           {leftover === 0 ? (
             <div className="prompt">
-              <TimeInput
-                label={t("close.missedQuestion", { name })}
-                value={missedTime}
-                onChange={onMissedTime}
-                error={missedError}
-              />
-              <p className="field__hint">{t("close.missedHint")}</p>
+              {unknownTime ? (
+                <>
+                  <p>{t("close.unknownTimeNote")}</p>
+                  <Button
+                    variant="secondary"
+                    className="btn--small"
+                    onClick={() => {
+                      onUnknownTime(false);
+                    }}
+                  >
+                    {t("close.knownTime")}
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <TimeInput
+                    label={t("close.missedQuestion", { name })}
+                    value={missedTime}
+                    onChange={onMissedTime}
+                    error={missedError}
+                  />
+                  <p className="field__hint">{t("close.missedHint")}</p>
+                  <Button
+                    variant="secondary"
+                    className="btn--small"
+                    onClick={() => {
+                      onUnknownTime(true);
+                    }}
+                  >
+                    {t("close.unknownTime")}
+                  </Button>
+                </>
+              )}
             </div>
+          ) : null}
+          {cancelled ? (
+            <Button
+              variant="secondary"
+              className="btn--small"
+              onClick={onRestoreSoldOut}
+            >
+              {t("close.didSellOut")}
+            </Button>
           ) : null}
         </>
       ) : (
@@ -77,8 +127,20 @@ export function CloseRow({
           >
             {t("common.edit")}
           </Button>
+          <Button
+            variant="secondary"
+            className="btn--small"
+            onClick={onCancelSoldOut}
+          >
+            {t("close.someLeft")}
+          </Button>
         </div>
       )}
+      {notes.map((note) => (
+        <p key={note} className="field__hint">
+          {note}
+        </p>
+      ))}
     </li>
   );
 }

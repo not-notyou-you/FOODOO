@@ -129,7 +129,31 @@ Edit menus, hours, busy profile, salvage value per menu (default 0); language to
 
 ### 5.9 Out of scope
 
-Payments, per-transaction sales recording, accounts, cloud sync, multi-device, delivery, customer data, any AI/ML model in the product.
+Payments, receipt printing, ingredients and stock purchasing, accounts, cloud sync, multi-device, delivery, customer data, any AI/ML model in the product.
+
+### 5.10 Register mode and sales-linked close — Should (stage 3, D-091)
+
+Added by team decision on 2026-11-25 (D-091), which lifts "per-transaction sales recording" from §5.9. The register is optional: **simple mode** (§5.3 as written) stays fully functional with zero `Sale` rows. The register records what sold; it never takes real payments. Cash and QRIS are labels only.
+
+**Types.** `Sale { id, date, time, createdAt, groupId, menuId, qty, unitPrice, method: 'cash' | 'qris' }`. `MenuDay.soldOutSource?: 'manual' | 'auto_pos' | 'unknown_time'`. `StallSettings.mode?: 'simple' | 'pos'` (default `simple`).
+
+| ID | Requirement |
+|---|---|
+| RG-1 | In `pos` mode the Sales tab is a register: one tile per planned menu with remaining portions (`cookedQty − sold`) and a stock bar; tapping adds one portion to the cart |
+| RG-2 | The cart is a bottom sheet with +/− per line, payment method label (cash or QRIS), cash chips (exact, 20,000, 50,000, 100,000) and change due |
+| RG-3 | Saving a transaction writes all its `Sale` rows and any sold-out marks in one database transaction under one `groupId`, or nothing |
+| RG-4 | The last transaction of the day can be voided; today's transactions are listed; revenue and transaction count are shown |
+| RG-5 | Selling beyond the plan is allowed and labelled "over plan". Remaining stays at 0 and the engine sees the menu as sold out at the first time it hit 0 |
+| SO-1 | When a sale brings remaining to 0 and the menu has no sell-out time, `soldOutAt` = the sale time and `soldOutSource = 'auto_pos'`, with a toast |
+| SO-2 | Voiding a transaction removes an `auto_pos` mark if remaining is above 0 again. A manual mark is kept |
+| SO-3 | A manual **Sold out** button (with Undo for 10 s) sets `soldOutSource = 'manual'` in both modes |
+| SM-1 | Settings switches mode at any time. `Sale` rows are kept when switching to simple |
+| CL-7 | At night in `pos` mode leftover is prefilled with remaining. If the owner enters another number, a neutral note shows both numbers |
+| CL-8 | Leftover 0 without a sell-out time asks for the time, with a **Don't remember** choice: time = closing time, `soldOutSource = 'unknown_time'` |
+| CL-9 | A sold-out menu offers **Some left over**: the sell-out mark is cancelled and a leftover count is entered |
+| CL-10 | **Save all** (the confirm button of Close day) closes the day. A closed day can be corrected for 7 days after its date; correcting re-estimates demand |
+| CL-11 | `sold = cookedQty − leftover` for the engine. Revenue = sum of `qty × unitPrice` (pos) or `sold × price` (simple) |
+| TP-1 | Morning plus night take at most 20 taps for 5 menus, in both modes (unit-tested) |
 
 ## 6. Logic (exact; implement in `src/domain/`)
 

@@ -12,7 +12,7 @@ export const id: Record<keyof typeof en, string> = {
   "nav.main": "Navigasi utama",
   "nav.today": "Hari ini",
   "nav.plan": "Rencana",
-  "nav.service": "Jualan",
+  "nav.service": "Penjualan",
   "nav.close": "Tutup",
   "nav.settings": "Pengaturan",
 
@@ -300,7 +300,7 @@ export const id: Record<keyof typeof en, string> = {
   "close.tomorrowHeading": "Saran untuk besok, {date}",
   "close.wanted": "Peminat",
   "close.suggestedPortions": "porsi disarankan",
-  "close.confirm": "Konfirmasi dan tutup hari",
+  "close.confirm": "Simpan semua",
   "close.closed": "Hari ditutup",
   "close.closedTitle": "Hari ini sudah ditutup",
   "close.unusualNote":
@@ -347,6 +347,72 @@ export const id: Record<keyof typeof en, string> = {
     "FOODOO menyarankan porsi dengan aturan tetap yang bisa dijelaskan. Tidak memakai model AI. Lisensi pustaka dan huruf, serta bantuan AI yang dipakai untuk membangun aplikasi ini, tercantum di README proyek.",
   "settings.about.link": "Buka README proyek",
 
+  "register.title": "Kasir",
+  "register.intro": "Ketuk menu untuk menambah satu porsi ke keranjang.",
+  "register.left": "Sisa {qty}",
+  "register.over": "Lebih {qty} dari rencana",
+  "register.stockLabel": "Stok {name}: sisa {left} dari {total}",
+  "register.soldOutButton": "Habis",
+  "register.soldOutLabel": "Tandai {name} habis",
+  "register.cartButton": "Keranjang: {count} item, {total}",
+  "register.cartTitle": "Keranjang",
+  "register.emptyCart": "Keranjang kosong.",
+  "register.clear": "Kosongkan keranjang",
+  "register.total": "Total",
+  "register.method": "Pembayaran (hanya label)",
+  "register.cash": "Tunai",
+  "register.qris": "QRIS",
+  "register.methodNote":
+    "FOODOO hanya mencatat caranya. Aplikasi ini tidak memproses pembayaran.",
+  "register.tendered": "Uang diterima",
+  "register.exact": "Uang pas",
+  "register.change": "Kembalian: {amount}",
+  "register.short": "Kurang {amount}",
+  "register.save": "Simpan penjualan",
+  "register.saved": "Penjualan tersimpan: {total}",
+  "register.autoSoldOut": "{name} habis pukul {time}",
+  "register.saveFailed": "Penjualan tidak tersimpan. Tidak ada yang dicatat.",
+  "register.todayTitle": "Penjualan hari ini",
+  "register.revenue": "Pendapatan",
+  "register.count": "Transaksi",
+  "register.noSales": "Belum ada penjualan hari ini.",
+  "register.line": "{qty} × {name}",
+  "register.methodCash": "Tunai",
+  "register.methodQris": "QRIS",
+  "register.void": "Batalkan penjualan terakhir",
+  "register.voidTitle": "Batalkan penjualan terakhir?",
+  "register.voidBody":
+    "Penjualan pukul {time} ({total}) dihapus. Tanda habis dari kasir ikut dihapus jika stok kembali.",
+  "register.voidConfirm": "Batalkan penjualan",
+  "register.voided": "Penjualan dibatalkan",
+  "register.voidedReopened": "Penjualan dibatalkan. {name} tersedia lagi.",
+  "register.dayChanged": "Hari berganti. Keranjang dikosongkan.",
+
+  "settings.mode.title": "Mode penjualan",
+  "settings.mode.simple": "Sederhana",
+  "settings.mode.simpleHint":
+    "Ketuk Habis saat menu habis. Penjualan tidak dicatat.",
+  "settings.mode.pos": "Kasir",
+  "settings.mode.posHint":
+    "Catat tiap penjualan. Sisa porsi dan jam habis terisi sendiri.",
+  "settings.mode.keep":
+    "Boleh berganti kapan saja. Penjualan yang sudah dicatat tidak hilang saat berganti.",
+  "settings.mode.saved": "Mode tersimpan",
+
+  "close.posNote":
+    "Kasir mencatat sisa {remaining}. Anda mengisi {entered} (selisih {gap}).",
+  "close.posOver": "Kasir mencatat {qty} porsi melebihi rencana.",
+  "close.unknownTime": "Tidak ingat",
+  "close.unknownTimeNote": "Dihitung habis pada jam tutup.",
+  "close.knownTime": "Isi jam",
+  "close.someLeft": "Masih ada sisa",
+  "close.cancelledNote": "Tanda habis dihapus. Isi sisa porsinya.",
+  "close.didSellOut": "Memang habis",
+  "close.revenue": "Pendapatan: {amount}",
+  "close.correct": "Koreksi hari ini",
+  "close.correctNote": "Hari ini bisa dikoreksi sampai {date}.",
+  "close.corrected": "Hari dikoreksi",
+
   "reason.history.soldOutWeekday":
     "Habis pada {soldOut} dari {observations} hari {weekdayPlural} terakhir → {delta}",
   "reason.history.soldOutRecent":
@@ -357,9 +423,9 @@ export const id: Record<keyof typeof en, string> = {
   "reason.coldStart":
     "Riwayat belum cukup. Mulai dari porsi biasa Anda, {usualQty}",
   "reason.coldStartUp":
-    "Riwayat belum cukup. Mulai dari porsi biasa Anda, {usualQty}, terakhir kali habis",
+    "Riwayat belum cukup. Mulai dari porsi biasa Anda, {usualQty}, terakhir kali habis → {delta}",
   "reason.coldStartDown":
-    "Riwayat belum cukup. Mulai dari porsi biasa Anda, {usualQty}, terakhir kali ada sisa",
+    "Riwayat belum cukup. Mulai dari porsi biasa Anda, {usualQty}, terakhir kali ada sisa → {delta}",
 
   "weekday.plural.0": "Minggu",
   "weekday.plural.1": "Senin",

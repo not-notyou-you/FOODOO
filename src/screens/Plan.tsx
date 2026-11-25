@@ -11,6 +11,7 @@ import {
   useDb,
   useHistory,
   useMenus,
+  useSales,
   useStall,
   useTodayState,
 } from "../db/hooks.ts";
@@ -37,6 +38,7 @@ export function Plan() {
   const menus = useMenus();
   const today = useTodayState(date);
   const history = useHistory();
+  const sales = useSales(date);
   const [draft, setDraft] = useState<Record<string, number>>({});
   const [saving, setSaving] = useState(false);
 
@@ -68,7 +70,7 @@ export function Plan() {
   }
 
   const closed = today.day?.closed === true;
-  const locked = isPlanLocked(today.menuDays);
+  const locked = isPlanLocked(today.menuDays) || (sales?.length ?? 0) > 0;
   const readOnly = closed || locked;
   const stored = new Map(today.menuDays.map((row) => [row.menuId, row]));
   const suggestions = new Map(

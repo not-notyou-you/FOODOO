@@ -17,11 +17,11 @@ import { DEMO_MENUS } from "../../src/demo/generator.ts";
 
 const TODAY = "2026-03-02";
 
-const V1_STORES = SCHEMA_VERSIONS[0]!.stores;
+const LATEST = SCHEMA_VERSIONS[SCHEMA_VERSIONS.length - 1]!;
 
 const NEXT_VERSION: SchemaVersion = {
-  version: 2,
-  stores: { ...V1_STORES, menus: "id, name" },
+  version: LATEST.version + 1,
+  stores: { ...LATEST.stores, menus: "id, name" },
 };
 
 let name: string;
@@ -33,6 +33,7 @@ async function snapshot(target: FoodooDb) {
     menus: await target.menus.toArray(),
     days: await target.days.toArray(),
     menuDays: await target.menuDays.toArray(),
+    sales: await target.sales.toArray(),
   };
 }
 
@@ -72,7 +73,7 @@ afterEach(async () => {
 
 describe("data survives an app update", () => {
   it("keeps every row identical when a later schema version is added", async () => {
-    const v1 = createDb(name, SCHEMA_VERSIONS.slice(0, 1));
+    const v1 = createDb(name);
     await fillLikeAnOwner(v1);
     const before = await snapshot(v1);
     expect(before.menuDays.length).toBeGreaterThan(200);
@@ -85,7 +86,7 @@ describe("data survives an app update", () => {
 
     db = createDb(name, [...SCHEMA_VERSIONS, NEXT_VERSION]);
     await db.open();
-    expect(db.verno).toBe(2);
+    expect(db.verno).toBe(NEXT_VERSION.version);
     expect(await snapshot(db)).toEqual(before);
     expect(await db.menus.where("name").equals("Nasi Uduk").count()).toBe(1);
   });
@@ -98,7 +99,7 @@ describe("data survives an app update", () => {
 
     db = createDb(name);
     await db.open();
-    expect(db.verno).toBe(1);
+    expect(db.verno).toBe(LATEST.version);
     expect(await snapshot(db)).toEqual(before);
     const history = await getHistory(db);
     expect(history.days.find((day) => day.date === TODAY)?.closed).toBe(true);

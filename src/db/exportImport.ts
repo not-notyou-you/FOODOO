@@ -884,7 +884,7 @@ export async function applyImport(
   db: FoodooDb,
   plan: ImportPlan,
 ): Promise<void> {
-  const tables = [db.stall, db.menus, db.days, db.menuDays];
+  const tables = [db.stall, db.menus, db.days, db.menuDays, db.sales];
   await db.transaction("rw", tables, async () => {
     if (plan.kind === "replace") {
       await Promise.all(tables.map((table) => table.clear()));

@@ -10,7 +10,7 @@ export const en = {
   "nav.main": "Main navigation",
   "nav.today": "Today",
   "nav.plan": "Plan",
-  "nav.service": "Service",
+  "nav.service": "Sales",
   "nav.close": "Close",
   "nav.settings": "Settings",
 
@@ -292,7 +292,7 @@ export const en = {
   "close.tomorrowHeading": "Tomorrow's suggestions, {date}",
   "close.wanted": "Wanted",
   "close.suggestedPortions": "suggested portions",
-  "close.confirm": "Confirm and close day",
+  "close.confirm": "Save all",
   "close.closed": "Day closed",
   "close.closedTitle": "Today is closed",
   "close.unusualNote":
@@ -339,6 +339,72 @@ export const en = {
     "FOODOO suggests portions with fixed, explainable rules. It uses no AI model. The licences of the libraries and fonts, and the AI assistance used to build the app, are listed in the project README.",
   "settings.about.link": "Open the project README",
 
+  "register.title": "Register",
+  "register.intro": "Tap a menu to add a portion to the cart.",
+  "register.left": "{qty} left",
+  "register.over": "{qty} over plan",
+  "register.stockLabel": "Stock of {name}: {left} of {total} left",
+  "register.soldOutButton": "Sold out",
+  "register.soldOutLabel": "Mark {name} as sold out",
+  "register.cartButton": "Cart: {count} items, {total}",
+  "register.cartTitle": "Cart",
+  "register.emptyCart": "The cart is empty.",
+  "register.clear": "Clear cart",
+  "register.total": "Total",
+  "register.method": "Payment (label only)",
+  "register.cash": "Cash",
+  "register.qris": "QRIS",
+  "register.methodNote":
+    "FOODOO records the method only. It does not process payments.",
+  "register.tendered": "Cash received",
+  "register.exact": "Exact",
+  "register.change": "Change: {amount}",
+  "register.short": "Short by {amount}",
+  "register.save": "Save sale",
+  "register.saved": "Sale saved: {total}",
+  "register.autoSoldOut": "{name} sold out at {time}",
+  "register.saveFailed": "The sale was not saved. Nothing was recorded.",
+  "register.todayTitle": "Today's sales",
+  "register.revenue": "Revenue",
+  "register.count": "Transactions",
+  "register.noSales": "No sales yet today.",
+  "register.line": "{qty} × {name}",
+  "register.methodCash": "Cash",
+  "register.methodQris": "QRIS",
+  "register.void": "Void last sale",
+  "register.voidTitle": "Void the last sale?",
+  "register.voidBody":
+    "The sale from {time} ({total}) is removed. Sold-out marks set by the register are removed if stock returns.",
+  "register.voidConfirm": "Void sale",
+  "register.voided": "Sale voided",
+  "register.voidedReopened": "Sale voided. {name} is available again.",
+  "register.dayChanged": "The day changed. The cart was cleared.",
+
+  "settings.mode.title": "Sales mode",
+  "settings.mode.simple": "Simple",
+  "settings.mode.simpleHint":
+    "Tap Sold out when a menu runs out. No sales are recorded.",
+  "settings.mode.pos": "Register",
+  "settings.mode.posHint":
+    "Record each sale. Remaining portions and sell-out times update by themselves.",
+  "settings.mode.keep":
+    "You can switch at any time. Recorded sales are never deleted by switching.",
+  "settings.mode.saved": "Mode saved",
+
+  "close.posNote":
+    "Register says {remaining} left. You entered {entered} (difference {gap}).",
+  "close.posOver": "The register recorded {qty} portions over the plan.",
+  "close.unknownTime": "Don't remember",
+  "close.unknownTimeNote": "Counted as sold out at closing time.",
+  "close.knownTime": "Enter a time",
+  "close.someLeft": "Some left over",
+  "close.cancelledNote": "Sell-out mark removed. Enter what is left.",
+  "close.didSellOut": "It did sell out",
+  "close.revenue": "Revenue: {amount}",
+  "close.correct": "Correct this day",
+  "close.correctNote": "You can correct this day until {date}.",
+  "close.corrected": "Day corrected",
+
   "reason.history.soldOutWeekday":
     "Sold out on {soldOut} of the last {observations} {weekdayPlural} → {delta}",
   "reason.history.soldOutRecent":
@@ -349,9 +415,9 @@ export const en = {
   "reason.coldStart":
     "Not enough history yet. Starting from your usual {usualQty}",
   "reason.coldStartUp":
-    "Not enough history yet. Starting from your usual {usualQty}, sold out last time",
+    "Not enough history yet. Starting from your usual {usualQty}, sold out last time → {delta}",
   "reason.coldStartDown":
-    "Not enough history yet. Starting from your usual {usualQty}, leftovers last time",
+    "Not enough history yet. Starting from your usual {usualQty}, leftovers last time → {delta}",
 
   "weekday.plural.0": "Sundays",
   "weekday.plural.1": "Mondays",
