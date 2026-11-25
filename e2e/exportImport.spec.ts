@@ -25,6 +25,7 @@ for (const [label, extension] of [
     await page.clock.setFixedTime(new Date("2026-03-02T09:00:00+07:00"));
     await page.goto("/");
     await page.getByRole("button", { name: "Try demo stall" }).click();
+    await page.getByRole("button", { name: /^Warung Demo/ }).click();
     await expect(
       page.getByRole("heading", { level: 1, name: "Today" }),
     ).toBeVisible();
@@ -39,6 +40,7 @@ for (const [label, extension] of [
       page.getByRole("heading", { level: 1, name: /Cook the right amount/ }),
     ).toBeVisible();
 
+    await page.getByRole("button", { name: "Import a file" }).click();
     await page.getByLabel("File to import").setInputFiles(file);
     const dialog = page.getByRole("dialog", { name: "Import this file?" });
     await expect(dialog).toContainText("replaces all data");

@@ -49,6 +49,9 @@ describe("Today", () => {
     fireEvent.click(
       await screen.findByRole("button", { name: "Try demo stall" }),
     );
+    fireEvent.click(
+      await screen.findByRole("button", { name: /^Warung Demo/ }),
+    );
     expect(
       await screen.findByRole("heading", { level: 1, name: "Today" }),
     ).toBeTruthy();

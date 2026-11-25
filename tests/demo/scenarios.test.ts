@@ -7,10 +7,12 @@ import {
   type DemoScenario,
 } from "../../src/demo/generator.ts";
 import {
-  DEFAULT_DEMO_SCENARIO,
+  DEMO_CATALOG,
   DEMO_SCENARIO_IDS,
-  parseDemoScenario,
-} from "../../src/demo/scenarioId.ts";
+  demoStallDate,
+  isDemoScenarioId,
+  parseDemoEnabled,
+} from "../../src/demo/catalog.ts";
 import { demoScenario } from "../../src/demo/scenarios.ts";
 import {
   profileHours,
@@ -37,27 +39,57 @@ function suggestionsFor(scenario: DemoScenario, weekday: number) {
   );
 }
 
-describe("parseDemoScenario", () => {
-  it("defaults to scenario 1 when the variable is missing or empty", () => {
-    expect(parseDemoScenario(undefined)).toBe(DEFAULT_DEMO_SCENARIO);
-    expect(parseDemoScenario("  ")).toBe(1);
-  });
-
-  it("turns the demo off", () => {
-    for (const value of ["off", "OFF", "0", "false", "none"]) {
-      expect(parseDemoScenario(value)).toBeNull();
+describe("parseDemoEnabled (VITE_DEMO)", () => {
+  it("is on when the variable is missing, empty or on", () => {
+    for (const value of [undefined, "", " ", "on", "ON", "1", "true", "yes"]) {
+      expect(parseDemoEnabled(value)).toBe(true);
     }
   });
 
-  it("selects scenarios 1 to 4", () => {
-    expect(DEMO_SCENARIO_IDS.map((id) => parseDemoScenario(` ${id} `))).toEqual(
-      [1, 2, 3, 4],
-    );
+  it("is off for off values", () => {
+    for (const value of ["off", "OFF", "0", "false", "no", "none"]) {
+      expect(parseDemoEnabled(value)).toBe(false);
+    }
   });
 
   it("rejects any other value", () => {
-    expect(() => parseDemoScenario("5")).toThrow("Invalid VITE_DEMO_SCENARIO");
-    expect(() => parseDemoScenario("on")).toThrow("Use off, 1, 2, 3 or 4");
+    expect(() => parseDemoEnabled("3")).toThrow("Invalid VITE_DEMO");
+    expect(() => parseDemoEnabled("maybe")).toThrow("Use on or off");
+  });
+});
+
+describe("demo catalog", () => {
+  it("matches the generated scenarios", () => {
+    expect(DEMO_CATALOG.map((entry) => entry.id)).toEqual([
+      ...DEMO_SCENARIO_IDS,
+    ]);
+    for (const entry of DEMO_CATALOG) {
+      const scenario = demoScenario(entry.id);
+      expect(entry).toEqual({
+        id: scenario.id,
+        stallName: scenario.stallName,
+        openAt: scenario.settings.openAt,
+        closeAt: scenario.settings.closeAt,
+        historyDays: scenario.historyDays,
+      });
+    }
+  });
+
+  it("recognises scenario ids", () => {
+    expect(isDemoScenarioId(3)).toBe(true);
+    expect(isDemoScenarioId(5)).toBe(false);
+    expect(isDemoScenarioId("1")).toBe(false);
+  });
+
+  it("dates a night stall loaded after midnight to the evening before", () => {
+    const night = DEMO_CATALOG[2];
+    const morning = DEMO_CATALOG[0];
+    expect(night && demoStallDate(night, "2026-03-03", "01:30")).toBe(
+      "2026-03-02",
+    );
+    expect(morning && demoStallDate(morning, "2026-03-03", "01:30")).toBe(
+      "2026-03-03",
+    );
   });
 });
 

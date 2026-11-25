@@ -35,9 +35,23 @@ export const en = {
 
   "welcome.start": "Start setup",
   "welcome.continue": "Continue setup",
+  "demo.pick.title": "Choose a demo stall",
+  "demo.pick.intro":
+    "All four stalls use made-up data. Their history always ends yesterday, on whatever day you open the app.",
+  "demo.pick.hours": "Open {open}–{close}",
+  "demo.pick.history": "{days} days of history",
+  "demo.s1.desc":
+    "Morning stall with two rush hours. Nasi Uduk sells out most days, so you can see how FOODOO counts the customers it missed.",
+  "demo.s2.desc":
+    "Office lunch stall with one noon rush. Busy on weekdays and quiet at weekends, so each weekday gets its own suggestion.",
+  "demo.s3.desc":
+    "Night stall open past midnight. Sales after 00:00 still count for the evening the stall opened.",
+  "demo.s4.desc":
+    "Stall that opened four days ago. There is not enough history yet, so suggestions start from the usual portions and adjust.",
+  "demo.refreshed": "Demo dates moved up to today",
   "welcome.demo": "Try demo stall",
   "welcome.demoNote":
-    "The demo stall uses made-up data so you can look around first.",
+    "Choose one of four demo stalls with made-up data to look around first.",
   "welcome.demoBlocked":
     "You have started your own setup. Delete it in Settings to try the demo.",
 
@@ -305,6 +319,7 @@ export const en = {
     "Everything is stored only on this device. Nothing is sent anywhere.",
   "settings.data.loadDemo": "Load demo stall",
   "settings.data.resetDemo": "Reset demo data",
+  "settings.data.switchDemo": "Choose another demo stall",
   "settings.data.loadDemoBlocked":
     "Delete your own data first to load the demo stall.",
   "settings.data.demoLoaded": "Demo stall loaded",

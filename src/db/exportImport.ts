@@ -1,4 +1,5 @@
 // src/db/exportImport.ts
+import { isDemoScenarioId } from "../demo/catalog.ts";
 import { profileHours, validateHours, validateMenu } from "../domain/setup.ts";
 import { formatHHMM, parseHHMM, weekdayOf } from "../domain/time.ts";
 import type {
@@ -108,6 +109,7 @@ const STALL_COLUMNS: readonly Column[] = [
   { key: "busyProfile", kind: "json" },
   { key: "isDemo", kind: "bool" },
   { key: "setupComplete", kind: "bool" },
+  { key: "demo", kind: "json", optional: true },
 ];
 
 const MENU_COLUMNS: readonly Column[] = [
@@ -235,6 +237,14 @@ function checkStall(raw: unknown, issues: Issues): StallRow | null {
   }
   if (typeof raw.setupComplete !== "boolean") bad("setupComplete");
   if (typeof settings.isDemo !== "boolean") bad("isDemo");
+  const demo = raw.demo ?? null;
+  const demoValid =
+    demo === null ||
+    (isRecord(demo) &&
+      settings.isDemo === true &&
+      isDemoScenarioId(demo.scenario) &&
+      isIsoDate(demo.generatedFor));
+  if (!demoValid) bad("demo");
   const openAt = settings.openAt;
   const closeAt = settings.closeAt;
   const hoursValid =
@@ -269,12 +279,20 @@ function checkStall(raw: unknown, issues: Issues): StallRow | null {
     busyProfile,
     isDemo: settings.isDemo === true,
   };
-  return {
+  const row: StallRow = {
     id: STALL_ID,
     name: String(raw.name),
     settings: clean,
     setupComplete: raw.setupComplete === true,
   };
+  if (
+    isRecord(demo) &&
+    isDemoScenarioId(demo.scenario) &&
+    isIsoDate(demo.generatedFor)
+  ) {
+    row.demo = { scenario: demo.scenario, generatedFor: demo.generatedFor };
+  }
+  return row;
 }
 
 function checkMenu(raw: unknown, where: string, issues: Issues): Menu | null {
@@ -657,6 +675,7 @@ export function backupSheets(backup: Backup) {
     busyProfile: backup.stall.settings.busyProfile,
     isDemo: backup.stall.settings.isDemo,
     setupComplete: backup.stall.setupComplete,
+    demo: backup.stall.demo ?? null,
   };
   const records = menuDayRecords(backup);
   return [
@@ -755,6 +774,7 @@ async function parseXlsx(data: Uint8Array): Promise<ImportResult> {
       id: STALL_ID,
       name: stallRecord.name,
       setupComplete: stallRecord.setupComplete,
+      demo: stallRecord.demo,
       settings: {
         openAt: stallRecord.openAt,
         closeAt: stallRecord.closeAt,

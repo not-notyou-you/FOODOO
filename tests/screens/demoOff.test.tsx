@@ -1,7 +1,7 @@
 // tests/screens/demoOff.test.tsx
 import { cleanup, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { loadDemo, startSetup } from "../../src/db/repositories.ts";
+import { getStall, loadDemo, startSetup } from "../../src/db/repositories.ts";
 import type { FoodooDb } from "../../src/db/schema.ts";
 import { renderApp } from "../app/renderApp.tsx";
 import { makeTestDb } from "../db/testDb.ts";
@@ -11,10 +11,9 @@ vi.mock("../../src/app/registerPwa.ts", () => ({
 }));
 
 vi.mock("../../src/app/demoConfig.ts", () => ({
-  DEMO_SCENARIO: null,
+  DEMO_ENABLED: false,
 }));
 
-const TODAY = "2026-03-02";
 let db: FoodooDb;
 
 beforeEach(() => {
@@ -26,7 +25,7 @@ afterEach(async () => {
   await db.delete();
 });
 
-describe("demo turned off (VITE_DEMO_SCENARIO=off)", () => {
+describe("demo turned off (VITE_DEMO=off)", () => {
   it("Welcome offers only Start setup", async () => {
     renderApp({ db });
     expect(
@@ -46,8 +45,8 @@ describe("demo turned off (VITE_DEMO_SCENARIO=off)", () => {
     ).toBeNull();
   });
 
-  it("a demo stored earlier can be removed but not reset", async () => {
-    await loadDemo(db, TODAY);
+  it("a demo stored earlier can be removed but not reset, switched or moved", async () => {
+    await loadDemo(db, "2026-02-25");
     renderApp({ db, path: "/settings" });
     expect(
       await screen.findByRole("button", { name: "Remove demo stall" }),
@@ -55,5 +54,9 @@ describe("demo turned off (VITE_DEMO_SCENARIO=off)", () => {
     expect(
       screen.queryByRole("button", { name: "Reset demo data" }),
     ).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: "Choose another demo stall" }),
+    ).toBeNull();
+    expect((await getStall(db))?.demo?.generatedFor).toBe("2026-02-25");
   });
 });

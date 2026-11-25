@@ -300,6 +300,43 @@ describe("DM-4 validation", () => {
     ]);
   });
 
+  it("keeps the demo scenario and refuses a broken one", async () => {
+    const backup = await demoBackup();
+    expect(backup.stall.demo).toEqual({ scenario: 1, generatedFor: TODAY });
+    const withDemo = (demo: unknown, isDemo = true) =>
+      validateBackup({
+        ...backup,
+        stall: {
+          ...backup.stall,
+          demo,
+          settings: { ...backup.stall.settings, isDemo },
+        },
+      });
+    const demoOf = (result: ImportResult) =>
+      result.ok && result.plan.kind === "replace"
+        ? result.plan.backup.stall.demo
+        : "invalid";
+    expect(
+      demoOf(withDemo({ scenario: 3, generatedFor: "2026-03-01" })),
+    ).toEqual({
+      scenario: 3,
+      generatedFor: "2026-03-01",
+    });
+    expect(demoOf(withDemo(undefined))).toBeUndefined();
+    for (const demo of [
+      { scenario: 9, generatedFor: TODAY },
+      { scenario: 1, generatedFor: "yesterday" },
+      "1",
+    ]) {
+      expect(issuesOf(withDemo(demo))).toEqual([
+        { code: "badValue", where: "stall.demo" },
+      ]);
+    }
+    expect(
+      issuesOf(withDemo({ scenario: 1, generatedFor: TODAY }, false)),
+    ).toEqual([{ code: "badValue", where: "stall.demo" }]);
+  });
+
   it("names a missing sheet or column and an empty file", async () => {
     const backup = await demoBackup();
     const sheets = backupSheets(backup);

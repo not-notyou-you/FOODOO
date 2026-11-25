@@ -146,7 +146,7 @@ npm run lighthouse     # with npm run preview running: Lighthouse scores into do
 
 **Windows note.** Run the test commands from a terminal whose path starts with an upper-case drive letter (`D:\...`, the default in PowerShell and VS Code). From a shell that reports `d:/...`, the coverage report lists every file twice and the 100% gate fails even though the tests pass. Linux and macOS are not affected, and CI runs on Linux.
 
-**Demo setting.** `VITE_DEMO_SCENARIO` chooses which demo stall the app offers. Copy `.env.example` to `.env` and set it to `off` (no demo button anywhere), or `1`, `2`, `3` or `4` (see section 4). A missing or empty value means `1`. The value is fixed at build time, so rebuild after changing it; any other value stops the build with an error. Unit and end-to-end tests always use `1`. On Cloudflare Pages, set the same variable in the project's environment variables. `.env` is git-ignored and holds no secrets.
+**Demo setting.** `VITE_DEMO` turns the demo stalls on or off. Copy `.env.example` to `.env` and set it to `off` (no demo button anywhere) or `on`. A missing or empty value means `on`. The value is fixed at build time, so rebuild after changing it; any other value stops the build with an error. Unit and end-to-end tests always use `on`. On Cloudflare Pages, set the same variable in the project's environment variables. `.env` is git-ignored and holds no secrets.
 
 **Dependencies.** Runtime and development dependencies are listed with versions and licences in section 7. All versions are pinned exactly and the lockfile is committed.
 
@@ -154,17 +154,17 @@ npm run lighthouse     # with npm run preview running: Lighthouse scores into do
 
 - Deployed URL: https://foodoo-d5h.pages.dev (Cloudflare Pages, deployed automatically from `main`). It serves the last pushed commit. Until the team commits and pushes the F2 and F3 work, it still shows the earlier build, where Plan, Service and Close say "Coming soon".
 - Walk the loop: **Try demo stall** → **Plan today's portions** → **Accept all** or **Save plan** → **Service**, tap a menu when it sells out (**Undo** for 10 seconds) → **Close**, enter leftovers → **Close day** → **Confirm and close day**. Tomorrow's suggestions are then shown on the Close screen. **How is this worked out?** there, or **Settings → About → How FOODOO calculates**, opens the explanation page.
-- Load demo data: on the first screen, press **Try demo stall**. The build offers one of four made-up stalls, chosen with `VITE_DEMO_SCENARIO` (section 3). Each has 4 menus and synthetic history ending yesterday, generated with a fixed seed. Details and generated numbers: `docs/DEMO_SCENARIOS.md`.
+- Load demo data: on the first screen, press **Try demo stall** and pick one of four made-up stalls. Each card shows the hours, the length of the history and a short description. Each stall has 4 menus and synthetic history from a fixed seed. Details and generated numbers: `docs/DEMO_SCENARIOS.md`.
 
-  | Value | Demo stall               | Hours          | What it shows                                                                   |
-  | ----- | ------------------------ | -------------- | ------------------------------------------------------------------------------- |
-  | `1`   | Warung Demo (default)    | 06:00 to 14:00 | Two rush hours; Nasi Uduk sells out most days, so demand is corrected (56 days) |
-  | `2`   | Demo Warung Makan Kantor | 10:00 to 15:00 | Lunch peak, quiet weekends; suggestions differ by weekday (56 days)             |
-  | `3`   | Demo Angkringan Malam    | 18:00 to 02:00 | Night stall whose day crosses midnight (56 days)                                |
-  | `4`   | Demo Warung Baru Buka    | 07:00 to 13:00 | New stall with 4 days of history: cold-start suggestions, a salvage value       |
-  | `off` | none                     |                | The demo button is hidden; only **Start setup** is offered                      |
+  | Demo stall               | Hours          | What it shows                                                                   |
+  | ------------------------ | -------------- | ------------------------------------------------------------------------------- |
+  | Warung Demo              | 06:00 to 14:00 | Two rush hours; Nasi Uduk sells out most days, so demand is corrected (56 days) |
+  | Demo Warung Makan Kantor | 10:00 to 15:00 | Lunch peak, quiet weekends; suggestions differ by weekday (56 days)             |
+  | Demo Angkringan Malam    | 18:00 to 02:00 | Night stall whose day crosses midnight (56 days)                                |
+  | Demo Warung Baru Buka    | 07:00 to 13:00 | New stall with 4 days of history: cold-start suggestions, a salvage value       |
 
-- Reset demo data: **Settings → Data → Reset demo data** reloads the demo history from scratch. **Remove demo stall** deletes it and returns to the first screen.
+- Dates always follow today: the history ends the day before the current stall day. When the app is opened on a later day, the demo is generated again with the same stall, so the content stays the same and only the dates move. A short message says so. Anything tried in the demo on an earlier day is replaced.
+- Reset demo data: **Settings → Data → Reset demo data** reloads the same demo stall from scratch. **Choose another demo stall** opens the same choice of four. **Remove demo stall** deletes it and returns to the first screen.
 - The demo cannot be loaded over an owner's own data; Settings explains that the own data must be deleted first.
 
 All synthetic data carries a yellow **Demo data** sticker in the header of every screen.
@@ -256,6 +256,7 @@ Per the competition rules, material AI assistance is disclosed here with the too
 | 2026-11-25 | Claude Code (Claude Opus 5.5)   | Data-correctness fixes: `src/domain/`, `src/screens/`, `src/components/`, `src/app/`, `src/i18n/`, tests, e2e                                                                                                      | Found and fixed four issues at the team's request: an unfilled leftover was stored as a sell-out at closing time; past unclosed days could not be closed; stalls closing after midnight were refused; a sell-out tapped right after opening was stored without a check. Added tests; decisions D-078 to D-081. Not committed.                                                                                                                                                                                                                  | Pending owner review (Hakim, Vassel)                                    |
 | 2026-11-25 | Claude Code (Claude Opus 5.5)   | Demo scenarios: `src/demo/`, `src/app/demoConfig.ts`, `src/screens/Welcome.tsx`, `src/screens/Settings.tsx`, `scripts/seed.ts`, config, tests                                                                      | At the team's request, added three more synthetic demo stalls (office lunch, night stall, new stall) and the `VITE_DEMO_SCENARIO` setting (`off`, 1 to 4); made `npm run seed` write `docs/DEMO_SCENARIOS.md`; kept scenario 1 and the backtest byte-identical; added tests; decision D-082. Not committed.                                                                                                                                                                                                                                    | Pending owner review (Hakim, Vassel)                                    |
 | 2026-11-25 | Claude Code (Claude Opus 5.5)   | History, analytics and export/import: `src/domain/metrics.ts`, `src/db/` (exportImport, csv, xlsx, zip), `src/screens/` (Today, History, DayDetail, Settings, Welcome), `src/components/`, `src/i18n/`, tests, e2e | At the team's request, built WS and DM-3/4 before the Final Day tag: last-7-days metrics on Today; the History screen (per-menu table, cooked vs demand chart, past-day list) and a read-only day view; export to JSON, CSV and XLSX and import from all three with full validation, on Settings and Welcome; a dependency-free ZIP/XLSX codec; unit, component and e2e tests; updated SPEC, DESIGN, PLAN, FINAL_DAY and this README; decisions D-083 to D-086; then a layout pass on these screens after team review (D-087). Not committed.  | Pending owner review (Hakim, assigned by the team for all of this work) |
+| 2026-11-25 | Claude Code (Claude Opus 5.5)   | Demo stall picker: `src/demo/catalog.ts`, `src/components/DemoPicker.tsx`, `src/app/useDemoRefresh.ts`, `src/db/`, `src/screens/Welcome.tsx`, `src/screens/Settings.tsx`, `src/i18n/`, tests, e2e                  | At the team's request, replaced the build-time scenario number with an in-app choice of the four demo stalls (EN and ID descriptions), moved demo dates to the current day on each new day, reduced the setting to `VITE_DEMO=on/off`, carried the demo marker through export and import (D-088); made import on the first screen a button beside Start setup and Try demo stall that opens a modal (D-089). Not committed.                                                                                                                    | Pending owner review (Hakim, Vassel)                                    |
 
 ## 9. Known limitations
 
@@ -270,8 +271,10 @@ Per the competition rules, material AI assistance is disclosed here with the too
 - Menu cards have a photo placeholder only; photos cannot be added.
 - The app has not been tested with real warung owners yet. ON-5 (setup in under 3 minutes) and the under-one-minute daily input target have not been timed with an owner.
 - Installation has been checked with Chromium's installability report only, not on a physical Android phone.
-- Demo scenarios 2 to 4 are covered by unit and database tests only; the end-to-end suite runs scenario 1. Each build offers one scenario; switching needs a rebuild.
-- With `VITE_DEMO_SCENARIO=off`, a demo stall stored earlier on a device stays until it is removed in Settings; it can no longer be reset.
+- The end-to-end suite runs the Warung Demo stall only; the other three demo stalls are covered by unit, database and screen tests.
+- When a demo stall is opened on a later day it is generated again, so plans and closes tried in the demo on earlier days are not kept. Demand depends on the weekday, so the numbers shift slightly with the date.
+- A demo restored from an older backup file (without the demo stall marker) keeps its dates and is not moved.
+- With `VITE_DEMO=off`, a demo stall stored earlier on a device stays until it is removed in Settings; it is no longer reset, switched or moved to today.
 - There is no `LICENSE` file yet.
 - The app icon and logo are redrawn from the brand sheet as plain shapes; the team should confirm they match the intended mark.
 - Only Chromium is covered by end-to-end tests.

@@ -34,6 +34,7 @@ async function goOfflineAfterFirstLoad(page: Page, context: BrowserContext) {
 
 async function runCoreLoop(page: Page, testInfo: TestInfo) {
   await page.getByRole("button", { name: "Try demo stall" }).click();
+  await page.getByRole("button", { name: /^Warung Demo/ }).click();
   await expect(
     page.getByRole("heading", { level: 1, name: "Today" }),
   ).toBeVisible();

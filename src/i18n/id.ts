@@ -37,9 +37,23 @@ export const id: Record<keyof typeof en, string> = {
 
   "welcome.start": "Mulai pengaturan",
   "welcome.continue": "Lanjutkan pengaturan",
+  "demo.pick.title": "Pilih warung demo",
+  "demo.pick.intro":
+    "Keempat warung memakai data buatan. Riwayatnya selalu berakhir kemarin, kapan pun aplikasi dibuka.",
+  "demo.pick.hours": "Buka {open}–{close}",
+  "demo.pick.history": "Riwayat {days} hari",
+  "demo.s1.desc":
+    "Warung pagi dengan dua jam ramai. Nasi Uduk hampir selalu habis, jadi terlihat cara FOODOO menghitung pembeli yang terlewat.",
+  "demo.s2.desc":
+    "Warung makan siang kantor dengan satu jam ramai. Ramai di hari kerja dan sepi di akhir pekan, jadi tiap hari punya saran sendiri.",
+  "demo.s3.desc":
+    "Angkringan yang buka sampai lewat tengah malam. Penjualan setelah 00:00 tetap dihitung untuk malam warung itu buka.",
+  "demo.s4.desc":
+    "Warung yang baru buka empat hari. Riwayat belum cukup, jadi saran dimulai dari porsi biasa lalu disesuaikan.",
+  "demo.refreshed": "Tanggal demo disesuaikan ke hari ini",
   "welcome.demo": "Coba warung demo",
   "welcome.demoNote":
-    "Warung demo memakai data buatan supaya Anda bisa melihat-lihat dulu.",
+    "Pilih salah satu dari empat warung demo berdata buatan untuk melihat-lihat dulu.",
   "welcome.demoBlocked":
     "Anda sudah mulai mengatur warung sendiri. Hapus datanya di Pengaturan untuk mencoba demo.",
 
@@ -313,6 +327,7 @@ export const id: Record<keyof typeof en, string> = {
     "Semua data hanya disimpan di perangkat ini. Tidak ada yang dikirim ke mana pun.",
   "settings.data.loadDemo": "Muat warung demo",
   "settings.data.resetDemo": "Atur ulang data demo",
+  "settings.data.switchDemo": "Pilih warung demo lain",
   "settings.data.loadDemoBlocked":
     "Hapus data Anda sendiri dulu untuk memuat warung demo.",
   "settings.data.demoLoaded": "Warung demo dimuat",

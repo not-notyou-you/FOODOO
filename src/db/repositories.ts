@@ -18,10 +18,7 @@ import type {
   Reason,
   StallSettings,
 } from "../domain/types.ts";
-import {
-  DEFAULT_DEMO_SCENARIO,
-  type DemoScenarioId,
-} from "../demo/scenarioId.ts";
+import { DEFAULT_DEMO_SCENARIO, type DemoScenarioId } from "../demo/catalog.ts";
 import { STALL_ID, type FoodooDb, type StallRow } from "./schema.ts";
 
 export const DEFAULT_OPEN_AT: HHMM = "06:00";
@@ -333,6 +330,24 @@ export async function loadDemo(
     await db.days.bulkPut(records.days);
     await db.menuDays.bulkPut(records.menuDays);
   });
+}
+
+export async function refreshDemo(
+  db: FoodooDb,
+  today: ISODate,
+): Promise<boolean> {
+  const stall = await db.stall.get(STALL_ID);
+  const demo = stall?.demo;
+  if (
+    stall === undefined ||
+    !stall.settings.isDemo ||
+    demo === undefined ||
+    demo.generatedFor === today
+  ) {
+    return false;
+  }
+  await loadDemo(db, today, demo.scenario);
+  return true;
 }
 
 export async function removeDemo(db: FoodooDb): Promise<void> {

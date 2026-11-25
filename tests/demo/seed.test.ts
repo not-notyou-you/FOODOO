@@ -14,6 +14,7 @@ describe("buildDemoRecords", () => {
       name: history.stallName,
       settings: { ...history.settings, isDemo: true },
       setupComplete: true,
+      demo: { scenario: 1, generatedFor: today },
     });
     expect(records.menus).toEqual(history.menus);
     expect(records.days).toEqual(history.days);

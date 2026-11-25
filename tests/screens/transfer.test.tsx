@@ -85,7 +85,17 @@ describe("Export and import screens", () => {
     await deleteAll(db);
 
     renderApp({ db, path: "/welcome" });
-    await screen.findByRole("button", { name: "Choose a file to import" });
+    expect(
+      screen.queryByRole("button", { name: "Choose a file to import" }),
+    ).toBeNull();
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Import a file" }),
+    );
+    const info = await screen.findByRole("dialog", { name: "Import a file" });
+    expect(
+      within(info).getByText(/JSON or XLSX restores a full backup/),
+    ).toBeTruthy();
+    within(info).getByRole("button", { name: "Choose a file to import" });
     expect(screen.queryByRole("button", { name: "Export file" })).toBeNull();
     chooseFile(fileOf(file.data, "backup.json"));
     const dialog = await screen.findByRole(

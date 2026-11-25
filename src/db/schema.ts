@@ -1,7 +1,9 @@
 // src/db/schema.ts
 import Dexie, { type EntityTable, type Table, type Transaction } from "dexie";
+import type { DemoScenarioId } from "../demo/catalog.ts";
 import type {
   DayRecord,
+  ISODate,
   Menu,
   MenuDay,
   StallSettings,
@@ -10,11 +12,17 @@ import type {
 export const DB_NAME = "foodoo";
 export const STALL_ID = "stall";
 
+export interface DemoMeta {
+  scenario: DemoScenarioId;
+  generatedFor: ISODate;
+}
+
 export interface StallRow {
   id: typeof STALL_ID;
   name: string;
   settings: StallSettings;
   setupComplete: boolean;
+  demo?: DemoMeta;
 }
 
 export type MenuDayKey = [string, string];

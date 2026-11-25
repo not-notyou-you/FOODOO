@@ -18,12 +18,10 @@ import { Sheet } from "./Sheet.tsx";
 const FORMATS: readonly ExportFormat[] = ["json", "csv", "xlsx"];
 
 interface ExportImportPanelProps {
-  showExport?: boolean;
+  compact?: boolean;
 }
 
-export function ExportImportPanel({
-  showExport = true,
-}: ExportImportPanelProps) {
+export function ExportImportPanel({ compact = false }: ExportImportPanelProps) {
   const t = useT();
   const db = useDb();
   const toast = useToast();
@@ -35,6 +33,7 @@ export function ExportImportPanel({
   const [busy, setBusy] = useState(false);
   const [issues, setIssues] = useState<ImportIssue[]>([]);
   const [plan, setPlan] = useState<ImportPlan | null>(null);
+  const [importOpen, setImportOpen] = useState(false);
 
   async function onExport() {
     setBusy(true);
@@ -65,6 +64,7 @@ export function ExportImportPanel({
         menus: await db.menus.toArray(),
       });
       if (result.ok) {
+        setImportOpen(false);
         setPlan(result.plan);
       } else {
         setIssues(result.issues);
@@ -94,45 +94,14 @@ export function ExportImportPanel({
     }
   }
 
-  return (
-    <div className="transfer">
-      {showExport ? (
-        <div className="transfer__block">
-          <h3>{t("transfer.export.title")}</h3>
-          <fieldset className="segmented segmented--even">
-            <legend>{t("transfer.format")}</legend>
-            <div className="segmented__options">
-              {FORMATS.map((option) => (
-                <label key={option} className="segmented__option">
-                  <input
-                    type="radio"
-                    name="export-format"
-                    value={option}
-                    checked={format === option}
-                    onChange={() => {
-                      setFormat(option);
-                    }}
-                  />
-                  <span>{t(`transfer.format.${option}`)}</span>
-                </label>
-              ))}
-            </div>
-          </fieldset>
-          <p className="field__hint">{t(`transfer.hint.${format}`)}</p>
-          <Button
-            variant="secondary"
-            disabled={busy}
-            onClick={() => {
-              void onExport();
-            }}
-          >
-            {t("transfer.export.action")}
-          </Button>
-        </div>
-      ) : null}
-
-      <div className="transfer__block">
-        <h3>{t("transfer.import.title")}</h3>
+  const importBlock = (
+    <>
+      <div
+        className={
+          compact ? "transfer__block transfer__block--sheet" : "transfer__block"
+        }
+      >
+        {compact ? null : <h3>{t("transfer.import.title")}</h3>}
         <p className="field__hint">{t("transfer.import.hint")}</p>
         <input
           ref={input}
@@ -172,44 +141,112 @@ export function ExportImportPanel({
           </ul>
         </div>
       )}
+    </>
+  );
 
-      <Sheet
-        open={plan !== null}
-        title={t("transfer.confirm.title")}
-        onClose={() => {
-          setPlan(null);
-        }}
-      >
-        <p>
-          {plan?.kind === "merge"
-            ? t("transfer.confirm.merge", {
-                days: new Set(plan.menuDays.map((item) => item.date)).size,
-              })
-            : t("transfer.confirm.replace", {
-                menus: plan?.kind === "replace" ? plan.backup.menus.length : 0,
-                days: plan?.kind === "replace" ? plan.backup.days.length : 0,
-              })}
-        </p>
-        <div className="form__actions">
-          <Button
-            variant="secondary"
-            onClick={() => {
-              setPlan(null);
-            }}
-          >
-            {t("common.cancel")}
-          </Button>
-          <Button
-            variant={plan?.kind === "merge" ? "primary" : "danger"}
-            disabled={busy}
-            onClick={() => {
-              void onConfirm();
-            }}
-          >
-            {t("transfer.confirm.action")}
-          </Button>
-        </div>
-      </Sheet>
+  const confirmSheet = (
+    <Sheet
+      open={plan !== null}
+      title={t("transfer.confirm.title")}
+      onClose={() => {
+        setPlan(null);
+      }}
+    >
+      <p>
+        {plan?.kind === "merge"
+          ? t("transfer.confirm.merge", {
+              days: new Set(plan.menuDays.map((item) => item.date)).size,
+            })
+          : t("transfer.confirm.replace", {
+              menus: plan?.kind === "replace" ? plan.backup.menus.length : 0,
+              days: plan?.kind === "replace" ? plan.backup.days.length : 0,
+            })}
+      </p>
+      <div className="form__actions">
+        <Button
+          variant="secondary"
+          onClick={() => {
+            setPlan(null);
+          }}
+        >
+          {t("common.cancel")}
+        </Button>
+        <Button
+          variant={plan?.kind === "merge" ? "primary" : "danger"}
+          disabled={busy}
+          onClick={() => {
+            void onConfirm();
+          }}
+        >
+          {t("transfer.confirm.action")}
+        </Button>
+      </div>
+    </Sheet>
+  );
+
+  if (compact) {
+    return (
+      <>
+        <Button
+          wide
+          variant="secondary"
+          disabled={busy}
+          onClick={() => {
+            setImportOpen(true);
+          }}
+        >
+          {t("transfer.import.title")}
+        </Button>
+        <Sheet
+          open={importOpen}
+          title={t("transfer.import.title")}
+          onClose={() => {
+            setImportOpen(false);
+          }}
+        >
+          {importBlock}
+        </Sheet>
+        {confirmSheet}
+      </>
+    );
+  }
+
+  return (
+    <div className="transfer">
+      <div className="transfer__block">
+        <h3>{t("transfer.export.title")}</h3>
+        <fieldset className="segmented segmented--even">
+          <legend>{t("transfer.format")}</legend>
+          <div className="segmented__options">
+            {FORMATS.map((option) => (
+              <label key={option} className="segmented__option">
+                <input
+                  type="radio"
+                  name="export-format"
+                  value={option}
+                  checked={format === option}
+                  onChange={() => {
+                    setFormat(option);
+                  }}
+                />
+                <span>{t(`transfer.format.${option}`)}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+        <p className="field__hint">{t(`transfer.hint.${format}`)}</p>
+        <Button
+          variant="secondary"
+          disabled={busy}
+          onClick={() => {
+            void onExport();
+          }}
+        >
+          {t("transfer.export.action")}
+        </Button>
+      </div>
+      {importBlock}
+      {confirmSheet}
     </div>
   );
 }

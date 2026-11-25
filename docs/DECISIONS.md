@@ -731,3 +731,18 @@ All versions are exact and in the lockfile. Where we are not on the newest relea
   - The day view has a short title, a summary card with the full date, and a four-number strip (cooked, sold, leftover, demand) per menu.
   - In Settings, the export and import blocks have full-width separators and three equal format options.
 - **Alternatives considered:** keeping the SVG chart with a fixed aspect ratio (text scales with width); a horizontal-scrolling table (hides columns on phones).
+
+### D-088 Demo stalls are chosen in the app and always dated to today (Hakim, Vassel)
+
+- **Problem:** with D-082, each build offered one demo stall picked by a number in `.env`, so a judge saw only one of the four. A demo loaded on one day kept its dates, so opening it days later showed a history that ended days ago.
+- **Decision:** **Try demo stall** opens a sheet with the four stalls; each card shows the name, hours, history length and a one-line description in English and Bahasa Indonesia. Settings has **Reset demo data** (same stall) and **Choose another demo stall**. The stall row stores `demo: { scenario, generatedFor }`. `useDemoRefresh`, mounted in the main layout, compares `generatedFor` with the current stall date and, on a new day, regenerates the same scenario (`refreshDemo`) and shows "Demo dates moved up to today". The setting became `VITE_DEMO=on/off`. A night stall picked at 09:00 is dated to the evening before, matching D-080.
+- **Export and import:** the `demo` marker is an optional field in the JSON backup and an optional `demo` column in XLSX, validated on import (scenario 1 to 4, a real date, demo stalls only). Older backups without it still import; such a demo is never regenerated, so imported data is not overwritten.
+- **Trade-off:** regenerating on a new day replaces anything tried in the demo on earlier days. The team chose this so the demo always looks current.
+- **Kept identical:** scenario data, `docs/BACKTEST.md` and the `docs/DEMO_SCENARIOS.md` numbers are unchanged. The picker uses a small catalog (`src/demo/catalog.ts`), so the history generator still loads only when a stall is chosen. A test keeps the catalog equal to the scenarios.
+- **Alternatives considered:** keeping the `.env` number (one stall per build); shifting stored dates instead of regenerating (weekday-dependent demand would no longer match the weekday); a URL parameter (changeable by anyone on the deployed site).
+
+### D-089 Import on the first screen is one button with a modal (Vassel)
+
+- **Problem:** the first screen showed the whole import block (heading, explanation, file button) under **Start setup** and **Try demo stall**. It broke the hero layout and read as a third, heavier section.
+- **Decision:** the first screen shows **Import a file** as a third button in the same row (three columns from 720 px, stacked on phones). It opens a modal with the explanation and **Choose a file to import**; after a valid file is read, the modal closes and the existing "Import this file?" confirmation opens. Settings keeps the full export and import panel. Sheets now align their text to the start, so modals opened from the centred landing page no longer inherit centred text.
+- **Alternatives considered:** a text link under the buttons (easy to miss for an owner restoring a backup); keeping the block but collapsing it (still a separate section).

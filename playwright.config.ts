@@ -22,7 +22,7 @@ export default defineConfig({
           command:
             "npm run build && npm run preview -- --port 4173 --strictPort",
           url: localUrl,
-          env: { VITE_DEMO_SCENARIO: "1" },
+          env: { VITE_DEMO: "on" },
           reuseExistingServer: process.env["CI"] === undefined,
           timeout: 120_000,
         }
