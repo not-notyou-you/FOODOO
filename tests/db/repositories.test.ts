@@ -114,10 +114,10 @@ describe("stall setup", () => {
     });
   });
 
-  it("refuses closing before opening", async () => {
+  it("refuses closing at the opening time", async () => {
     await startSetup(db);
     await expect(
-      saveHours(db, { openAt: "14:00", closeAt: "06:00", busyProfile: {} }),
+      saveHours(db, { openAt: "14:00", closeAt: "14:00", busyProfile: {} }),
     ).rejects.toThrow(RangeError);
   });
 

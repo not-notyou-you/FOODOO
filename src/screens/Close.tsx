@@ -1,7 +1,8 @@
 // src/screens/Close.tsx
 import { useId, useState } from "react";
-import { useLocalStamp } from "../app/clock.ts";
+import { Navigate, useParams } from "react-router-dom";
 import { useToast } from "../app/toast.ts";
+import { useStallStamp } from "../app/useStallStamp.ts";
 import { Button } from "../components/Button.tsx";
 import { CloseRow } from "../components/CloseRow.tsx";
 import { CloseSummary } from "../components/CloseSummary.tsx";
@@ -19,6 +20,8 @@ import {
 import { closeDay, setSoldOut } from "../db/repositories.ts";
 import {
   closeDayRecords,
+  incompleteDays,
+  missingLeftovers,
   tomorrowPlan,
   validateSoldOutTime,
   withClosedDay,
@@ -26,13 +29,17 @@ import {
 } from "../domain/close.ts";
 import { isCooked } from "../domain/plan.ts";
 import type { HHMM, MenuDay } from "../domain/types.ts";
-import { useT, type MessageKey } from "../i18n/index.ts";
+import { formatLongDate } from "../i18n/format.ts";
+import { useI18n, type MessageKey } from "../i18n/index.ts";
 
 export function Close() {
-  const t = useT();
+  const { t, language } = useI18n();
   const db = useDb();
   const toast = useToast();
-  const { date } = useLocalStamp();
+  const stamp = useStallStamp();
+  const { date: pastDate } = useParams();
+  const isPast = pastDate !== undefined && pastDate !== stamp.date;
+  const date = pastDate ?? stamp.date;
   const stall = useStall();
   const menus = useMenus();
   const today = useTodayState(date);
@@ -59,7 +66,18 @@ export function Close() {
     );
   }
 
+  if (pastDate !== undefined && !isPast) {
+    return <Navigate to="/close" replace />;
+  }
+  if (
+    isPast &&
+    !incompleteDays(history.days, history.menuDays, stamp.date).includes(date)
+  ) {
+    return <Navigate to="/today" replace />;
+  }
+
   const settings = stall.settings;
+  const longDate = formatLongDate(date, language);
   const names = new Map(menus.map((menu) => [menu.id, menu.name]));
   const nameOf = (menuId: string) => names.get(menuId) ?? menuId;
   const rows = today.menuDays
@@ -97,7 +115,7 @@ export function Close() {
     );
   }
 
-  const leftoverOf = (row: MenuDay) => leftovers[row.menuId] ?? 0;
+  const leftoverOf = (row: MenuDay) => leftovers[row.menuId] ?? null;
   const missedOf = (row: MenuDay) => missed[row.menuId] ?? settings.closeAt;
   const entries: CloseEntry[] = rows.map((row) => {
     if (row.soldOutAt !== null) {
@@ -110,6 +128,7 @@ export function Close() {
       soldOutAt: leftover === 0 ? missedOf(row) : null,
     };
   });
+  const missing = new Set(missingLeftovers(rows, leftovers));
   const errors = new Map(
     rows.flatMap((row) => {
       if (row.soldOutAt !== null || leftoverOf(row) !== 0) {
@@ -139,7 +158,9 @@ export function Close() {
     try {
       await closeDay(db, date, { unusual, entries });
       setConfirming(false);
-      toast.show(t("close.closed"));
+      toast.show(
+        isPast ? t("close.pastClosed", { date: longDate }) : t("close.closed"),
+      );
     } catch {
       toast.show(t("common.saveFailed"));
     } finally {
@@ -165,6 +186,11 @@ export function Close() {
 
   return (
     <Screen title={t("close.title")}>
+      {isPast ? (
+        <p className="note note--info">
+          {t("close.pastIntro", { date: longDate })}
+        </p>
+      ) : null}
       <p className="note">{t("close.intro")}</p>
       <ul className="card-grid">
         {rows.map((row) => {
@@ -176,6 +202,11 @@ export function Close() {
               cooked={row.cookedQty}
               soldOutAt={row.soldOutAt}
               leftover={leftoverOf(row)}
+              leftoverError={
+                submitted && missing.has(row.menuId)
+                  ? t("close.leftoverMissing")
+                  : undefined
+              }
               missedTime={missedOf(row)}
               missedError={
                 error === undefined
@@ -221,7 +252,7 @@ export function Close() {
           wide
           onClick={() => {
             setSubmitted(true);
-            if (errors.size === 0) {
+            if (errors.size === 0 && missing.size === 0) {
               setConfirming(true);
             }
           }}
@@ -229,10 +260,19 @@ export function Close() {
           {t("close.closeDay")}
         </Button>
       </div>
+      {submitted && missing.size > 0 ? (
+        <p className="field__error" role="alert">
+          {t("close.leftoverMissingSummary", { count: missing.size })}
+        </p>
+      ) : null}
       {sheet === null ? null : (
         <Sheet
           open
-          title={t("close.sheetTitle")}
+          title={
+            isPast
+              ? t("close.pastSheetTitle", { date: longDate })
+              : t("close.sheetTitle")
+          }
           onClose={() => {
             setConfirming(false);
           }}
@@ -243,7 +283,7 @@ export function Close() {
           <CloseSummary
             rows={sheet.rows}
             menus={menus}
-            tomorrow={sheet.tomorrow}
+            tomorrow={isPast ? null : sheet.tomorrow}
           />
           <div className="form__actions">
             <Button

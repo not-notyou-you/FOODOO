@@ -89,6 +89,7 @@ export function App() {
             <Route path="/plan" element={<Plan />} />
             <Route path="/service" element={<Service />} />
             <Route path="/close" element={<Close />} />
+            <Route path="/close/:date" element={<Close />} />
             <Route path="/settings" element={<Settings />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />

@@ -58,12 +58,27 @@ async function fillAndOpenSheet() {
     await screen.findByLabelText("Leftover portions of Ayam Goreng"),
     { target: { value: "3" } },
   );
+  fireEvent.change(screen.getByLabelText("Leftover portions of Tempe Orek"), {
+    target: { value: "0" },
+  });
   fireEvent.change(
     screen.getByLabelText("About what time did Tempe Orek run out?"),
     { target: { value: "12:15" } },
   );
   fireEvent.click(screen.getByRole("button", { name: "Close day" }));
   return screen.findByRole("dialog", { name: "Close today?" });
+}
+
+async function fillAndOpenSheetPast() {
+  fireEvent.change(
+    await screen.findByLabelText("Leftover portions of Ayam Goreng"),
+    { target: { value: "3" } },
+  );
+  fireEvent.change(screen.getByLabelText("Leftover portions of Tempe Orek"), {
+    target: { value: "2" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Close day" }));
+  return screen.findByRole("dialog", { name: "Close Monday 2 March?" });
 }
 
 describe("Close", () => {
@@ -83,7 +98,11 @@ describe("Close", () => {
     const ayam = screen.getByLabelText<HTMLInputElement>(
       "Leftover portions of Ayam Goreng",
     );
-    expect(ayam.value).toBe("0");
+    expect(ayam.value).toBe("");
+    expect(
+      screen.queryByLabelText("About what time did Ayam Goreng run out?"),
+    ).toBeNull();
+    fireEvent.change(ayam, { target: { value: "0" } });
     const missed = screen.getByLabelText<HTMLInputElement>(
       "About what time did Ayam Goreng run out?",
     );
@@ -96,13 +115,47 @@ describe("Close", () => {
     expect(
       screen.queryByLabelText("About what time did Ayam Goreng run out?"),
     ).toBeNull();
+  });
+
+  it("blocks closing until every leftover is entered", async () => {
+    renderApp({ db, path: "/close", at: EVENING });
+    fireEvent.change(
+      await screen.findByLabelText("Leftover portions of Ayam Goreng"),
+      { target: { value: "3" } },
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Close day" }));
     expect(
-      screen.getByLabelText("About what time did Tempe Orek run out?"),
+      await screen.findByText(
+        "Enter the leftover portions, or 0 if none are left",
+      ),
+    ).toBeTruthy();
+    expect(
+      screen.getByText(
+        "Enter the leftover portions for 1 menu(s) before closing.",
+      ),
+    ).toBeTruthy();
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect((await db.days.get(TODAY))?.closed).toBe(false);
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "One less Tempe Orek" }),
+    );
+    expect(
+      screen.getByLabelText<HTMLInputElement>("Leftover portions of Tempe Orek")
+        .value,
+    ).toBe("0");
+    fireEvent.click(screen.getByRole("button", { name: "Close day" }));
+    expect(
+      await screen.findByRole("dialog", { name: "Close today?" }),
     ).toBeTruthy();
   });
 
   it("CL-3: blocks closing when the missed sell-out time is outside opening hours", async () => {
     renderApp({ db, path: "/close", at: EVENING });
+    fireEvent.change(
+      await screen.findByLabelText("Leftover portions of Tempe Orek"),
+      { target: { value: "0" } },
+    );
     fireEvent.change(
       await screen.findByLabelText("About what time did Tempe Orek run out?"),
       { target: { value: "15:30" } },
@@ -234,11 +287,55 @@ describe("Close", () => {
     fireEvent.change(await screen.findByLabelText("Sisa porsi Ayam Goreng"), {
       target: { value: "3" },
     });
+    fireEvent.change(screen.getByLabelText("Sisa porsi Tempe Orek"), {
+      target: { value: "2" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Tutup hari" }));
     const dialog = await screen.findByRole("dialog", {
       name: "Tutup hari ini?",
     });
     expect(within(dialog).getByText("≈ 81 (perkiraan)")).toBeTruthy();
+  });
+
+  it("CL-6: a past day that was never closed can be closed from Today", async () => {
+    const NEXT_MORNING = new Date(2026, 2, 3, 9, 0);
+    renderApp({ db, path: "/today", at: NEXT_MORNING });
+    const notice = await screen.findByRole("region", {
+      name: "Days not closed",
+    });
+    fireEvent.click(
+      within(notice).getByRole("link", { name: "Close Monday 2 March" }),
+    );
+    expect(
+      await screen.findByText("You are closing a past day: Monday 2 March."),
+    ).toBeTruthy();
+    const dialog = await fillAndOpenSheetPast();
+    expect(
+      within(dialog).queryByRole("region", {
+        name: /Tomorrow's suggestions/,
+      }),
+    ).toBeNull();
+    fireEvent.click(
+      within(dialog).getByRole("button", { name: "Confirm and close day" }),
+    );
+    expect(
+      await screen.findByRole("heading", { level: 1, name: "Today" }),
+    ).toBeTruthy();
+    expect(await db.days.get(TODAY)).toMatchObject({ closed: true });
+    expect(await db.menuDays.get([TODAY, "ayam-goreng"])).toMatchObject({
+      leftover: 3,
+      estimatedDemand: 28,
+    });
+    expect(
+      screen.queryByRole("region", { name: "Days not closed" }),
+    ).toBeNull();
+  });
+
+  it("sends an unknown or already closed past date back to Today", async () => {
+    renderApp({ db, path: "/close/2026-02-20", at: EVENING });
+    expect(
+      await screen.findByRole("heading", { level: 1, name: "Today" }),
+    ).toBeTruthy();
   });
 
   it("asks to plan first when nothing is planned", async () => {

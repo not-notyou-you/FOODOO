@@ -23,6 +23,41 @@ export function formatHHMM(minutes: number): HHMM {
   return `${hours}:${rest}`;
 }
 
+export interface DayHours {
+  openAt: HHMM;
+  closeAt: HHMM;
+}
+
+export function spansMidnight(hours: DayHours): boolean {
+  return parseHHMM(hours.closeAt) < parseHHMM(hours.openAt);
+}
+
+export function rolloverMinute(hours: DayHours): number {
+  if (!spansMidnight(hours)) {
+    return 0;
+  }
+  const open = parseHHMM(hours.openAt);
+  const close = parseHHMM(hours.closeAt);
+  return close + Math.floor((open - close) / 2);
+}
+
+export function dayMinute(time: HHMM, hours: DayHours): number {
+  const minute = parseHHMM(time);
+  return minute < rolloverMinute(hours) ? minute + MINUTES_PER_DAY : minute;
+}
+
+export function openMinute(hours: DayHours): number {
+  return parseHHMM(hours.openAt);
+}
+
+export function closeMinute(hours: DayHours): number {
+  return dayMinute(hours.closeAt, hours);
+}
+
+export function stallDate(date: ISODate, time: HHMM, hours: DayHours): ISODate {
+  return parseHHMM(time) < rolloverMinute(hours) ? addDays(date, -1) : date;
+}
+
 function toUtcMs(date: ISODate): number {
   const match = ISO_DATE_PATTERN.exec(date);
   if (match === null) {

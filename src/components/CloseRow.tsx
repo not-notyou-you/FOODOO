@@ -9,7 +9,8 @@ interface CloseRowProps {
   name: string;
   cooked: number;
   soldOutAt: HHMM | null;
-  leftover: number;
+  leftover: number | null;
+  leftoverError?: string | undefined;
   missedTime: HHMM;
   missedError: string | undefined;
   onLeftover: (value: number) => void;
@@ -22,6 +23,7 @@ export function CloseRow({
   cooked,
   soldOutAt,
   leftover,
+  leftoverError,
   missedTime,
   missedError,
   onLeftover,
@@ -46,6 +48,8 @@ export function CloseRow({
             value={leftover}
             min={0}
             max={cooked}
+            placeholder={t("close.leftoverPlaceholder")}
+            error={leftoverError}
             onChange={onLeftover}
           />
           {leftover === 0 ? (

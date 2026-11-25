@@ -1,7 +1,7 @@
 // src/screens/Plan.tsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useLocalStamp } from "../app/clock.ts";
+import { useStallStamp } from "../app/useStallStamp.ts";
 import { useToast } from "../app/toast.ts";
 import { Button } from "../components/Button.tsx";
 import { EmptyState } from "../components/EmptyState.tsx";
@@ -32,7 +32,7 @@ export function Plan() {
   const db = useDb();
   const toast = useToast();
   const navigate = useNavigate();
-  const { date, weekday } = useLocalStamp();
+  const { date, weekday } = useStallStamp();
   const stall = useStall();
   const menus = useMenus();
   const today = useTodayState(date);

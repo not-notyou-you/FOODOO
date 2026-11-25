@@ -3,7 +3,10 @@ import { describe, expect, it } from "vitest";
 import {
   closeDayRecords,
   closeMenuDay,
+  EARLY_SELL_OUT_MINUTES,
   incompleteDays,
+  isEarlySellOut,
+  missingLeftovers,
   tomorrowPlan,
   validateSoldOutTime,
   withClosedDay,
@@ -46,6 +49,48 @@ describe("validateSoldOutTime", () => {
     expect(validateSoldOutTime("14:01", referenceSettings)).toBe(
       "outsideHours",
     );
+  });
+
+  it("accepts times after midnight for a night stall", () => {
+    const night = { openAt: "18:00", closeAt: "02:00" };
+    expect(validateSoldOutTime("18:00", night)).toBeNull();
+    expect(validateSoldOutTime("23:45", night)).toBeNull();
+    expect(validateSoldOutTime("01:30", night)).toBeNull();
+    expect(validateSoldOutTime("02:00", night)).toBeNull();
+    expect(validateSoldOutTime("02:01", night)).toBe("outsideHours");
+    expect(validateSoldOutTime("17:59", night)).toBe("outsideHours");
+  });
+});
+
+describe("isEarlySellOut", () => {
+  it("is true before opening and in the first 30 minutes", () => {
+    expect(EARLY_SELL_OUT_MINUTES).toBe(30);
+    expect(isEarlySellOut("05:50", referenceSettings)).toBe(true);
+    expect(isEarlySellOut("06:00", referenceSettings)).toBe(true);
+    expect(isEarlySellOut("06:29", referenceSettings)).toBe(true);
+    expect(isEarlySellOut("06:30", referenceSettings)).toBe(false);
+    expect(isEarlySellOut("10:30", referenceSettings)).toBe(false);
+  });
+
+  it("works for a night stall", () => {
+    const night = { openAt: "23:45", closeAt: "03:00" };
+    expect(isEarlySellOut("00:10", night)).toBe(true);
+    expect(isEarlySellOut("00:15", night)).toBe(false);
+  });
+});
+
+describe("missingLeftovers", () => {
+  it("lists cooked menus that are neither sold out nor counted", () => {
+    const rows = [
+      planned("nasi-uduk", 42, "10:30"),
+      planned("ayam-goreng", 31, null),
+      planned("tempe-orek", 24, null),
+      planned("sayur-lodeh", 0, null),
+    ];
+    expect(missingLeftovers(rows, {})).toEqual(["ayam-goreng", "tempe-orek"]);
+    expect(
+      missingLeftovers(rows, { "ayam-goreng": 3, "tempe-orek": 0 }),
+    ).toEqual([]);
   });
 });
 
@@ -104,14 +149,14 @@ describe("closeMenuDay", () => {
     ).toThrow(RangeError);
   });
 
-  it("keeps the demand empty when nothing was recorded", () => {
-    const row = closeMenuDay(
-      planned("tempe-orek", 24, null),
-      { leftover: null, soldOutAt: null },
-      referenceSettings,
-    );
-    expect(row.estimatedDemand).toBeNull();
-    expect(row.demandIsEstimate).toBe(false);
+  it("refuses a cooked menu with no leftover and no sell-out time", () => {
+    expect(() =>
+      closeMenuDay(
+        planned("tempe-orek", 24, null),
+        { leftover: null, soldOutAt: null },
+        referenceSettings,
+      ),
+    ).toThrow(RangeError);
   });
 
   it("records a menu that was not cooked without a demand, so it never enters history", () => {

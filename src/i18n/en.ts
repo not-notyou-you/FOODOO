@@ -81,8 +81,10 @@ export const en = {
   "hours.open": "Opening time",
   "hours.close": "Closing time",
   "hours.error.timeInvalid": "Enter a time as HH:MM",
-  "hours.error.closeNotAfterOpen":
-    "Closing time must be after opening time, on the same day",
+  "hours.error.closeSameAsOpen":
+    "Closing time must be different from opening time",
+  "hours.overnight":
+    "You close after midnight. Sales after midnight count for the day you opened.",
   "hours.busyTitle": "Busy hours",
   "hours.busyHint":
     "Tap an hour to change it: quiet, normal, busy. Busier hours mean more customers arrive then.",
@@ -119,7 +121,8 @@ export const en = {
   "today.empty.menusAction": "Open Settings",
   "today.incompleteTitle": "Days not closed",
   "today.incompleteBody":
-    "These days were never closed. They are kept but not used for suggestions:",
+    "These days were never closed, so they are not used for suggestions yet. Close them to count them:",
+  "today.incompleteAction": "Close {date}",
 
   "plan.title": "Plan",
   "plan.intro": "Suggested portions for today. Change any number, then save.",
@@ -145,6 +148,10 @@ export const en = {
   "service.tapHint": "Tap when sold out",
   "service.soldOutAt": "Sold out {time}",
   "service.holdHint": "Hold the tile or press Edit time to change the time.",
+  "service.earlyTitle": "{name} sold out already?",
+  "service.earlyBody":
+    "It is {time} and you opened at {open}. A sell-out this early makes FOODOO estimate very high demand. Mark it only if it really sold out.",
+  "service.earlyConfirm": "Yes, it sold out",
   "service.editTime": "Edit time",
   "service.editTimeLabel": "Edit the sold-out time of {name}",
   "service.soldOutToast": "{name} sold out at {time}",
@@ -165,6 +172,13 @@ export const en = {
 
   "close.title": "Close",
   "close.intro": "Count what is left of each menu.",
+  "close.leftoverPlaceholder": "?",
+  "close.leftoverMissing": "Enter the leftover portions, or 0 if none are left",
+  "close.leftoverMissingSummary":
+    "Enter the leftover portions for {count} menu(s) before closing.",
+  "close.pastIntro": "You are closing a past day: {date}.",
+  "close.pastSheetTitle": "Close {date}?",
+  "close.pastClosed": "{date} closed",
   "close.soldOutChip": "Sold out {time}",
   "close.leftoverLabel": "Leftover portions of {name}",
   "close.cookedOf": "Cooked {qty}",

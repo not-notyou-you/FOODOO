@@ -1,5 +1,5 @@
 // src/domain/phase.ts
-import { parseHHMM } from "./time.ts";
+import { closeMinute, dayMinute } from "./time.ts";
 import type { DayRecord, HHMM, MenuDay } from "./types.ts";
 
 export type LoopPhase = "plan" | "service" | "close";
@@ -17,6 +17,7 @@ export interface DaySummary {
 
 export interface PhaseInput extends DaySummary {
   time: HHMM;
+  openAt: HHMM;
   closeAt: HHMM;
 }
 
@@ -41,7 +42,7 @@ export function todayPhase(input: PhaseInput): Phase {
   }
   if (
     input.soldOutCount >= input.plannedCount ||
-    parseHHMM(input.time) >= parseHHMM(input.closeAt)
+    dayMinute(input.time, input) >= closeMinute(input)
   ) {
     return "close";
   }

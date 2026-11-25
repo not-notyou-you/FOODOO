@@ -1,13 +1,16 @@
 // src/screens/Service.tsx
 import { useState } from "react";
-import { useClock, useLocalStamp } from "../app/clock.ts";
+import { useClock } from "../app/clock.ts";
+import { useStallStamp } from "../app/useStallStamp.ts";
 import { toLocalStamp } from "../app/localStamp.ts";
 import { UNDO_MS, useToast } from "../app/toast.ts";
 import { Button } from "../components/Button.tsx";
 import { EmptyState } from "../components/EmptyState.tsx";
 import { Screen } from "../components/Screen.tsx";
 import { ServiceTile } from "../components/ServiceTile.tsx";
+import { Sheet } from "../components/Sheet.tsx";
 import { SoldOutTimeSheet } from "../components/SoldOutTimeSheet.tsx";
+import { isEarlySellOut } from "../domain/close.ts";
 import { useDb, useMenus, useStall, useTodayState } from "../db/hooks.ts";
 import { setSoldOut } from "../db/repositories.ts";
 import { isCooked } from "../domain/plan.ts";
@@ -19,11 +22,14 @@ export function Service() {
   const db = useDb();
   const toast = useToast();
   const clock = useClock();
-  const { date } = useLocalStamp();
+  const { date } = useStallStamp();
   const stall = useStall();
   const menus = useMenus();
   const today = useTodayState(date);
   const [editing, setEditing] = useState<string | null>(null);
+  const [early, setEarly] = useState<{ menuId: string; time: HHMM } | null>(
+    null,
+  );
 
   if (!stall || menus === undefined || today === undefined) {
     return (
@@ -67,8 +73,16 @@ export function Service() {
     }
   }
 
-  function markSoldOut(menuId: string) {
+  function tapSoldOut(menuId: string) {
     const time = toLocalStamp(clock.now()).time;
+    if (stall && isEarlySellOut(time, stall.settings)) {
+      setEarly({ menuId, time });
+      return;
+    }
+    markSoldOut(menuId, time);
+  }
+
+  function markSoldOut(menuId: string, time: HHMM) {
     const name = nameOf(menuId);
     void write(menuId, time, () => {
       toast.show(t("service.soldOutToast", { name, time }), {
@@ -97,7 +111,7 @@ export function Service() {
             soldOutAt={row.soldOutAt}
             disabled={closed}
             onSoldOut={() => {
-              markSoldOut(row.menuId);
+              tapSoldOut(row.menuId);
             }}
             onEditTime={() => {
               setEditing(row.menuId);
@@ -106,6 +120,41 @@ export function Service() {
         ))}
       </ul>
       {closed ? null : <p className="field__hint">{t("service.holdHint")}</p>}
+      {early === null || closed ? null : (
+        <Sheet
+          open
+          title={t("service.earlyTitle", { name: nameOf(early.menuId) })}
+          onClose={() => {
+            setEarly(null);
+          }}
+        >
+          <p>
+            {t("service.earlyBody", {
+              time: early.time,
+              open: stall.settings.openAt,
+            })}
+          </p>
+          <div className="form__actions">
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setEarly(null);
+              }}
+            >
+              {t("common.cancel")}
+            </Button>
+            <Button
+              onClick={() => {
+                const { menuId, time } = early;
+                setEarly(null);
+                markSoldOut(menuId, time);
+              }}
+            >
+              {t("service.earlyConfirm")}
+            </Button>
+          </div>
+        </Sheet>
+      )}
       {editRow === undefined || editRow.soldOutAt === null || closed ? null : (
         <SoldOutTimeSheet
           menuName={nameOf(editRow.menuId)}

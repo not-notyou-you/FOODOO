@@ -88,6 +88,7 @@ async function runCoreLoop(page: Page, testInfo: TestInfo) {
   await expect(page.getByText("Sold out 10:30")).toBeVisible();
   await page.getByLabel("Leftover portions of Ayam Goreng").fill("3");
   await page.getByLabel("Leftover portions of Sayur Lodeh").fill("5");
+  await page.getByLabel("Leftover portions of Tempe Orek").fill("0");
   const missed = page.getByLabel("About what time did Tempe Orek run out?");
   await expect(missed).toHaveValue("14:00");
   await missed.fill("12:15");

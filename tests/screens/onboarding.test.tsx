@@ -129,11 +129,11 @@ describe("onboarding", () => {
     expect(screen.getByRole("button", { name: "06:00 Quiet" })).toBeTruthy();
     expect(screen.getAllByRole("button", { name: /Normal$/ })).toHaveLength(7);
 
-    fireEvent.change(field("Closing time"), { target: { value: "05:00" } });
+    fireEvent.change(field("Closing time"), { target: { value: "06:00" } });
     fireEvent.click(screen.getByRole("button", { name: "Finish setup" }));
     expect(
       await screen.findByText(
-        "Closing time must be after opening time, on the same day",
+        "Closing time must be different from opening time",
       ),
     ).toBeTruthy();
     expect((await getStall(db))?.setupComplete).toBe(false);

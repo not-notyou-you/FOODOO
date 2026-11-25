@@ -1,5 +1,5 @@
 // src/domain/estimate.ts
-import { parseHHMM } from "./time.ts";
+import { closeMinute, dayMinute, openMinute } from "./time.ts";
 import type { DemandEstimate, HHMM, StallSettings } from "./types.ts";
 
 const DEFAULT_WEIGHT = 2;
@@ -13,13 +13,13 @@ export function hourWeight(settings: StallSettings, hour: number): number {
 }
 
 function weightedMinutes(settings: StallSettings, untilMinute: number): number {
-  const open = parseHHMM(settings.openAt);
-  const end = Math.min(untilMinute, parseHHMM(settings.closeAt));
+  const open = openMinute(settings);
+  const end = Math.min(untilMinute, closeMinute(settings));
   let total = 0;
   for (let hour = Math.floor(open / 60); hour * 60 < end; hour += 1) {
     const from = Math.max(open, hour * 60);
     const to = Math.min(end, (hour + 1) * 60);
-    total += hourWeight(settings, hour) * Math.max(0, to - from);
+    total += hourWeight(settings, hour % 24) * Math.max(0, to - from);
   }
   return total;
 }
@@ -29,8 +29,8 @@ export function arrivalWeights(
   at: HHMM,
 ): { arrived: number; total: number } {
   return {
-    arrived: weightedMinutes(settings, parseHHMM(at)),
-    total: weightedMinutes(settings, parseHHMM(settings.closeAt)),
+    arrived: weightedMinutes(settings, dayMinute(at, settings)),
+    total: weightedMinutes(settings, closeMinute(settings)),
   };
 }
 

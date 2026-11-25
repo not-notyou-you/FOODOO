@@ -28,6 +28,32 @@ describe("arrivalShare", () => {
     expect(arrivalShare(referenceSettings, "06:00")).toBe(0);
   });
 
+  it("counts hours after midnight for a night stall", () => {
+    const night: StallSettings = {
+      openAt: "20:00",
+      closeAt: "04:00",
+      busyProfile: {
+        "20": 1,
+        "21": 4,
+        "22": 4,
+        "23": 2,
+        "00": 2,
+        "01": 4,
+        "02": 4,
+        "03": 2,
+      },
+      isDemo: false,
+    };
+    expect(arrivalShare(night, "00:30")).toBeCloseTo(
+      arrivalShare(referenceSettings, "10:30"),
+      10,
+    );
+    expect(arrivalShare(night, "04:00")).toBe(1);
+    expect(estimateDemand(42, 0, "00:30", night)).toEqual(
+      estimateDemand(42, 0, "10:30", referenceSettings),
+    );
+  });
+
   it("treats a missing hour as normal (weight 2)", () => {
     const sparse: StallSettings = { ...referenceSettings, busyProfile: {} };
     expect(hourWeight(sparse, 7)).toBe(2);
@@ -47,11 +73,11 @@ describe("arrivalShare", () => {
     expect(total).toBe(30 * 1 + 60 * 4 + 30 * 2);
   });
 
-  it("returns 1 when the closing time is not after opening", () => {
+  it("returns 1 when the closing time equals the opening time", () => {
     const broken: StallSettings = {
       ...referenceSettings,
       openAt: "10:00",
-      closeAt: "09:00",
+      closeAt: "10:00",
     };
     expect(arrivalShare(broken, "09:30")).toBe(1);
   });
@@ -139,11 +165,11 @@ describe("estimateDemand", () => {
     });
   });
 
-  it("returns cooked when the closing time is not after opening", () => {
+  it("returns cooked when the closing time equals the opening time", () => {
     const broken: StallSettings = {
       ...referenceSettings,
       openAt: "10:00",
-      closeAt: "09:00",
+      closeAt: "10:00",
     };
     expect(estimateDemand(12, null, "09:30", broken)).toEqual({
       demand: 12,

@@ -1,7 +1,14 @@
 // src/domain/close.ts
 import { estimateDemand } from "./estimate.ts";
 import { isCooked, suggestAll } from "./plan.ts";
-import { addDays, parseHHMM, weekdayOf } from "./time.ts";
+import {
+  addDays,
+  closeMinute,
+  dayMinute,
+  openMinute,
+  parseHHMM,
+  weekdayOf,
+} from "./time.ts";
 import type {
   DayRecord,
   HHMM,
@@ -31,23 +38,45 @@ export interface TomorrowPlan {
 
 export type SoldOutTimeError = "timeInvalid" | "outsideHours";
 
+export const EARLY_SELL_OUT_MINUTES = 30;
+
 export function validateSoldOutTime(
   time: HHMM,
   settings: Pick<StallSettings, "openAt" | "closeAt">,
 ): SoldOutTimeError | null {
-  let minutes: number;
   try {
-    minutes = parseHHMM(time);
+    parseHHMM(time);
   } catch {
     return "timeInvalid";
   }
-  if (
-    minutes < parseHHMM(settings.openAt) ||
-    minutes > parseHHMM(settings.closeAt)
-  ) {
+  const minute = dayMinute(time, settings);
+  if (minute < openMinute(settings) || minute > closeMinute(settings)) {
     return "outsideHours";
   }
   return null;
+}
+
+export function isEarlySellOut(
+  time: HHMM,
+  settings: Pick<StallSettings, "openAt" | "closeAt">,
+): boolean {
+  return (
+    dayMinute(time, settings) < openMinute(settings) + EARLY_SELL_OUT_MINUTES
+  );
+}
+
+export function missingLeftovers(
+  rows: readonly MenuDay[],
+  leftovers: Readonly<Record<string, number>>,
+): string[] {
+  return rows
+    .filter(
+      (row) =>
+        isCooked(row) &&
+        row.soldOutAt === null &&
+        leftovers[row.menuId] === undefined,
+    )
+    .map((row) => row.menuId);
 }
 
 export function closeMenuDay(
@@ -77,12 +106,15 @@ export function closeMenuDay(
     soldOutAt,
     settings,
   );
+  if (estimate === null) {
+    throw new RangeError(`Missing leftover for ${menuDay.menuId}`);
+  }
   return {
     ...menuDay,
     soldOutAt,
     leftover,
-    estimatedDemand: estimate === null ? null : estimate.demand,
-    demandIsEstimate: estimate === null ? false : estimate.isEstimate,
+    estimatedDemand: estimate.demand,
+    demandIsEstimate: estimate.isEstimate,
   };
 }
 

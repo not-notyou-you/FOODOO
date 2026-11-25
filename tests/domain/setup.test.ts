@@ -80,11 +80,14 @@ describe("validateHours", () => {
     expect(validateHours("06:00", "14:00")).toEqual({});
   });
 
-  it("blocks closing at or before opening", () => {
-    expect(validateHours("14:00", "06:00")).toEqual({
-      closeAt: "closeNotAfterOpen",
+  it("accepts closing after midnight", () => {
+    expect(validateHours("18:00", "02:00")).toEqual({});
+  });
+
+  it("blocks closing at the opening time", () => {
+    expect(validateHours("06:00", "06:00")).toEqual({
+      closeAt: "closeSameAsOpen",
     });
-    expect(validateHours("06:00", "06:00").closeAt).toBe("closeNotAfterOpen");
   });
 
   it("flags times that are not HH:MM", () => {
@@ -111,8 +114,22 @@ describe("profileHours and resizeProfile", () => {
     expect(profileHours("06:30", "08:15")).toEqual(["06", "07", "08"]);
   });
 
+  it("lists the hours across midnight in opening order", () => {
+    expect(profileHours("18:00", "02:00")).toEqual([
+      "18",
+      "19",
+      "20",
+      "21",
+      "22",
+      "23",
+      "00",
+      "01",
+    ]);
+    expect(profileHours("06:30", "06:15")).toHaveLength(24);
+  });
+
   it("returns no slots for invalid hours", () => {
-    expect(profileHours("10:00", "09:00")).toEqual([]);
+    expect(profileHours("10:00", "10:00")).toEqual([]);
     expect(profileHours("x", "09:00")).toEqual([]);
   });
 

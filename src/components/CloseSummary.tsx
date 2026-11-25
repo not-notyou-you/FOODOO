@@ -12,7 +12,7 @@ import { EstimateValue } from "./EstimateValue.tsx";
 interface CloseSummaryProps {
   rows: readonly MenuDay[];
   menus: readonly Menu[];
-  tomorrow: TomorrowPlan;
+  tomorrow: TomorrowPlan | null;
 }
 
 export function CloseSummary({ rows, menus, tomorrow }: CloseSummaryProps) {
@@ -48,39 +48,41 @@ export function CloseSummary({ rows, menus, tomorrow }: CloseSummaryProps) {
           </Link>
         </p>
       </section>
-      <section aria-labelledby={tomorrowId}>
-        <h3 id={tomorrowId}>
-          {t("close.tomorrowHeading", {
-            date: formatLongDate(tomorrow.date, language),
-          })}
-        </h3>
-        {tomorrow.suggestions.length === 0 ? (
-          <p>{t("close.tomorrowNone")}</p>
-        ) : (
-          <ul className="summary__list">
-            {tomorrow.suggestions.map((suggestion) => {
-              const menu = byId.get(suggestion.menuId);
-              return (
-                <li key={suggestion.menuId} className="summary__row">
-                  <span className="summary__name">
-                    {nameOf(suggestion.menuId)}
-                  </span>{" "}
-                  <span className="summary__value">
-                    <span className="num">{suggestion.qty}</span>{" "}
-                    <span>{t("close.suggestedPortions")}</span>
-                  </span>{" "}
-                  <span className="summary__reason">
-                    {renderReason(t, suggestion.reason, {
-                      weekday: tomorrow.weekday,
-                      usualQty: menu?.usualQty ?? 0,
-                    })}
-                  </span>
-                </li>
-              );
+      {tomorrow === null ? null : (
+        <section aria-labelledby={tomorrowId}>
+          <h3 id={tomorrowId}>
+            {t("close.tomorrowHeading", {
+              date: formatLongDate(tomorrow.date, language),
             })}
-          </ul>
-        )}
-      </section>
+          </h3>
+          {tomorrow.suggestions.length === 0 ? (
+            <p>{t("close.tomorrowNone")}</p>
+          ) : (
+            <ul className="summary__list">
+              {tomorrow.suggestions.map((suggestion) => {
+                const menu = byId.get(suggestion.menuId);
+                return (
+                  <li key={suggestion.menuId} className="summary__row">
+                    <span className="summary__name">
+                      {nameOf(suggestion.menuId)}
+                    </span>{" "}
+                    <span className="summary__value">
+                      <span className="num">{suggestion.qty}</span>{" "}
+                      <span>{t("close.suggestedPortions")}</span>
+                    </span>{" "}
+                    <span className="summary__reason">
+                      {renderReason(t, suggestion.reason, {
+                        weekday: tomorrow.weekday,
+                        usualQty: menu?.usualQty ?? 0,
+                      })}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </section>
+      )}
     </div>
   );
 }

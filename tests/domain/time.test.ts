@@ -2,10 +2,44 @@
 import { describe, expect, it } from "vitest";
 import {
   addDays,
+  closeMinute,
+  dayMinute,
   formatHHMM,
   parseHHMM,
+  rolloverMinute,
+  spansMidnight,
+  stallDate,
   weekdayOf,
 } from "../../src/domain/time.ts";
+
+const DAY = { openAt: "06:00", closeAt: "14:00" };
+const NIGHT = { openAt: "18:00", closeAt: "02:00" };
+
+describe("stall day across midnight", () => {
+  it("leaves a same-day stall on the calendar day", () => {
+    expect(spansMidnight(DAY)).toBe(false);
+    expect(rolloverMinute(DAY)).toBe(0);
+    expect(dayMinute("05:00", DAY)).toBe(300);
+    expect(closeMinute(DAY)).toBe(840);
+    expect(stallDate("2026-03-02", "00:30", DAY)).toBe("2026-03-02");
+  });
+
+  it("rolls over halfway between closing and opening for a night stall", () => {
+    expect(spansMidnight(NIGHT)).toBe(true);
+    expect(rolloverMinute(NIGHT)).toBe(600);
+    expect(dayMinute("01:30", NIGHT)).toBe(1530);
+    expect(dayMinute("10:00", NIGHT)).toBe(600);
+    expect(dayMinute("19:00", NIGHT)).toBe(1140);
+    expect(closeMinute(NIGHT)).toBe(1560);
+  });
+
+  it("keeps hours after midnight on the opening date", () => {
+    expect(stallDate("2026-03-03", "01:30", NIGHT)).toBe("2026-03-02");
+    expect(stallDate("2026-03-03", "09:59", NIGHT)).toBe("2026-03-02");
+    expect(stallDate("2026-03-03", "10:00", NIGHT)).toBe("2026-03-03");
+    expect(stallDate("2026-03-01", "00:10", NIGHT)).toBe("2026-02-28");
+  });
+});
 
 describe("parseHHMM and formatHHMM", () => {
   it("round-trips valid times", () => {

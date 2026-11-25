@@ -1,6 +1,6 @@
 // src/components/Header.tsx
 import { Link } from "react-router-dom";
-import { useLocalStamp } from "../app/clock.ts";
+import { useStallStamp } from "../app/useStallStamp.ts";
 import { useStall } from "../db/hooks.ts";
 import { formatLongDate } from "../i18n/format.ts";
 import { useI18n } from "../i18n/index.ts";
@@ -17,7 +17,7 @@ interface HeaderProps {
 export function Header({ title, showSettings = true }: HeaderProps) {
   const { t, language } = useI18n();
   const stall = useStall();
-  const { date } = useLocalStamp();
+  const { date } = useStallStamp();
   const isDemo = stall?.settings.isDemo === true;
   return (
     <header className="header">

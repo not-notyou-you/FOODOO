@@ -134,7 +134,10 @@ describe("Today", () => {
     const notice = await screen.findByRole("region", {
       name: "Days not closed",
     });
-    expect(within(notice).getByText("Sunday 1 March")).toBeTruthy();
+    const link = within(notice).getByRole("link", {
+      name: "Close Sunday 1 March",
+    });
+    expect(link.getAttribute("href")).toBe("/close/2026-03-01");
   });
 
   it("has no unfinished loop screens left in the navigation", async () => {

@@ -1,5 +1,6 @@
 // src/screens/Today.tsx
-import { useLocalStamp } from "../app/clock.ts";
+import { Link } from "react-router-dom";
+import { useStallStamp } from "../app/useStallStamp.ts";
 import { Button } from "../components/Button.tsx";
 import { EmptyState } from "../components/EmptyState.tsx";
 import { LoopProgress } from "../components/LoopProgress.tsx";
@@ -21,7 +22,7 @@ const ACTIONS: Record<Phase, { label: MessageKey; to: string | null }> = {
 
 export function Today() {
   const { t, language } = useI18n();
-  const { date, time } = useLocalStamp();
+  const { date, time } = useStallStamp();
   const stall = useStall();
   const menus = useMenus();
   const today = useTodayState(date);
@@ -72,6 +73,7 @@ export function Today() {
   const phase = todayPhase({
     ...summary,
     time,
+    openAt: stall.settings.openAt,
     closeAt: stall.settings.closeAt,
   });
   const action = ACTIONS[phase];
@@ -116,7 +118,13 @@ export function Today() {
           <p>{t("today.incompleteBody")}</p>
           <ul>
             {incomplete.slice(0, MAX_INCOMPLETE_SHOWN).map((day) => (
-              <li key={day}>{formatLongDate(day, language)}</li>
+              <li key={day}>
+                <Link className="link-target" to={`/close/${day}`}>
+                  {t("today.incompleteAction", {
+                    date: formatLongDate(day, language),
+                  })}
+                </Link>
+              </li>
             ))}
           </ul>
         </section>

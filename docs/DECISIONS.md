@@ -655,3 +655,28 @@ All versions are exact and in the lockfile. Where we are not on the newest relea
 - **Decision:** the figure-8 drawing above the phase steps on Today was removed. Team review found it hard to read: the right loop was split into Service (top) and Close (bottom) with no arrows, and it repeated the three step boxes below it. `LoopProgress` now shows only the Plan, Service and Close boxes with Done, Now and Next. The figure-8 stays in the logo.
 - **Landing layout:** the logo is smaller and shares one row with a compact language switch. Its legend and radio dots are hidden visually but stay available to screen readers and the keyboard. The hero content is centred. No content was added.
 - **Alternatives considered:** a linear Plan → Service → Close arrow strip (it would still repeat the boxes); keeping the drawing as a brand element (it was not understood).
+
+### D-078 Leftover must be entered before a day can close (Vassel, Hakim)
+
+- **Problem:** on Close, every leftover stepper started at 0. A menu that was not sold out but had leftover 0 was stored as a missed sell-out at closing time. If the owner pressed Close day without counting, every menu was recorded as sold out, and the next suggestions rose.
+- **Decision:** the leftover now starts empty (shown as "?"). Close day is blocked, with an error on each empty row and a summary line, until every cooked menu that was not tapped sold out has a leftover. The missed sell-out prompt appears only after the owner enters 0. In the stepper, minus on an empty value gives 0 and plus gives 1. In the domain, `closeMenuDay` now refuses a cooked menu with neither a leftover nor a sell-out time, and `missingLeftovers` lists the rows still to count.
+- **Alternatives considered:** keeping 0 and showing a warning when every menu is 0 (it misses the case where only some rows were skipped); a single "nothing left" confirmation (it adds a step without fixing skipped rows).
+
+### D-079 A past day that was never closed can be closed later (Vassel, Samuel)
+
+- **Problem:** CL-6 listed unclosed days on Today, but the only way to close a day was on that same day. Forgetting to close meant losing the day's data for suggestions.
+- **Decision:** each date in the "Days not closed" card links to `/close/:date`. That route only accepts a past date that is planned and still open (`incompleteDays`); any other date goes back to Today, and today's date goes to `/close`. The screen says which day is being closed, and the confirmation sheet does not show tomorrow's suggestions, because they belong to a different day. After confirming, the app returns to Today and the day is used for suggestions from then on.
+- **Alternatives considered:** a date picker on Close (it lets the owner pick days with no plan); closing old days automatically with no leftovers (that invents data).
+
+### D-080 Stalls that close after midnight (Hakim)
+
+- **Problem:** `validateHours` refused a closing time earlier than the opening time, so a night stall (for example 18:00 to 02:00) could not use the app.
+- **Decision:** any closing time different from the opening time is valid. When closing is earlier than opening, the stall day spans midnight. The stall day then rolls over halfway between closing and opening (`rolloverMinute`; 10:00 for an 18:00 to 02:00 stall). A time before the rollover belongs to the previous date (`stallDate`), and its minute counts after midnight (`dayMinute`, +1440). The estimator, the sold-out time check, the Today phase and the busy-hour list all use these helpers. For stalls that close the same day, the rollover is midnight and every result is unchanged. `npm run backtest` reproduces `docs/BACKTEST.md` exactly. Screens get the stall date from `useStallStamp`.
+- **Why halfway:** the stall is closed then, so no sale or sell-out can fall on the wrong side. Rolling over at midnight would split one night across two dates. Rolling over at the opening time would leave the owner no time to plan before opening.
+- **Alternatives considered:** documenting it as a limitation only.
+
+### D-081 Confirm a sell-out tapped in the first 30 minutes (Vassel, Hakim)
+
+- **Problem:** a sell-out at the opening minute gives the estimator almost no arrivals, so the demand estimate jumps to the 3x cap. One accidental tap early in the day would push that menu's suggestions up for weeks.
+- **Decision:** a tap before opening or in the first 30 minutes (`isEarlySellOut`, `EARLY_SELL_OUT_MINUTES = 30`) opens a confirmation sheet that explains the effect; Cancel stores nothing. Later taps are stored right away as before. The estimator is unchanged, so backtest results stay the same.
+- **Alternatives considered:** a softer cap inside `estimateDemand` (changes every estimate and the backtest, and still accepts the mistake); ignoring early taps (loses real early sell-outs).

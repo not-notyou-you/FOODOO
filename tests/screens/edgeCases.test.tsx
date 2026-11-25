@@ -113,7 +113,13 @@ describe("edge case: all menus archived", () => {
     ).toBeTruthy();
     cleanup();
     renderApp({ db, path: "/close", at: EVENING });
-    fireEvent.click(await screen.findByRole("button", { name: "Close day" }));
+    for (const menu of DEMO_MENUS) {
+      fireEvent.change(
+        await screen.findByLabelText(`Leftover portions of ${menu.name}`),
+        { target: { value: "2" } },
+      );
+    }
+    fireEvent.click(screen.getByRole("button", { name: "Close day" }));
     const dialog = await screen.findByRole("dialog");
     const tomorrow = within(dialog).getByRole("region", {
       name: "Tomorrow's suggestions, Tuesday 3 March",
@@ -146,7 +152,9 @@ describe("edge case: a day left unclosed", () => {
     const notice = await screen.findByRole("region", {
       name: "Days not closed",
     });
-    expect(within(notice).getByText("Sunday 1 March")).toBeTruthy();
+    expect(
+      within(notice).getByRole("link", { name: "Close Sunday 1 March" }),
+    ).toBeTruthy();
     expect(currentStep()).toBe("Plan Now");
     cleanup();
     renderApp({ db, path: "/plan" });
@@ -195,6 +203,10 @@ describe("edge case: the clock is past closing time", () => {
     cleanup();
 
     renderApp({ db, path: "/close", at: AFTER_CLOSING });
+    fireEvent.change(
+      await screen.findByLabelText("Leftover portions of Ayam Goreng"),
+      { target: { value: "0" } },
+    );
     const missed = await screen.findByLabelText(
       "About what time did Ayam Goreng run out?",
     );

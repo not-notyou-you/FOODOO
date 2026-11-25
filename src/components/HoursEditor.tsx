@@ -19,6 +19,7 @@ interface HoursEditorProps {
 export function HoursEditor({ value, errors, onChange }: HoursEditorProps) {
   const t = useT();
   const hours = profileHours(value.openAt, value.closeAt);
+  const overnight = hours.length > 0 && value.closeAt < value.openAt;
 
   function setTime(field: HoursField, time: string) {
     const next = { ...value, [field]: time };
@@ -56,6 +57,7 @@ export function HoursEditor({ value, errors, onChange }: HoursEditorProps) {
           error={message("closeAt")}
         />
       </div>
+      {overnight ? <p className="field__hint">{t("hours.overnight")}</p> : null}
       <BusyHourStrip
         hours={hours}
         profile={value.busyProfile}

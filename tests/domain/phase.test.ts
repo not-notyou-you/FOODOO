@@ -11,6 +11,7 @@ import { makeDay, makeMenuDay } from "../helpers.ts";
 function input(overrides: Partial<PhaseInput> = {}): PhaseInput {
   return {
     time: "09:00",
+    openAt: "06:00",
     closeAt: "14:00",
     plannedCount: 4,
     portions: 120,
@@ -77,6 +78,15 @@ describe("todayPhase", () => {
   it("is close at closing time or when every menu sold out", () => {
     expect(todayPhase(input({ time: "14:00" }))).toBe("close");
     expect(todayPhase(input({ soldOutCount: 4 }))).toBe("close");
+  });
+
+  it("handles a stall that closes after midnight", () => {
+    const night = { openAt: "18:00", closeAt: "02:00" };
+    expect(todayPhase(input({ ...night, time: "17:00" }))).toBe("service");
+    expect(todayPhase(input({ ...night, time: "23:30" }))).toBe("service");
+    expect(todayPhase(input({ ...night, time: "01:59" }))).toBe("service");
+    expect(todayPhase(input({ ...night, time: "02:00" }))).toBe("close");
+    expect(todayPhase(input({ ...night, time: "09:59" }))).toBe("close");
   });
 
   it("is done once the day is closed", () => {

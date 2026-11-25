@@ -28,7 +28,9 @@ export type MenuErrorCode =
 export type MenuErrors = Partial<Record<MenuField, MenuErrorCode>>;
 
 export type HoursField = "openAt" | "closeAt";
-export type HoursErrorCode = "timeInvalid" | "closeNotAfterOpen";
+export type HoursErrorCode = "timeInvalid" | "closeSameAsOpen";
+
+const MINUTES_PER_DAY = 1440;
 export type HoursErrors = Partial<Record<HoursField, HoursErrorCode>>;
 
 function isWholeAtLeast(value: number, min: number): boolean {
@@ -78,8 +80,8 @@ export function validateHours(openAt: HHMM, closeAt: HHMM): HoursErrors {
   }
   if (close === null) {
     errors.closeAt = "timeInvalid";
-  } else if (open !== null && close <= open) {
-    errors.closeAt = "closeNotAfterOpen";
+  } else if (open !== null && close === open) {
+    errors.closeAt = "closeSameAsOpen";
   }
   return errors;
 }
@@ -87,14 +89,15 @@ export function validateHours(openAt: HHMM, closeAt: HHMM): HoursErrors {
 export function profileHours(openAt: HHMM, closeAt: HHMM): string[] {
   const open = minutesOrNull(openAt);
   const close = minutesOrNull(closeAt);
-  if (open === null || close === null || close <= open) {
+  if (open === null || close === null || close === open) {
     return [];
   }
-  const hours: string[] = [];
-  for (let hour = Math.floor(open / 60); hour * 60 < close; hour += 1) {
-    hours.push(String(hour).padStart(2, "0"));
+  const end = close < open ? close + MINUTES_PER_DAY : close;
+  const hours = new Set<string>();
+  for (let hour = Math.floor(open / 60); hour * 60 < end; hour += 1) {
+    hours.add(String(hour % 24).padStart(2, "0"));
   }
-  return hours;
+  return [...hours];
 }
 
 export function resizeProfile(

@@ -84,8 +84,9 @@ export const id: Record<keyof typeof en, string> = {
   "hours.open": "Jam buka",
   "hours.close": "Jam tutup",
   "hours.error.timeInvalid": "Isi jam dengan format JJ:MM",
-  "hours.error.closeNotAfterOpen":
-    "Jam tutup harus setelah jam buka, di hari yang sama",
+  "hours.error.closeSameAsOpen": "Jam tutup harus berbeda dari jam buka",
+  "hours.overnight":
+    "Anda tutup lewat tengah malam. Penjualan setelah tengah malam dihitung untuk hari Anda buka.",
   "hours.busyTitle": "Jam ramai",
   "hours.busyHint":
     "Ketuk satu jam untuk mengubahnya: sepi, biasa, ramai. Jam ramai berarti lebih banyak pembeli datang.",
@@ -123,7 +124,8 @@ export const id: Record<keyof typeof en, string> = {
   "today.empty.menusAction": "Buka Pengaturan",
   "today.incompleteTitle": "Hari yang belum ditutup",
   "today.incompleteBody":
-    "Hari-hari ini tidak pernah ditutup. Tetap disimpan tetapi tidak dipakai untuk saran:",
+    "Hari-hari ini belum ditutup, jadi belum dipakai untuk saran. Tutup agar ikut dihitung:",
+  "today.incompleteAction": "Tutup {date}",
 
   "plan.title": "Rencana",
   "plan.intro":
@@ -151,6 +153,10 @@ export const id: Record<keyof typeof en, string> = {
   "service.soldOutAt": "Habis {time}",
   "service.holdHint":
     "Tahan kotak menu atau tekan Ubah jam untuk mengganti jamnya.",
+  "service.earlyTitle": "{name} sudah habis?",
+  "service.earlyBody":
+    "Sekarang pukul {time} dan Anda buka pukul {open}. Habis secepat ini membuat FOODOO memperkirakan permintaan sangat tinggi. Tandai hanya jika benar-benar habis.",
+  "service.earlyConfirm": "Ya, sudah habis",
   "service.editTime": "Ubah jam",
   "service.editTimeLabel": "Ubah jam habis {name}",
   "service.soldOutToast": "{name} habis pukul {time}",
@@ -173,6 +179,13 @@ export const id: Record<keyof typeof en, string> = {
 
   "close.title": "Tutup",
   "close.intro": "Hitung sisa setiap menu.",
+  "close.leftoverPlaceholder": "?",
+  "close.leftoverMissing": "Isi sisa porsi, atau 0 jika tidak ada sisa",
+  "close.leftoverMissingSummary":
+    "Isi sisa porsi untuk {count} menu sebelum menutup hari.",
+  "close.pastIntro": "Anda menutup hari yang sudah lewat: {date}.",
+  "close.pastSheetTitle": "Tutup {date}?",
+  "close.pastClosed": "{date} ditutup",
   "close.soldOutChip": "Habis {time}",
   "close.leftoverLabel": "Sisa porsi {name}",
   "close.cookedOf": "Dimasak {qty}",

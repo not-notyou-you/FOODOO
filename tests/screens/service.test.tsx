@@ -103,6 +103,34 @@ describe("Service", () => {
     ).toBeTruthy();
   });
 
+  it("asks before storing a sell-out in the first 30 minutes after opening", async () => {
+    await plan({ "nasi-uduk": 42 });
+    renderApp({ db, path: "/service", at: new Date(2026, 2, 2, 6, 10) });
+    const tile = await screen.findByRole("button", {
+      name: "Nasi Uduk Cooked 42 Tap when sold out",
+    });
+    fireEvent.click(tile);
+    let dialog = await screen.findByRole("dialog", {
+      name: "Nasi Uduk sold out already?",
+    });
+    expect(
+      within(dialog).getByText(/It is 06:10 and you opened at 06:00/),
+    ).toBeTruthy();
+    fireEvent.click(within(dialog).getByRole("button", { name: "Cancel" }));
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(await soldOutAt("nasi-uduk")).toBeNull();
+
+    fireEvent.click(tile);
+    dialog = await screen.findByRole("dialog", {
+      name: "Nasi Uduk sold out already?",
+    });
+    fireEvent.click(
+      within(dialog).getByRole("button", { name: "Yes, it sold out" }),
+    );
+    expect(await screen.findByText("Sold out 06:10")).toBeTruthy();
+    expect(await soldOutAt("nasi-uduk")).toBe("06:10");
+  });
+
   it("SV-4: a long press or the Edit time button changes the time, within opening hours", async () => {
     await plan();
     await setSoldOut(db, TODAY, "nasi-uduk", "10:32");
