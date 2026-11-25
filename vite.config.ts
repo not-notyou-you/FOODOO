@@ -4,12 +4,10 @@ import { VitePWA } from "vite-plugin-pwa";
 import { loadEnv } from "vite";
 import { defineConfig } from "vitest/config";
 import packageJson from "./package.json" with { type: "json" };
-import { parseDemoScenario } from "./src/demo/scenarioId.ts";
+import { parseDemoEnabled } from "./src/demo/catalog.ts";
 
 export default defineConfig(({ mode }) => {
-  parseDemoScenario(
-    loadEnv(mode, process.cwd(), "VITE_")["VITE_DEMO_SCENARIO"],
-  );
+  parseDemoEnabled(loadEnv(mode, process.cwd(), "VITE_")["VITE_DEMO"]);
   return {
     plugins: [
       react(),
@@ -53,7 +51,7 @@ export default defineConfig(({ mode }) => {
       include: ["tests/**/*.test.{ts,tsx}"],
       setupFiles: ["tests/setup.ts"],
       testTimeout: 15_000,
-      env: { VITE_DEMO_SCENARIO: "1" },
+      env: { VITE_DEMO: "on" },
       coverage: {
         provider: "v8",
         include: ["src/domain/**/*.ts"],

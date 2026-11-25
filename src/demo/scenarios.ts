@@ -1,6 +1,6 @@
 // src/demo/scenarios.ts
 import { DEMO_SCENARIO_1, type DemoScenario } from "./generator.ts";
-import type { DemoScenarioId } from "./scenarioId.ts";
+import type { DemoScenarioId } from "./catalog.ts";
 
 export const DEMO_SCENARIO_2: DemoScenario = {
   id: 2,

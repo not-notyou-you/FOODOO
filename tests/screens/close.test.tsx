@@ -298,6 +298,14 @@ describe("Close", () => {
   });
 
   it("CL-6: a past day that was never closed can be closed from Today", async () => {
+    const stall = await db.stall.get("stall");
+    if (!stall) throw new Error("stall missing");
+    const ownStall = {
+      ...stall,
+      settings: { ...stall.settings, isDemo: false },
+    };
+    delete ownStall.demo;
+    await db.stall.put(ownStall);
     const NEXT_MORNING = new Date(2026, 2, 3, 9, 0);
     renderApp({ db, path: "/today", at: NEXT_MORNING });
     const notice = await screen.findByRole("region", {

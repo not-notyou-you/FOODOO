@@ -12,6 +12,12 @@ import { Splash } from "../components/Splash.tsx";
 const Close = lazy(() =>
   import("../screens/Close.tsx").then((m) => ({ default: m.Close })),
 );
+const DayDetail = lazy(() =>
+  import("../screens/DayDetail.tsx").then((m) => ({ default: m.DayDetail })),
+);
+const History = lazy(() =>
+  import("../screens/History.tsx").then((m) => ({ default: m.History })),
+);
 const HowItWorks = lazy(() =>
   import("../screens/HowItWorks.tsx").then((m) => ({ default: m.HowItWorks })),
 );
@@ -90,6 +96,8 @@ export function App() {
             <Route path="/service" element={<Service />} />
             <Route path="/close" element={<Close />} />
             <Route path="/close/:date" element={<Close />} />
+            <Route path="/history" element={<History />} />
+            <Route path="/day/:date" element={<DayDetail />} />
             <Route path="/settings" element={<Settings />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />

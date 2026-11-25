@@ -34,6 +34,7 @@ async function goOfflineAfterFirstLoad(page: Page, context: BrowserContext) {
 
 async function runCoreLoop(page: Page, testInfo: TestInfo) {
   await page.getByRole("button", { name: "Try demo stall" }).click();
+  await page.getByRole("button", { name: /^Warung Demo/ }).click();
   await expect(
     page.getByRole("heading", { level: 1, name: "Today" }),
   ).toBeVisible();
@@ -149,6 +150,20 @@ async function runCoreLoop(page: Page, testInfo: TestInfo) {
   await page.getByRole("link", { name: "Service", exact: true }).click();
   await expect(soldOut).toBeVisible();
   await expect(soldOut).toBeDisabled();
+
+  await page.getByRole("link", { name: "History", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { level: 1, name: "History" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("region", { name: "Per menu, last 7 days" }),
+  ).toContainText("Nasi Uduk");
+  await page.getByRole("link", { name: /Monday 2 March/ }).click();
+  await expect(
+    page.getByRole("heading", { level: 2, name: "Monday 2 March" }),
+  ).toBeVisible();
+  await expect(page.getByText("≈ 81", { exact: true })).toBeVisible();
+  await snap(page, testInfo, "6-history-day");
 }
 
 test.describe("core loop", () => {

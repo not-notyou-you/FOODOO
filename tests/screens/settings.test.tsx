@@ -106,7 +106,7 @@ describe("Settings", () => {
       screen.getByText("Delete your own data first to load the demo stall."),
     ).toBeTruthy();
     expect(screen.queryByText("Demo data")).toBeNull();
-    expect(screen.queryByText(/export/i)).toBeNull();
+    expect(screen.getByRole("button", { name: "Export file" })).toBeTruthy();
   });
 
   it("edits the salvage value of a menu, which onboarding does not ask for", async () => {

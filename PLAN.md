@@ -63,8 +63,9 @@ Scope: the application only. Dates follow the STACK 2026 timeline (all 23:59 WIB
 
 | # | Task | Why it is substantive | Done when |
 |---|---|---|---|
-| R1 | Weekly summary screen (`SPEC.md` §5.6) with metrics from `metrics.ts` | Turns the daily loop into measurable impact for the owner | WS-1 to WS-3 pass; numbers come from stored data; estimates labelled |
-| R2 | Export JSON/CSV and import JSON with validation (DM-3, DM-4) | Real data portability and safety for an on-device app | A round trip export → delete all → import restores identical data (e2e test) |
+| R1 | ~~Weekly summary screen~~ Built early on 2026-11-25 by team decision (D-083), before the `final-day-start` tag; no longer Final Day work. | — | — |
+| R2 | ~~Export / import~~ Built early on 2026-11-25 by team decision (D-083), before the `final-day-start` tag; no longer Final Day work. | — | — |
+| R1′, R2′ | Replacement tasks: **to be chosen by the team** | — | — |
 | R3 | Fix the top usability issue found in owner testing during F3 | Responds to real validation | The issue and the fix are recorded in the decision log, with a before/after note |
 
 At the cutoff: record the final commit, fill in the README "Final Day log" (start tag, final commit, changes, member contributions), and stop modifying the code.
@@ -105,8 +106,8 @@ At the cutoff: record the final commit, fill in the README "Final Day log" (star
 | I18N | English / Bahasa Indonesia | Core | Done |
 | DM-1/2/5 | Delete all, demo load/remove, persistent storage | Core | Done |
 | BT | Backtest report | Core | Done |
-| WS | Weekly summary | Should | Reserved for Final Day |
-| DM-3/4 | Export / import | Should | Reserved for Final Day |
+| WS | Weekly summary + history | Should | Done |
+| DM-3/4 | Export / import | Should | Done |
 | UX-FIX | Top usability fix from owner testing | Should | Reserved for Final Day |
 
 Allowed status values: `Not started`, `In progress`, `Done`, `Reserved for Final Day`, `Simulated` (works on demo data only).

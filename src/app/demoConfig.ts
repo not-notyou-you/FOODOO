@@ -1,6 +1,4 @@
 // src/app/demoConfig.ts
-import { parseDemoScenario } from "../demo/scenarioId.ts";
+import { parseDemoEnabled } from "../demo/catalog.ts";
 
-export const DEMO_SCENARIO = parseDemoScenario(
-  import.meta.env.VITE_DEMO_SCENARIO,
-);
+export const DEMO_ENABLED = parseDemoEnabled(import.meta.env.VITE_DEMO);

@@ -9,7 +9,7 @@ import type {
   StallSettings,
 } from "../domain/types.ts";
 import { generateScenarioHistory } from "./generator.ts";
-import { DEFAULT_DEMO_SCENARIO, type DemoScenarioId } from "./scenarioId.ts";
+import { DEFAULT_DEMO_SCENARIO, type DemoScenarioId } from "./catalog.ts";
 import { demoScenario } from "./scenarios.ts";
 
 export interface DemoRecords {
@@ -87,6 +87,7 @@ export function buildDemoRecords(
       name: history.stallName,
       settings: pickSettings(history.settings),
       setupComplete: true,
+      demo: { scenario, generatedFor: today },
     },
     menus: history.menus.map(pickMenu),
     days: history.days.map(pickDay),

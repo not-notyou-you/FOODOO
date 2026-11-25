@@ -5,8 +5,10 @@ import { Button } from "../components/Button.tsx";
 import { EmptyState } from "../components/EmptyState.tsx";
 import { LoopProgress } from "../components/LoopProgress.tsx";
 import { Screen } from "../components/Screen.tsx";
+import { WeekStats } from "../components/WeekStats.tsx";
 import { useHistory, useMenus, useStall, useTodayState } from "../db/hooks.ts";
 import { incompleteDays } from "../domain/close.ts";
+import { weeklyMetrics } from "../domain/metrics.ts";
 import { summarizeDay, todayPhase, type Phase } from "../domain/phase.ts";
 import { formatLongDate } from "../i18n/format.ts";
 import { useI18n, type MessageKey } from "../i18n/index.ts";
@@ -112,6 +114,19 @@ export function Today() {
           </div>
         </dl>
       </section>
+      {history === undefined ? null : (
+        <section className="card panel" aria-labelledby="today-week">
+          <div className="panel__head">
+            <h2 id="today-week">{t("week.title")}</h2>
+            <Link className="link-target panel__link" to="/history">
+              {t("today.historyLink")}
+            </Link>
+          </div>
+          <WeekStats
+            metrics={weeklyMetrics(history.menuDays, history.days, date)}
+          />
+        </section>
+      )}
       {incomplete.length === 0 ? null : (
         <section className="card notice" aria-labelledby="today-incomplete">
           <h2 id="today-incomplete">{t("today.incompleteTitle")}</h2>

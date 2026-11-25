@@ -35,9 +35,23 @@ export const en = {
 
   "welcome.start": "Start setup",
   "welcome.continue": "Continue setup",
+  "demo.pick.title": "Choose a demo stall",
+  "demo.pick.intro":
+    "All four stalls use made-up data. Their history always ends yesterday, on whatever day you open the app.",
+  "demo.pick.hours": "Open {open}–{close}",
+  "demo.pick.history": "{days} days of history",
+  "demo.s1.desc":
+    "Morning stall with two rush hours. Nasi Uduk sells out most days, so you can see how FOODOO counts the customers it missed.",
+  "demo.s2.desc":
+    "Office lunch stall with one noon rush. Busy on weekdays and quiet at weekends, so each weekday gets its own suggestion.",
+  "demo.s3.desc":
+    "Night stall open past midnight. Sales after 00:00 still count for the evening the stall opened.",
+  "demo.s4.desc":
+    "Stall that opened four days ago. There is not enough history yet, so suggestions start from the usual portions and adjust.",
+  "demo.refreshed": "Demo dates moved up to today",
   "welcome.demo": "Try demo stall",
   "welcome.demoNote":
-    "The demo stall uses made-up data so you can look around first.",
+    "Choose one of four demo stalls with made-up data to look around first.",
   "welcome.demoBlocked":
     "You have started your own setup. Delete it in Settings to try the demo.",
 
@@ -123,6 +137,89 @@ export const en = {
   "today.incompleteBody":
     "These days were never closed, so they are not used for suggestions yet. Close them to count them:",
   "today.incompleteAction": "Close {date}",
+  "week.title": "Last 7 days",
+  "week.empty":
+    "No closed days in the last 7 days yet. Close a day to see your numbers.",
+  "week.leftover": "Leftover portions",
+  "week.sellOuts": "Sell-outs",
+  "week.lostSales": "Lost sales (portions)",
+  "week.accepted": "Plans accepted as suggested",
+  "week.percent": "{value}%",
+  "nav.history": "History",
+  "today.historyLink": "See history",
+  "history.title": "History",
+  "history.menus.title": "Per menu, last 7 days",
+  "history.col.menu": "Menu",
+  "history.col.date": "Date",
+  "history.col.cooked": "Cooked",
+  "history.col.sold": "Sold",
+  "history.col.leftover": "Leftover",
+  "history.col.demand": "Demand",
+  "history.chart.title": "Cooked vs demand",
+  "history.chart.menu": "Menu",
+  "history.chart.caption": "Cooked and demand per day for {menu}, last 7 days",
+  "history.chart.cooked": "Cooked",
+  "history.chart.demand": "Demand",
+  "history.chart.estimate": "Demand (estimate, sold-out day)",
+  "history.days.title": "Past days",
+  "history.days.empty": "No days recorded yet.",
+  "history.days.meta": "{portions} portions · {soldOut} sold out",
+  "history.days.more": "Show more days",
+  "history.status.open": "Not closed",
+  "history.status.closed": "Closed",
+  "history.status.unusual": "Unusual day",
+  "estimate.tag": "estimate",
+  "history.menus.note":
+    "Totals of closed, usual days. Demand on sold-out days is an estimate.",
+  "day.title": "Day details",
+  "day.noSuggestion": "No suggestion stored",
+  "day.back": "Back to history",
+  "day.empty": "Nothing was recorded on this day.",
+  "day.closeAction": "Close this day",
+  "day.suggested": "Suggested {qty}",
+  "day.soldOutAt": "Sold out {time}",
+  "day.notSoldOut": "Not sold out",
+  "transfer.export.title": "Export your data",
+  "transfer.format": "File format",
+  "transfer.format.json": "JSON",
+  "transfer.format.csv": "CSV",
+  "transfer.format.xlsx": "XLSX",
+  "transfer.hint.json":
+    "Full backup of your stall, menus and every day. Use it to move to a new phone.",
+  "transfer.hint.csv":
+    "Daily records per menu, one row each. Opens in any spreadsheet app.",
+  "transfer.hint.xlsx":
+    "Full backup for Excel or Google Sheets, in four sheets: Stall, Menus, Days, MenuDays.",
+  "transfer.export.action": "Export file",
+  "transfer.exported": "File saved",
+  "transfer.exportFailed": "Could not export. Please try again.",
+  "transfer.import.title": "Import a file",
+  "transfer.import.hint":
+    "JSON or XLSX restores a full backup and replaces the data on this device. CSV adds or updates daily records for the menus you already have.",
+  "transfer.import.action": "Choose a file to import",
+  "transfer.import.file": "File to import",
+  "transfer.imported": "Data imported",
+  "transfer.issues.title":
+    "Nothing was imported. Fix these problems in the file and try again:",
+  "transfer.issue.unreadable": "The file could not be read ({where}).",
+  "transfer.issue.wrongFormat": "This is not a FOODOO file.",
+  "transfer.issue.unknownVersion":
+    "This file comes from a newer or unknown version of FOODOO.",
+  "transfer.issue.missingSheet": "The sheet {where} is missing.",
+  "transfer.issue.missingColumn": "The column {where} is missing.",
+  "transfer.issue.badValue": "The value at {where} is not valid.",
+  "transfer.issue.unknownMenu":
+    "The menu at {where} does not exist on this device.",
+  "transfer.issue.duplicate": "{where} appears twice.",
+  "transfer.issue.noStall": "Set up your stall first, then import a CSV file.",
+  "transfer.issue.empty": "The file has no data ({where}).",
+  "transfer.confirm.title": "Import this file?",
+  "transfer.confirm.replace":
+    "This replaces all data on this device with the file: {menus} menus and {days} days.",
+  "transfer.confirm.merge":
+    "This adds or updates {days} days of records for your menus. Other data stays as it is.",
+  "transfer.confirm.action": "Import",
+  "transfer.manage.title": "Manage data",
 
   "plan.title": "Plan",
   "plan.intro": "Suggested portions for today. Change any number, then save.",
@@ -222,6 +319,7 @@ export const en = {
     "Everything is stored only on this device. Nothing is sent anywhere.",
   "settings.data.loadDemo": "Load demo stall",
   "settings.data.resetDemo": "Reset demo data",
+  "settings.data.switchDemo": "Choose another demo stall",
   "settings.data.loadDemoBlocked":
     "Delete your own data first to load the demo stall.",
   "settings.data.demoLoaded": "Demo stall loaded",

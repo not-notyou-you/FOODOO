@@ -1,7 +1,8 @@
 // tests/screens/today.test.tsx
 import { cleanup, fireEvent, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { loadDemo } from "../../src/db/repositories.ts";
+import { getHistory, loadDemo } from "../../src/db/repositories.ts";
+import { weeklyMetrics } from "../../src/domain/metrics.ts";
 import type { FoodooDb } from "../../src/db/schema.ts";
 import { renderApp } from "../app/renderApp.tsx";
 import { makeTestDb } from "../db/testDb.ts";
@@ -47,6 +48,9 @@ describe("Today", () => {
     renderApp({ db });
     fireEvent.click(
       await screen.findByRole("button", { name: "Try demo stall" }),
+    );
+    fireEvent.click(
+      await screen.findByRole("button", { name: /^Warung Demo/ }),
     );
     expect(
       await screen.findByRole("heading", { level: 1, name: "Today" }),
@@ -146,6 +150,38 @@ describe("Today", () => {
     await screen.findByRole("heading", { level: 1, name: "Today" });
     expect(screen.queryByText("Soon")).toBeNull();
     expect(screen.queryByText("Coming soon")).toBeNull();
+  });
+
+  it("WS-1: shows the last 7 days from stored data with lost sales labelled estimate", async () => {
+    await loadDemo(db, TODAY);
+    const history = await getHistory(db);
+    const metrics = weeklyMetrics(history.menuDays, history.days, TODAY);
+    renderApp({ db, path: "/today" });
+    const week = await screen.findByRole("region", { name: "Last 7 days" });
+    expect(
+      within(week).getByText("Leftover portions").nextSibling?.textContent,
+    ).toBe(String(metrics.leftoverPortions));
+    expect(within(week).getByText("Sell-outs").nextSibling?.textContent).toBe(
+      String(metrics.sellOutEvents),
+    );
+    const lost = within(week).getByText("Lost sales (portions)").nextSibling;
+    expect(lost?.textContent).toBe(`≈ ${metrics.estimatedLostSales}estimate`);
+    expect(within(week).getByText("estimate")).toBeTruthy();
+    expect(
+      within(week)
+        .getByRole("link", { name: "See history" })
+        .getAttribute("href"),
+    ).toBe("/history");
+  });
+
+  it("WS-1: explains the empty week when no day was closed", async () => {
+    await loadDemo(db, TODAY);
+    await db.days.toCollection().modify({ closed: false });
+    renderApp({ db, path: "/today" });
+    const week = await screen.findByRole("region", { name: "Last 7 days" });
+    expect(
+      within(week).getByText(/No closed days in the last 7 days/),
+    ).toBeTruthy();
   });
 
   it("sends a visitor with no data from an app route to Welcome", async () => {

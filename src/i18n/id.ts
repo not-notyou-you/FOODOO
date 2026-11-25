@@ -37,9 +37,23 @@ export const id: Record<keyof typeof en, string> = {
 
   "welcome.start": "Mulai pengaturan",
   "welcome.continue": "Lanjutkan pengaturan",
+  "demo.pick.title": "Pilih warung demo",
+  "demo.pick.intro":
+    "Keempat warung memakai data buatan. Riwayatnya selalu berakhir kemarin, kapan pun aplikasi dibuka.",
+  "demo.pick.hours": "Buka {open}–{close}",
+  "demo.pick.history": "Riwayat {days} hari",
+  "demo.s1.desc":
+    "Warung pagi dengan dua jam ramai. Nasi Uduk hampir selalu habis, jadi terlihat cara FOODOO menghitung pembeli yang terlewat.",
+  "demo.s2.desc":
+    "Warung makan siang kantor dengan satu jam ramai. Ramai di hari kerja dan sepi di akhir pekan, jadi tiap hari punya saran sendiri.",
+  "demo.s3.desc":
+    "Angkringan yang buka sampai lewat tengah malam. Penjualan setelah 00:00 tetap dihitung untuk malam warung itu buka.",
+  "demo.s4.desc":
+    "Warung yang baru buka empat hari. Riwayat belum cukup, jadi saran dimulai dari porsi biasa lalu disesuaikan.",
+  "demo.refreshed": "Tanggal demo disesuaikan ke hari ini",
   "welcome.demo": "Coba warung demo",
   "welcome.demoNote":
-    "Warung demo memakai data buatan supaya Anda bisa melihat-lihat dulu.",
+    "Pilih salah satu dari empat warung demo berdata buatan untuk melihat-lihat dulu.",
   "welcome.demoBlocked":
     "Anda sudah mulai mengatur warung sendiri. Hapus datanya di Pengaturan untuk mencoba demo.",
 
@@ -126,6 +140,89 @@ export const id: Record<keyof typeof en, string> = {
   "today.incompleteBody":
     "Hari-hari ini belum ditutup, jadi belum dipakai untuk saran. Tutup agar ikut dihitung:",
   "today.incompleteAction": "Tutup {date}",
+  "week.title": "7 hari terakhir",
+  "week.empty":
+    "Belum ada hari yang ditutup dalam 7 hari terakhir. Tutup satu hari untuk melihat angkanya.",
+  "week.leftover": "Porsi sisa",
+  "week.sellOuts": "Kejadian habis",
+  "week.lostSales": "Penjualan hilang (porsi)",
+  "week.accepted": "Rencana diterima tanpa diubah",
+  "week.percent": "{value}%",
+  "nav.history": "Riwayat",
+  "today.historyLink": "Lihat riwayat",
+  "history.title": "Riwayat",
+  "history.menus.title": "Per menu, 7 hari terakhir",
+  "history.col.menu": "Menu",
+  "history.col.date": "Tanggal",
+  "history.col.cooked": "Dimasak",
+  "history.col.sold": "Terjual",
+  "history.col.leftover": "Sisa",
+  "history.col.demand": "Permintaan",
+  "history.chart.title": "Dimasak vs permintaan",
+  "history.chart.menu": "Menu",
+  "history.chart.caption":
+    "Porsi dimasak dan permintaan per hari untuk {menu}, 7 hari terakhir",
+  "history.chart.cooked": "Dimasak",
+  "history.chart.demand": "Permintaan",
+  "history.chart.estimate": "Permintaan (estimasi, hari habis)",
+  "history.days.title": "Hari-hari sebelumnya",
+  "history.days.empty": "Belum ada hari yang tercatat.",
+  "history.days.meta": "{portions} porsi · {soldOut} habis",
+  "history.days.more": "Tampilkan lebih banyak hari",
+  "history.status.open": "Belum ditutup",
+  "history.status.closed": "Ditutup",
+  "history.status.unusual": "Hari tidak biasa",
+  "estimate.tag": "perkiraan",
+  "history.menus.note":
+    "Total hari yang ditutup dan bukan hari tidak biasa. Permintaan pada hari habis adalah perkiraan.",
+  "day.title": "Detail hari",
+  "day.noSuggestion": "Tidak ada saran tersimpan",
+  "day.back": "Kembali ke riwayat",
+  "day.empty": "Tidak ada yang tercatat pada hari ini.",
+  "day.closeAction": "Tutup hari ini",
+  "day.suggested": "Saran {qty}",
+  "day.soldOutAt": "Habis {time}",
+  "day.notSoldOut": "Tidak habis",
+  "transfer.export.title": "Ekspor data",
+  "transfer.format": "Format file",
+  "transfer.format.json": "JSON",
+  "transfer.format.csv": "CSV",
+  "transfer.format.xlsx": "XLSX",
+  "transfer.hint.json":
+    "Cadangan lengkap warung, menu, dan semua hari. Pakai untuk pindah ke HP baru.",
+  "transfer.hint.csv":
+    "Catatan harian per menu, satu baris per menu per hari. Bisa dibuka di aplikasi spreadsheet apa pun.",
+  "transfer.hint.xlsx":
+    "Cadangan lengkap untuk Excel atau Google Sheets, dalam empat sheet: Stall, Menus, Days, MenuDays.",
+  "transfer.export.action": "Ekspor file",
+  "transfer.exported": "File tersimpan",
+  "transfer.exportFailed": "Gagal mengekspor. Coba lagi.",
+  "transfer.import.title": "Impor file",
+  "transfer.import.hint":
+    "JSON atau XLSX memulihkan cadangan lengkap dan mengganti data di perangkat ini. CSV menambah atau memperbarui catatan harian untuk menu yang sudah ada.",
+  "transfer.import.action": "Pilih file untuk diimpor",
+  "transfer.import.file": "File untuk diimpor",
+  "transfer.imported": "Data berhasil diimpor",
+  "transfer.issues.title":
+    "Tidak ada yang diimpor. Perbaiki masalah berikut di file, lalu coba lagi:",
+  "transfer.issue.unreadable": "File tidak bisa dibaca ({where}).",
+  "transfer.issue.wrongFormat": "Ini bukan file FOODOO.",
+  "transfer.issue.unknownVersion":
+    "File ini berasal dari versi FOODOO yang lebih baru atau tidak dikenal.",
+  "transfer.issue.missingSheet": "Sheet {where} tidak ada.",
+  "transfer.issue.missingColumn": "Kolom {where} tidak ada.",
+  "transfer.issue.badValue": "Nilai di {where} tidak valid.",
+  "transfer.issue.unknownMenu": "Menu di {where} tidak ada di perangkat ini.",
+  "transfer.issue.duplicate": "{where} muncul dua kali.",
+  "transfer.issue.noStall": "Atur warung dulu, lalu impor file CSV.",
+  "transfer.issue.empty": "File tidak berisi data ({where}).",
+  "transfer.confirm.title": "Impor file ini?",
+  "transfer.confirm.replace":
+    "Ini mengganti semua data di perangkat ini dengan isi file: {menus} menu dan {days} hari.",
+  "transfer.confirm.merge":
+    "Ini menambah atau memperbarui catatan {days} hari untuk menu Anda. Data lain tetap.",
+  "transfer.confirm.action": "Impor",
+  "transfer.manage.title": "Kelola data",
 
   "plan.title": "Rencana",
   "plan.intro":
@@ -230,6 +327,7 @@ export const id: Record<keyof typeof en, string> = {
     "Semua data hanya disimpan di perangkat ini. Tidak ada yang dikirim ke mana pun.",
   "settings.data.loadDemo": "Muat warung demo",
   "settings.data.resetDemo": "Atur ulang data demo",
+  "settings.data.switchDemo": "Pilih warung demo lain",
   "settings.data.loadDemoBlocked":
     "Hapus data Anda sendiri dulu untuk memuat warung demo.",
   "settings.data.demoLoaded": "Warung demo dimuat",

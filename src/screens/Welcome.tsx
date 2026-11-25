@@ -2,9 +2,11 @@
 import { useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useLocalStamp } from "../app/clock.ts";
-import { DEMO_SCENARIO } from "../app/demoConfig.ts";
+import { DEMO_ENABLED } from "../app/demoConfig.ts";
 import { useToast } from "../app/toast.ts";
 import { Button } from "../components/Button.tsx";
+import { DemoPicker } from "../components/DemoPicker.tsx";
+import { ExportImportPanel } from "../components/ExportImportPanel.tsx";
 import { EstimateValue } from "../components/EstimateValue.tsx";
 import { FeatureCard } from "../components/FeatureCard.tsx";
 import { ClockIcon } from "../components/icons/ClockIcon.tsx";
@@ -22,6 +24,7 @@ import { OfflinePill } from "../components/OfflinePill.tsx";
 import { Splash } from "../components/Splash.tsx";
 import { Sticker } from "../components/Sticker.tsx";
 import { useDb, useStall } from "../db/hooks.ts";
+import { demoStallDate } from "../demo/catalog.ts";
 import {
   loadDemo,
   requestPersistentStorage,
@@ -37,14 +40,14 @@ interface WelcomeProps {
 }
 
 export function Welcome({ about = false }: WelcomeProps) {
-  const demoScenario = DEMO_SCENARIO;
   const t = useT();
   const db = useDb();
   const toast = useToast();
   const navigate = useNavigate();
   const stall = useStall();
-  const { date } = useLocalStamp();
+  const { date, time } = useLocalStamp();
   const [busy, setBusy] = useState(false);
+  const [picking, setPicking] = useState(false);
   const [failed, setFailed] = useState(false);
 
   if (stall === undefined) {
@@ -93,28 +96,41 @@ export function Welcome({ about = false }: WelcomeProps) {
   ) : (
     <div className="landing__actions">
       {startButton(t(started ? "welcome.continue" : "welcome.start"))}
-      {demoScenario === null ? null : (
+      {DEMO_ENABLED ? (
+        <Button
+          wide
+          variant="secondary"
+          disabled={busy || started}
+          aria-describedby="welcome-demo-note"
+          onClick={() => {
+            setPicking(true);
+          }}
+        >
+          {t("welcome.demo")}
+        </Button>
+      ) : null}
+      <ExportImportPanel compact />
+      {DEMO_ENABLED ? (
         <>
-          <Button
-            wide
-            variant="secondary"
-            disabled={busy || started}
-            aria-describedby="welcome-demo-note"
-            onClick={() => {
+          <p id="welcome-demo-note" className="field__hint">
+            {t(started ? "welcome.demoBlocked" : "welcome.demoNote")}
+          </p>
+          <DemoPicker
+            open={picking}
+            busy={busy}
+            onClose={() => {
+              setPicking(false);
+            }}
+            onPick={(entry) => {
               void run(async () => {
-                await loadDemo(db, date, demoScenario);
+                await loadDemo(db, demoStallDate(entry, date, time), entry.id);
                 toast.show(t("settings.data.demoLoaded"));
                 void requestPersistentStorage(navigator.storage);
               }, "/today");
             }}
-          >
-            {t("welcome.demo")}
-          </Button>
-          <p id="welcome-demo-note" className="field__hint">
-            {t(started ? "welcome.demoBlocked" : "welcome.demoNote")}
-          </p>
+          />
         </>
-      )}
+      ) : null}
       {failed ? (
         <p className="form__failure" role="alert">
           {t("common.saveFailed")}

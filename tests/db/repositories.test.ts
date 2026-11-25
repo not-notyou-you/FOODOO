@@ -8,6 +8,7 @@ import {
   getTodayState,
   listMenus,
   loadDemo,
+  refreshDemo,
   removeDemo,
   requestPersistentStorage,
   saveHours,
@@ -208,6 +209,7 @@ describe("demo stall", () => {
     expect(days).toHaveLength(DEMO_HISTORY_DAYS);
     expect(menuDays).toHaveLength(DEMO_HISTORY_DAYS * DEMO_MENUS.length);
     expect(Object.keys(stall ?? {}).sort()).toEqual([
+      "demo",
       "id",
       "name",
       "settings",
@@ -238,6 +240,35 @@ describe("demo stall", () => {
     expect((await getStall(db))?.name).toBe("Demo Warung Baru Buka");
     expect(await db.menus.get("nasi-kucing")).toBeUndefined();
     expect(await db.days.count()).toBe(4);
+  });
+
+  it("moves the demo history up to a new day with the same scenario", async () => {
+    await loadDemo(db, TODAY, 2);
+    expect(await refreshDemo(db, TODAY)).toBe(false);
+    expect(await refreshDemo(db, "2026-03-05")).toBe(true);
+    const stall = await getStall(db);
+    expect(stall?.name).toBe("Demo Warung Makan Kantor");
+    expect(stall?.demo).toEqual({ scenario: 2, generatedFor: "2026-03-05" });
+    const days = await db.days.orderBy("date").toArray();
+    expect(days).toHaveLength(56);
+    expect(days.at(-1)?.date).toBe("2026-03-04");
+  });
+
+  it("never refreshes the owner's own stall or a demo without its scenario", async () => {
+    await startSetup(db);
+    expect(await refreshDemo(db, "2026-03-05")).toBe(false);
+    await deleteAll(db);
+    expect(await refreshDemo(db, "2026-03-05")).toBe(false);
+    await loadDemo(db, TODAY);
+    const stall = await getStall(db);
+    if (!stall) {
+      throw new Error("demo stall missing");
+    }
+    const imported = { ...stall };
+    delete imported.demo;
+    await db.stall.put(imported);
+    expect(await refreshDemo(db, "2026-03-05")).toBe(false);
+    expect(await db.days.get("2026-03-04")).toBeUndefined();
   });
 
   it("reloads the demo from scratch when the demo is already stored", async () => {
