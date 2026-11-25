@@ -1,8 +1,8 @@
 // tests/App.test.tsx
-import { render, screen } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
-import { describe, expect, it, vi } from "vitest";
-import { App } from "../src/app/App.tsx";
+import { cleanup, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { renderApp } from "./app/renderApp.tsx";
+import { makeTestDb } from "./db/testDb.ts";
 
 vi.mock("../src/app/registerPwa.ts", () => ({
   registerPwa: (onOfflineReady: () => void) => {
@@ -10,24 +10,37 @@ vi.mock("../src/app/registerPwa.ts", () => ({
   },
 }));
 
+afterEach(() => {
+  cleanup();
+});
+
 describe("App shell", () => {
-  it("renders the foundation placeholder and the offline-ready status", () => {
-    render(
-      <MemoryRouter
-        initialEntries={["/"]}
-        future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
-      >
-        <App />
-      </MemoryRouter>,
-    );
-    expect(screen.getByRole("heading", { level: 1 }).textContent).toBe(
-      "Foundation shell",
-    );
+  it("offers a skip link and announces when it is ready offline", async () => {
+    const db = makeTestDb();
+    renderApp({ db });
     expect(
-      screen.getByText("No features are built yet. Coming soon."),
+      screen
+        .getByRole("link", { name: "Skip to content" })
+        .getAttribute("href"),
+    ).toBe("#main");
+    expect(await screen.findByText("Ready to work offline.")).toBeTruthy();
+    expect(
+      screen
+        .getByText("Ready to work offline.")
+        .closest('[aria-live="polite"]'),
     ).toBeTruthy();
-    expect(screen.getByRole("status").textContent).toBe(
-      "Ready to work offline.",
-    );
+    await db.delete();
+  });
+
+  it("sends an unknown path to the start", async () => {
+    const db = makeTestDb();
+    renderApp({ db, path: "/nowhere" });
+    expect(
+      await screen.findByRole("heading", {
+        level: 1,
+        name: "Welcome to FOODOO",
+      }),
+    ).toBeTruthy();
+    await db.delete();
   });
 });

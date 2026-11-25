@@ -1,35 +1,72 @@
 // src/app/App.tsx
-import { useEffect, useState } from "react";
-import { Route, Routes } from "react-router-dom";
-import { t } from "../i18n/index.ts";
+import { useEffect, useRef } from "react";
+import { Navigate, Route, Routes } from "react-router-dom";
+import { useT } from "../i18n/index.ts";
+import { ComingSoon } from "../screens/ComingSoon.tsx";
+import { Settings } from "../screens/Settings.tsx";
+import { SetupHours } from "../screens/SetupHours.tsx";
+import { SetupMenus } from "../screens/SetupMenus.tsx";
+import { Today } from "../screens/Today.tsx";
+import { Welcome } from "../screens/Welcome.tsx";
+import { Layout } from "./Layout.tsx";
 import { registerPwa } from "./registerPwa.ts";
+import { RequireStall } from "./RequireStall.tsx";
+import { RootRedirect } from "./RootRedirect.tsx";
+import { useToast } from "./toast.ts";
 
-function Shell() {
-  const [offlineReady, setOfflineReady] = useState(false);
+export function App() {
+  const t = useT();
+  const toast = useToast();
+
+  const announce = useRef(() => {
+    toast.show(t("app.offlineReady"));
+  });
+
+  useEffect(() => {
+    announce.current = () => {
+      toast.show(t("app.offlineReady"));
+    };
+  }, [toast, t]);
 
   useEffect(() => {
     registerPwa(() => {
-      setOfflineReady(true);
+      announce.current();
     });
   }, []);
 
   return (
-    <main className="page">
-      <section className="card">
-        <span className="wordmark">{t("app.name")}</span>
-        <h1>{t("shell.title")}</h1>
-        <p>{t("shell.body")}</p>
-        <span className="pill">{t("shell.status")}</span>
-        {offlineReady ? <p role="status">{t("shell.offlineReady")}</p> : null}
-      </section>
-    </main>
-  );
-}
-
-export function App() {
-  return (
-    <Routes>
-      <Route path="/" element={<Shell />} />
-    </Routes>
+    <>
+      <a className="skip-link" href="#main">
+        {t("app.skip")}
+      </a>
+      <Routes>
+        <Route path="/" element={<RootRedirect />} />
+        <Route path="/welcome" element={<Welcome />} />
+        <Route
+          path="/setup/menus"
+          element={
+            <RequireStall>
+              <SetupMenus />
+            </RequireStall>
+          }
+        />
+        <Route
+          path="/setup/hours"
+          element={
+            <RequireStall>
+              <SetupHours />
+            </RequireStall>
+          }
+        />
+        <Route element={<Layout />}>
+          <Route path="/today" element={<Today />} />
+          <Route path="/plan" element={<ComingSoon title="nav.plan" />} />
+          <Route path="/service" element={<ComingSoon title="nav.service" />} />
+          <Route path="/close" element={<ComingSoon title="nav.close" />} />
+          <Route path="/settings" element={<Settings />} />
+        </Route>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </>
   );
 }

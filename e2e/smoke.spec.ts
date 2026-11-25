@@ -1,28 +1,33 @@
 // e2e/smoke.spec.ts
 import { expect, test } from "@playwright/test";
 
-test("shell loads, installs its service worker, and reloads offline", async ({
+test("demo stall loads, installs its service worker, and survives an offline reload", async ({
   page,
   context,
 }) => {
   await page.goto("/");
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    "Foundation shell",
-  );
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Welcome to FOODOO" }),
+  ).toBeVisible();
+  await expect(page.getByRole("button", { name: "Start setup" })).toBeVisible();
 
   await page.evaluate(async () => {
     await navigator.serviceWorker.ready;
   });
-  await expect(page.getByRole("status")).toHaveText("Ready to work offline.");
+
+  await page.getByRole("button", { name: "Try demo stall" }).click();
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Today" }),
+  ).toBeVisible();
+  await expect(page.getByText("Demo data")).toBeVisible();
 
   await context.setOffline(true);
   await page.reload();
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    "Foundation shell",
-  );
   await expect(
-    page.getByText("No features are built yet. Coming soon."),
+    page.getByRole("heading", { level: 1, name: "Today" }),
   ).toBeVisible();
+  await expect(page.getByText("Demo data")).toBeVisible();
+  await expect(page.getByText("Offline. Saved on this device.")).toBeVisible();
 });
 
 test("web manifest is installable", async ({ page, request }) => {
