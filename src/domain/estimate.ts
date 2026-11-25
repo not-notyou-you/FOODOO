@@ -1,0 +1,63 @@
+// src/domain/estimate.ts
+import { parseHHMM } from "./time.ts";
+import type { DemandEstimate, HHMM, StallSettings } from "./types.ts";
+
+const DEFAULT_WEIGHT = 2;
+const FULL_SHARE_NUMERATOR = 19;
+const FULL_SHARE_DENOMINATOR = 20;
+const DEMAND_CAP_FACTOR = 3;
+
+export function hourWeight(settings: StallSettings, hour: number): number {
+  const level = settings.busyProfile[String(hour).padStart(2, "0")];
+  return level ?? DEFAULT_WEIGHT;
+}
+
+function weightedMinutes(settings: StallSettings, untilMinute: number): number {
+  const open = parseHHMM(settings.openAt);
+  const end = Math.min(untilMinute, parseHHMM(settings.closeAt));
+  let total = 0;
+  for (let hour = Math.floor(open / 60); hour * 60 < end; hour += 1) {
+    const from = Math.max(open, hour * 60);
+    const to = Math.min(end, (hour + 1) * 60);
+    total += hourWeight(settings, hour) * Math.max(0, to - from);
+  }
+  return total;
+}
+
+export function arrivalWeights(
+  settings: StallSettings,
+  at: HHMM,
+): { arrived: number; total: number } {
+  return {
+    arrived: weightedMinutes(settings, parseHHMM(at)),
+    total: weightedMinutes(settings, parseHHMM(settings.closeAt)),
+  };
+}
+
+export function arrivalShare(settings: StallSettings, at: HHMM): number {
+  const { arrived, total } = arrivalWeights(settings, at);
+  return total === 0 ? 1 : arrived / total;
+}
+
+export function estimateDemand(
+  cooked: number,
+  leftover: number | null,
+  soldOutAt: HHMM | null,
+  settings: StallSettings,
+): DemandEstimate | null {
+  if (soldOutAt === null) {
+    return leftover === null
+      ? null
+      : { demand: cooked - leftover, isEstimate: false };
+  }
+  const { arrived, total } = arrivalWeights(settings, soldOutAt);
+  if (arrived * FULL_SHARE_DENOMINATOR >= total * FULL_SHARE_NUMERATOR) {
+    return { demand: cooked, isEstimate: true };
+  }
+  const cap = cooked * DEMAND_CAP_FACTOR;
+  if (arrived === 0) {
+    return { demand: cap, isEstimate: true };
+  }
+  const rounded = Math.floor((2 * cooked * total + arrived) / (2 * arrived));
+  return { demand: Math.min(rounded, cap), isEstimate: true };
+}
