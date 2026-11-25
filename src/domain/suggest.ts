@@ -4,6 +4,7 @@ import type {
   Menu,
   MenuDay,
   ReasonCode,
+  ReasonScope,
   Suggestion,
 } from "./types.ts";
 
@@ -74,13 +75,13 @@ function eligibleObservations(
 function selectHistory(
   eligible: readonly Observation[],
   weekday: number,
-): Observation[] {
+): { history: Observation[]; scope: ReasonScope } {
   const sameWeekday = eligible
     .filter((item) => item.weekday === weekday)
     .slice(0, SAME_WEEKDAY_LIMIT);
   return sameWeekday.length >= MIN_HISTORY
-    ? sameWeekday
-    : eligible.slice(0, ANY_WEEKDAY_LIMIT);
+    ? { history: sameWeekday, scope: "weekday" }
+    : { history: eligible.slice(0, ANY_WEEKDAY_LIMIT), scope: "recent" };
 }
 
 function coldStart(
@@ -109,7 +110,7 @@ export function suggestQty(
   menuDays: readonly MenuDay[],
   days: readonly DayRecord[],
 ): Suggestion {
-  const history = selectHistory(
+  const { history, scope } = selectHistory(
     eligibleObservations(menu.id, menuDays, days),
     weekday,
   );
@@ -137,6 +138,7 @@ export function suggestQty(
     qty,
     reason: {
       code: decision.code,
+      scope,
       observations: history.length,
       soldOutDays: history.filter((item) => item.menuDay.soldOutAt !== null)
         .length,

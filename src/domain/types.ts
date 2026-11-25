@@ -30,8 +30,11 @@ export interface DayRecord {
 export type ReasonCode =
   "cold-start" | "cold-start-up" | "cold-start-down" | "history";
 
+export type ReasonScope = "weekday" | "recent";
+
 export interface Reason {
   code: ReasonCode;
+  scope: ReasonScope;
   observations: number;
   soldOutDays: number;
   leftoverDays: number;

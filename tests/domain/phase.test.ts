@@ -1,0 +1,86 @@
+// tests/domain/phase.test.ts
+import { describe, expect, it } from "vitest";
+import {
+  segmentStatus,
+  summarizeDay,
+  todayPhase,
+  type PhaseInput,
+} from "../../src/domain/phase.ts";
+import { makeDay, makeMenuDay } from "../helpers.ts";
+
+function input(overrides: Partial<PhaseInput> = {}): PhaseInput {
+  return {
+    time: "09:00",
+    closeAt: "14:00",
+    plannedCount: 4,
+    portions: 120,
+    soldOutCount: 0,
+    closed: false,
+    ...overrides,
+  };
+}
+
+describe("summarizeDay", () => {
+  it("counts planned menus, portions and sell-outs", () => {
+    const summary = summarizeDay(
+      [
+        makeMenuDay("2026-03-02", { cookedQty: 42, soldOutAt: "10:32" }),
+        makeMenuDay("2026-03-02", { menuId: "b", cookedQty: 30 }),
+      ],
+      makeDay("2026-03-02", 1, { closed: false }),
+    );
+    expect(summary).toEqual({
+      plannedCount: 2,
+      portions: 72,
+      soldOutCount: 1,
+      closed: false,
+    });
+  });
+
+  it("treats a missing day record as not closed", () => {
+    expect(summarizeDay([], undefined)).toEqual({
+      plannedCount: 0,
+      portions: 0,
+      soldOutCount: 0,
+      closed: false,
+    });
+    expect(summarizeDay([], makeDay("2026-03-02", 1)).closed).toBe(true);
+  });
+});
+
+describe("todayPhase", () => {
+  it("is plan when nothing is planned yet, even after closing time", () => {
+    expect(todayPhase(input({ plannedCount: 0 }))).toBe("plan");
+    expect(todayPhase(input({ plannedCount: 0, time: "20:00" }))).toBe("plan");
+  });
+
+  it("is service between planning and closing time", () => {
+    expect(todayPhase(input())).toBe("service");
+    expect(todayPhase(input({ time: "05:00" }))).toBe("service");
+    expect(todayPhase(input({ time: "13:59", soldOutCount: 3 }))).toBe(
+      "service",
+    );
+  });
+
+  it("is close at closing time or when every menu sold out", () => {
+    expect(todayPhase(input({ time: "14:00" }))).toBe("close");
+    expect(todayPhase(input({ soldOutCount: 4 }))).toBe("close");
+  });
+
+  it("is done once the day is closed", () => {
+    expect(todayPhase(input({ closed: true, plannedCount: 0 }))).toBe("done");
+  });
+});
+
+describe("segmentStatus", () => {
+  it("marks earlier segments done, the current one current, later ones next", () => {
+    expect(segmentStatus("service", "plan")).toBe("done");
+    expect(segmentStatus("service", "service")).toBe("current");
+    expect(segmentStatus("service", "close")).toBe("next");
+  });
+
+  it("marks every segment done when the day is done", () => {
+    expect(segmentStatus("done", "plan")).toBe("done");
+    expect(segmentStatus("done", "close")).toBe("done");
+  });
+});

@@ -85,6 +85,7 @@ describe("suggestQty cold start", () => {
     expect(result.qty).toBe(44);
     expect(result.reason).toEqual({
       code: "cold-start-up",
+      scope: "recent",
       observations: 3,
       soldOutDays: 1,
       leftoverDays: 0,
@@ -131,6 +132,7 @@ describe("suggestQty cold start", () => {
     expect(result.qty).toBe(25);
     expect(result.reason).toEqual({
       code: "cold-start",
+      scope: "recent",
       observations: 0,
       soldOutDays: 0,
       leftoverDays: 0,
@@ -181,6 +183,7 @@ describe("suggestQty with history", () => {
     expect(result.qty).toBe(34);
     expect(result.reason).toEqual({
       code: "history",
+      scope: "weekday",
       observations: 5,
       soldOutDays: 1,
       leftoverDays: 0,
@@ -246,6 +249,7 @@ describe("suggestQty with history", () => {
     }
     const result = suggestQty(makeMenu(), 1, menuDays, days);
     expect(result.reason.observations).toBe(6);
+    expect(result.reason.scope).toBe("weekday");
     expect(result.qty).toBe(50);
   });
 
@@ -267,6 +271,7 @@ describe("suggestQty with history", () => {
     const result = suggestQty(makeMenu(), 0, menuDays, days);
     expect(result.reason.observations).toBe(14);
     expect(result.reason.code).toBe("history");
+    expect(result.reason.scope).toBe("recent");
   });
 
   it("clamps a large suggestion to 999", () => {

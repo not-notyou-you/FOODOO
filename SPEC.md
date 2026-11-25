@@ -141,7 +141,7 @@ interface Menu { id: string; name: string; price: number; cost: number; salvage:
 interface StallSettings { openAt: HHMM; closeAt: HHMM; busyProfile: Record<string, BusyLevel>; isDemo: boolean }
 interface DayRecord { date: ISODate; weekday: number; unusual: boolean; closed: boolean }
 interface MenuDay { date: ISODate; menuId: string; suggestedQty: number | null; reason: Reason | null; cookedQty: number; soldOutAt: HHMM | null; leftover: number | null; estimatedDemand: number | null; demandIsEstimate: boolean }
-interface Reason { code: 'cold-start' | 'cold-start-up' | 'cold-start-down' | 'history' ; observations: number; soldOutDays: number; leftoverDays: number; delta: number }
+interface Reason { code: 'cold-start' | 'cold-start-up' | 'cold-start-down' | 'history' ; scope: 'weekday' | 'recent'; observations: number; soldOutDays: number; leftoverDays: number; delta: number }
 interface Suggestion { menuId: string; qty: number; reason: Reason }
 ```
 
@@ -170,13 +170,13 @@ The share of the day's customers expected to have arrived by time `at`.
 ### 6.5 `suggestQty(menu, weekday, menuDays, days)`
 
 1. **Eligible days:** closed, not unusual, with `estimatedDemand !== null`, for this menu.
-2. **History:** the latest 8 eligible days on the same weekday. If fewer than 5, use the latest 14 eligible days of any weekday.
+2. **History:** the latest 8 eligible days on the same weekday (`scope = 'weekday'`). If fewer than 5, use the latest 14 eligible days of any weekday (`scope = 'recent'`).
 3. **If the history has ≥ 5 values:** `qty = round(quantile(values, CR))`, where `quantile` uses linear interpolation on sorted values: `h = (n − 1) · p`, `q = x[⌊h⌋] + (h − ⌊h⌋)(x[⌊h⌋+1] − x[⌊h⌋])`. Reason code `history`; `delta = qty − last cookedQty`.
 4. **Otherwise (cold start):** `base = usualQty`. If the most recent eligible day sold out → `ceil(base × 11 / 10)`, code `cold-start-up`. If its leftover > 20% of cooked → `floor(base × 9 / 10)`, code `cold-start-down`. Use integer arithmetic: `base × 1.1` in floating point gives 44.000000000000004 for 40 and the wrong ceiling. Else `base`, code `cold-start`.
 5. Clamp to `[0, 999]`.
 
 **Reason text** (rendered by i18n, English shown):
-- `history` + sold-out days > 0: "Sold out on {soldOutDays} of the last {observations} {weekday}s → {±delta}"
+- `history` + sold-out days > 0: "Sold out on {soldOutDays} of the last {observations} {weekday}s → {±delta}" (with `scope = 'recent'`: "… of the last {observations} days …")
 - `history` + leftover days > 0: "Leftovers on {leftoverDays} of the last {observations} days → {±delta}"
 - `history` otherwise: "Based on the last {observations} days"
 - `cold-start*`: "Not enough history yet. Starting from your usual {usualQty}" (+ "sold out last time" / "leftovers last time")
