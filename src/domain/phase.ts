@@ -25,7 +25,7 @@ export function summarizeDay(
   day: DayRecord | undefined,
 ): DaySummary {
   return {
-    plannedCount: menuDays.length,
+    plannedCount: menuDays.filter((item) => item.cookedQty > 0).length,
     portions: menuDays.reduce((sum, item) => sum + item.cookedQty, 0),
     soldOutCount: menuDays.filter((item) => item.soldOutAt !== null).length,
     closed: day?.closed ?? false,

@@ -1,6 +1,6 @@
 // src/screens/Settings.tsx
 import { useState, type FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useLocalStamp } from "../app/clock.ts";
 import { useToast } from "../app/toast.ts";
 import { Button } from "../components/Button.tsx";
@@ -9,6 +9,7 @@ import { LanguageSwitch } from "../components/LanguageSwitch.tsx";
 import { MenuManager } from "../components/MenuManager.tsx";
 import { Screen } from "../components/Screen.tsx";
 import { Sheet } from "../components/Sheet.tsx";
+import { StorageStatus } from "../components/StorageStatus.tsx";
 import { TextField } from "../components/TextField.tsx";
 import { useDb, useStall } from "../db/hooks.ts";
 import {
@@ -144,6 +145,7 @@ export function Settings() {
       <section className="card settings-section" aria-labelledby="set-data">
         <h2 id="set-data">{t("settings.data.title")}</h2>
         <p>{t("settings.data.onDevice")}</p>
+        <StorageStatus />
         <div className="settings-actions">
           {isDemo ? (
             <>
@@ -197,7 +199,17 @@ export function Settings() {
         <h2 id="set-about">{t("settings.about.title")}</h2>
         <p>{t("settings.about.version", { version: __APP_VERSION__ })}</p>
         <p>{t("settings.about.body")}</p>
-        <a href={README_URL} target="_blank" rel="noreferrer">
+        <p>
+          <Link className="link-target" to="/how">
+            {t("settings.about.how")}
+          </Link>
+        </p>
+        <a
+          className="link-target"
+          href={README_URL}
+          target="_blank"
+          rel="noreferrer"
+        >
           {t("settings.about.link")}
         </a>
       </section>

@@ -310,3 +310,317 @@ All versions are exact and in the lockfile. Where we are not on the newest relea
   - `Logo` draws "Fâˆž / DOO" using the self-hosted Rubik Mono One, with `textLength` so its width is stable while the font loads.
 - **Source:** `docs/brand/FOODOO_logo.png` was used only as a visual reference; nothing was traced or embedded.
 - **Known gap:** the icon SVG file and the component share the geometry by copy, not by import. Changing one means changing the other.
+
+## Phase F2, second half (Stage 4, 2026-11-25)
+
+### D-047 Scope and starting state (all owners)
+
+- **Checked first:** `npm run lint`, `npm test` (149 tests) and `npm run build` passed before any change.
+- **Built:**
+  - the Plan, Service and Close screens
+  - the "estimate" labels
+  - the core-loop end-to-end test, online and offline
+  - a Chromium installability check
+- **Removed:** the "Coming soon" screen, the "Soon" tags and their strings, because no loop screen is unfinished any more.
+- **Not started on purpose:** export and import (DM-3, DM-4) and the weekly summary stay reserved for Final Day.
+
+### D-048 Plan and close rules live in two new pure files (Hakim)
+
+- **Decision:**
+  - `src/domain/plan.ts` holds `suggestAll` (`suggestQty` for every active menu), `isPlanQty`, `clampQty`, `isCooked` and `isPlanLocked`.
+  - `src/domain/close.ts` holds `closeMenuDay`, `closeDayRecords`, `withClosedDay`, `tomorrowPlan`, `validateSoldOutTime` and `incompleteDays`.
+  - Both files are under the 100% coverage gate.
+- **Why:** tomorrow's suggestions appear in three places: the Close confirmation sheet, the closed Close screen, and tomorrow's Plan screen. All three call `suggestAll`, so the numbers cannot drift apart.
+- **Alternative:** compute inside the screens. Rejected because the screens are not under the coverage gate and the rule would exist three times.
+
+### D-049 Plan screen: one button whose label follows the edits (Vassel)
+
+- **Decision:** the sticky bar shows the total and one primary button.
+  - It reads **Accept all** while every card equals its suggestion, and **Save plan** once one is edited. Both save every card.
+  - An edited card shows an "Edited" tag and "Suggested N", so PL-4 is visible in the UI, not only stored.
+- **Why:** `DESIGN.md` asks for one primary action per screen and names both labels. Two buttons side by side would invite the wrong tap.
+- **After saving:** the app returns to Today, where the loop graphic moves on to Service.
+- **Stored values:** once a plan exists, a card shows the stored `suggestedQty` and reason. Re-opening the plan therefore never changes what counts as "suggested".
+
+### D-050 When the plan is locked (Hakim)
+
+- **Decision:** the plan can be changed while no menu is currently marked sold out today. If the only sell-out is undone, the plan opens again. A closed day is always read-only.
+- **Why:** PL-5 says "until the first sell-out tap". An undone tap was a mistake, so it should not lock the owner out.
+- **Enforced twice:** the screen hides the steppers, and `savePlan` refuses to write.
+
+### D-051 A menu planned at 0 portions was not cooked (Hakim, Samuel)
+
+- **Decision:**
+  - The row is still stored, so its suggestion counts toward the "accepted without edit" metric.
+  - It gets no Service tile and no Close row.
+  - It is closed with leftover 0 and `estimatedDemand = null`, so it never enters the history as "nobody wanted it".
+  - `summarizeDay` counts only rows with portions as planned.
+- **Alternative:** do not store the row. Rejected because the suggestion would be lost.
+
+### D-052 Close screen: leftover starts at 0, and the missed sell-out prompt defaults to closing time (Vassel, Hakim)
+
+- **Decision:** each menu not tapped sold out starts at leftover 0. Leftover 0 shows the yellow CL-3 prompt "About what time did it run out?", already filled with the closing time. The owner usually types one or two leftovers and moves on.
+- **Why closing time is safe:** a sell-out at closing gives an arrival share of 1, so demand equals cooked (an estimate). An untouched prompt can never inflate demand.
+- **Storage:** a confirmed missed time is stored as `soldOutAt` with leftover 0. This is the same as a tapped sell-out, and the same as the generator's sold-out rows.
+- **Validation:**
+  - A sell-out time edited by the owner must lie between opening and closing time (`validateSoldOutTime`).
+  - A tap during service stores the real clock time unchecked, as SV-2 requires.
+- **Alternative:** start each leftover empty and require an entry. Rejected because it doubles the taps at night, against the under-one-minute target.
+
+### D-053 Close day previews first, then writes (Samuel, Vassel)
+
+- **Decision:**
+  - **Close day** opens a sheet computed in memory by `closeDayRecords`, `withClosedDay` and `tomorrowPlan`.
+  - The sheet shows how many people wanted each menu today, and tomorrow's suggestion with its reason.
+  - Nothing is written until **Confirm and close day**. `closeDay` then runs the same functions in one Dexie transaction.
+- **After closing:** the Close screen shows the stored result, recomputed from the database. It survives a reload, and the e2e test checks that its text equals the preview exactly.
+- **Not built:** reopening a closed day, so a wrong close cannot be corrected yet. This is listed in the README limitations.
+
+### D-054 How estimates are shown (Vassel)
+
+- **Decision:** one component, `EstimateValue`, renders every demand.
+  - An estimate reads "≈ 81 (estimate)" ("≈ 81 (perkiraan)" in Bahasa Indonesia), inside a dashed badge.
+  - A counted demand is a bare number.
+  - Plan numbers are labelled "suggested portions", never "demand".
+- **Why:** `DESIGN.md` section 8 requires "≈ 81 (estimate)", never a bare number. The dashed border marks an estimate without relying on colour.
+
+### D-055 Service: tap time, undo and the time edit (Vassel, Sonny)
+
+- **Tap time:** read from the clock at the moment of the tap (`useClock().now()`), not from the 30-second tick that drives the header.
+- **Undo:**
+  - The toast stays 10 seconds (`UNDO_MS`). A fake-timer test checks it is still there at 9,999 ms and gone at 10,000 ms.
+  - Undo sets `soldOutAt` back to `null`.
+  - Tapping a second menu replaces the toast, so only the latest tap can be undone from it. Earlier taps are corrected with the time sheet.
+- **Time edit (SV-4):**
+  - A 500 ms long press on a sold-out tile opens the time sheet, with **Save** and **Not sold out**.
+  - A visible **Edit time** button does the same, because a long press cannot be done from a keyboard (`DESIGN.md` section 7).
+  - A short tap on a sold-out tile does nothing, so a second tap cannot change data by accident.
+
+### D-056 Stepper (Vassel)
+
+- **Behaviour:**
+  - The − and + buttons step once per press. While held, they repeat after 400 ms, every 100 ms.
+  - The number between them is a text input with a numeric keyboard, so a large change can be typed.
+  - Values are clamped: 0 to 999 on Plan, 0 to the cooked amount on Close.
+- **Implementation:** the press logic lives in `StepButton`. It steps on pointer-down and ignores the click that follows. Keyboard activation (a click with `detail = 0`) still steps once.
+- **Why a separate component:**
+  - The React hooks lint rule rejected timer refs used through a helper during render.
+  - One component per file also follows `AGENTS.md` section 6.
+
+### D-057 Photo slot and incomplete days (Vassel, Hakim)
+
+- **Photo slot:** each Plan card shows a neutral square with the menu's first letter. No upload exists, because storing photos would need a schema change and is outside the abstract's scope.
+- **CL-6:** Today lists past days that were planned but never closed, as "kept but not used for suggestions". `suggestQty` already ignores them because they are not closed.
+
+### D-058 Core-loop end-to-end test (Sonny)
+
+- **Decision:** `e2e/coreLoop.spec.ts` runs the PLAN F2 item 7 loop twice against the production build:
+  - **online**
+  - **offline:** first load online, wait for the service worker to control the page, cut the network, reload, then run the whole loop with no network, including the final reload
+- **Determinism:**
+  - Time zone `Asia/Jakarta`.
+  - Playwright's `clock.setFixedTime` pins Monday 2 March 2026 at 09:00, then 10:30 for the sell-out, then 20:00 for the close.
+  - Timers still run, so the real 10-second undo is used.
+  - The demo history is generated relative to that date, so every number is reproducible.
+- **Checked in the real UI:**
+  - Nasi Uduk, cooked 42 and sold out at 10:30, shows "Wanted ≈ 81 (estimate)".
+  - Ayam Goreng with leftover 3 shows cooked − 3, with no estimate label.
+  - After the reload, tomorrow's four suggestions equal the preview text.
+- **Screenshots** of Plan, Service, Close, the sheet and the closed day are attached to the Playwright report (not committed).
+
+### D-059 Installability evidence (Sonny)
+
+- **Decision:**
+  - `e2e/smoke.spec.ts` asks Chromium through the DevTools protocol (`Page.getInstallabilityErrors`) and expects an empty list.
+  - The existing test checks the manifest name, the display mode and the 192, 512 and maskable 512 icons.
+- **Icons:** they were already rendered from `public/icons/icon.svg` in the F2 first half (D-046). The SVG did not change, so they were not re-rendered. A visual check showed the mark inside the maskable safe zone.
+- **Not claimed:** installing on a physical Android phone. The team should do that once on a real device.
+
+### D-060 Test timing on slow machines (Sonny)
+
+- **Observed:**
+  - The "Delete all data" component test sometimes failed: it waited longer than Testing Library's default of 1 second for the Welcome screen.
+  - It also failed this way at the previous commit (checked in a separate worktree), so this stage did not cause it.
+  - Under full-suite load with coverage, the same test also exceeded Vitest's 5-second per-test limit.
+- **Decision:**
+  - `tests/setup.ts` sets Testing Library's wait to 5 seconds.
+  - `vite.config.ts` sets Vitest's per-test timeout to 15 seconds.
+  - No assertion changed. Clearing about 280 demo rows in the in-memory IndexedDB is simply slow on this machine.
+
+### D-061 Toast position above the action bar (Vassel)
+
+- **Observed in the e2e screenshots:** on a phone, the toast covered the **Save plan** button for 4 seconds.
+- **Decision:** when a screen has the sticky action bar, the toast sits above it. This is plain CSS (`body:has(.action-bar)`). Browsers without `:has` keep the old position, so the change is cosmetic only.
+
+### D-062 Deployment for the semifinal (Samuel, Sonny)
+
+- **Decision (made by the team in this session):**
+  - The AI does not commit.
+  - The owners review, commit and push to `main`, and Cloudflare Pages builds it.
+  - The same e2e suite then runs against https://foodoo-d5h.pages.dev with `E2E_BASE_URL`.
+- **Alternatives:**
+  - A Wrangler direct upload. It needs the team's Cloudflare login and may be refused for a Git-connected project.
+  - The AI committing to a preview branch. This breaks the no-commit instruction.
+
+## Phase F3, product improvement (Stage 5, 2026-11-25)
+
+### D-063 Scope and starting state (all owners)
+
+- **Checked first:**
+  - `npm run lint` passed.
+  - `npm test` passed: 199 tests.
+  - `npm run build` and `npm run e2e` passed: 5 tests, online and offline.
+  - The F2 second half was still uncommitted, so the deployed URL still served the pre-F2 build.
+- **Built:**
+  - the "How FOODOO calculates" page
+  - edge-case tests and one fix
+  - a schema-upgrade test
+  - a storage-protection status in Settings
+  - route code splitting
+  - a bundle budget check
+  - a Lighthouse measurement script
+  - a no-network end-to-end test
+  - `FINAL_DAY.md`
+- **Not done, on purpose:**
+  - **PLAN F3 item 1 (owner-testing fixes).** The team had no findings from owner tests or interviews yet, so nothing was fixed. Nothing was invented in its place. R3 depends on these findings (see `FINAL_DAY.md`).
+  - R1, R2 and R3 are not started or scaffolded. The `final-day-start` tag was not created.
+
+### D-064 "How FOODOO calculates" is computed by the real rules (Hakim, Vassel)
+
+- **Decision:** `workedExample()` in `src/domain/explain.ts` runs the same functions the app uses:
+  - `arrivalWeights` and `estimateDemand` give the example "sold out at 10:30 → about 52% had arrived → about 81 wanted it" (`DESIGN.md` 5.8)
+  - `criticalRatio` and `suggestQty`, over five closed Mondays, give the suggestion 34 and its reason line
+- **Why:** a judge or an owner can check the logic from the UI, and the page cannot drift from the code. A test pins 52, 81 and 34 and checks them against `arrivalShare`, `estimateDemand` and `quantile` directly. The file is under the 100% coverage gate.
+- **Example data:**
+  - It uses the `SPEC.md` 6.6 reference profile and the demo Nasi Uduk prices.
+  - It is labelled "Example stall. These numbers are an example, not your data." It is never mixed with the owner's data.
+- **Plain language:**
+  - Suggestions are explained as "enough on about 44 of every 100 past days", weighed against "Rp 3.500 earned per extra sale, Rp 4.500 lost per leftover".
+  - The words "quantile" and "critical ratio" do not appear (`DESIGN.md` 8).
+- **Access:**
+  - Route `/how` is outside the stall guard, so the page works before setup and offline.
+  - It is linked from Settings → About and from the Close summary ("How is this worked out?").
+- **Small refactor:** `DEMAND_CAP_FACTOR` is exported from `estimate.ts`, so the page shows the same 3× cap the estimator uses.
+
+### D-065 Data survives an app update (Samuel)
+
+- **Decision:** `tests/db/migration.test.ts` uses the real repositories to build a version-1 database:
+  - load the demo
+  - plan a day, tap a sell-out, close the day
+  - reopen the database with an extra version-2 step that adds an index
+  - check that every row of every table is deep-equal before and after, and that the new index works
+  - a second case reopens the same version, as after a service-worker update, and checks nothing changes
+- **Why:** a PWA update ships new code against old IndexedDB data, and the owner's history must survive it. D-038 only proved that an upgrade step runs; this test proves the data is untouched.
+- **How a real migration is added:** one new entry in `SCHEMA_VERSIONS`, plus one test like this one that fills v1 data first.
+
+### D-066 Edge cases (Hakim, Vassel)
+
+- **Tested** in `tests/screens/edgeCases.test.tsx`:
+  - no menus
+  - all menus archived, before and after today's plan
+  - a day left unclosed
+  - the clock past closing time, with and without a plan
+- **Found and fixed:** when every menu was archived, the Close summary showed the heading "Tomorrow's suggestions" over an empty list. It now says "No active menus. Add or restore a menu in Settings."
+- **Checked and kept as is:**
+  - A menu archived after today's plan still appears on Service and Close, so the day can be closed.
+  - Past closing time with no plan, Today still offers the plan, so a forgotten morning can be recorded (D-036).
+  - A tap during service after closing time stores the real time (D-052).
+- **Known edge, documented, not changed:** a plan where every menu is set to 0 portions leaves nothing to serve or close, so Today stays on Plan. That day is not counted as incomplete, because nothing was cooked (D-051).
+
+### D-067 Storage protection is visible in Settings (Samuel, Vassel)
+
+- **Decision:** Settings → Data reads `navigator.storage.persisted()` and shows one of three states:
+  - "Protected"
+  - "Not protected yet"
+  - "This browser does not say"
+- While unprotected, a **Keep my data** button asks the browser again. A toast reports the browser's answer, including a refusal.
+- **Why:** DM-5 was already requested after setup and after loading the demo. But Chrome often refuses until the app is installed or used often, and the owner could not see that. Telling the owner is better than silently hoping.
+- **Pure part:** `getStorageStatus` in `src/db/repositories.ts`, unit-tested with stubs.
+
+### D-068 Bundle budget check (Sonny)
+
+- **Decision:** `npm run size` (`scripts/bundleSize.ts`) gzips every JavaScript file in `dist/assets` with Node's zlib and fails above 250 KB, the PLAN F3 budget. It also prints CSS and the service-worker files. CI runs it after the build.
+- **Why:** a number checked on every push stays true; a number in a README does not. No dependency was added.
+
+### D-069 Faster first load: code splitting, and what did not help (Sonny, Vassel)
+
+- **Code splitting:**
+  - Every screen except Welcome is now loaded on demand (`React.lazy` in `src/app/App.tsx`), and so is the demo seed (`loadDemo` imports it dynamically).
+  - The entry chunk went from 115.9 KB to about 104.6 KB gzip.
+  - The service worker precaches every chunk, so offline use is unchanged. The offline e2e run navigates through every lazy screen with the network cut.
+- **Splash:** the loading state is now the logo and the value line instead of a bare "Loading…" (`src/components/Splash.tsx`), with the loading message kept for screen readers.
+- **Tried and reverted:** removing the font preload. On cold mobile runs LCP did not improve (2.04 s), and FCP got worse (1.79 s against 1.65 s).
+- **Result (Lighthouse 12.8.2, cold first visit, mobile simulated Slow 4G and 4× CPU slowdown, 3 runs):**
+  - first contentful paint 1.49 s
+  - largest contentful paint 2.03 to 2.05 s
+  - The PLAN F3 target "first load < 2 s" is met by first paint and **missed by about 30 to 50 ms** on largest contentful paint. This is reported as missed.
+  - The remaining time is mostly running React, the router and Dexie on the slowed CPU.
+
+### D-070 How accessibility and performance are measured (Sonny, Vassel)
+
+- **Decision:** `npm run lighthouse` (`scripts/lighthouse.ts`) runs Lighthouse 12.8.2 with `npx`, against `npm run preview`. It covers:
+  - a cold first visit
+  - Today, Plan, Service and the How page, after loading the demo and saving a plan
+  - the mobile and desktop presets for each
+- It writes `docs/LIGHTHOUSE.md` and README section 12, so no score is typed by hand.
+- **Why `npx` and not a dependency:** the team chose this in the session. Lighthouse is a measurement tool, not part of the app, and it is listed in the README's third-party table.
+- **How the demo state reaches Lighthouse:**
+  - The script starts Playwright's Chromium with a fixed profile and a debugging port, seeds the demo through `connectOverCDP`, and Lighthouse attaches with `--port` and `--disable-storage-reset`.
+  - A guard fails the run if a page redirects to Welcome. This guard caught an earlier attempt, where Lighthouse's launcher silently used its own empty profile.
+- **Result on 2026-11-25:**
+  - Accessibility 100 and Best practices 100 on every measured page, mobile and desktop. No failed audit.
+  - Mobile performance 95 to 99; desktop 100.
+  - The warm rows are repeat visits served by the service worker; the cold row is the first-visit figure.
+  - This meets `DESIGN.md` section 7 (≥ 95).
+- **Environment note:** the C: drive of the measuring laptop was full. The npm cache and temporary files for this run were pointed at `D:\try\.foodoo-measure`, outside the repository. This does not change any measured value.
+
+### D-071 Local fallback is proven by tests, not only documented (Sonny)
+
+- **Decision:** `e2e/noNetwork.spec.ts`:
+  - routes every request and aborts any that is not to the local server
+  - walks Welcome, demo, Plan, Service, Close, How and Settings
+  - asserts that the list of blocked requests is empty and that the self-hosted Space Grotesk face loaded
+- **Clean-copy check:** the working tree, without `node_modules` and `dist`, was copied to a new folder, then:
+  - `npm ci` and `npm run build` succeeded
+  - `npm run preview` ran on port 4174
+  - the full e2e suite passed against it (6 of 6)
+- **Not done:** turning the laptop's network adapter off; that is for the team to rehearse (`FINAL_DAY.md` section 5).
+
+### D-072 Final Day preparation (all owners)
+
+- **Decision:** `FINAL_DAY.md` holds:
+  - the feature list with evidence
+  - the unfinished items, including owner testing
+  - R1 to R3 completion plans, with owner, files, tests and a time box
+  - the session timeline
+  - the setup checklist
+  - the exact tag and cutoff commands
+  - the local fallback steps
+- **R3:** blocked until real owner findings exist; if there are none, it stays Not started rather than being invented.
+- **PLAN section 5:** only items verified in this session are ticked:
+  - the deployed URL smoke test passed on its current, older build
+  - no secrets in history (scan of file names and contents)
+  - README sections
+  - `FINAL_DAY.md`
+- **Left unticked:**
+  - the clean-machine offline run, because the network adapter was not switched off
+  - the tag
+  - the member review
+
+### D-073 Visual style changed from soft neo-brutalism to clean and formal (Vassel)
+
+- **Decision:** the team agreed to replace the soft neo-brutalist look with a clean, formal one:
+  - 1 px neutral grey borders instead of 3 px black outlines
+  - no offset shadows; a soft shadow only on layers that float (toast, sheet, sticky action bar)
+  - radii of 6 to 8 px instead of 10 to 14 px; neutral grey page background (`#F5F6F8`) instead of cream
+  - navy primary buttons with white text instead of orange; orange kept as a status accent (current phase, sold out)
+  - pale tints (`--navy-soft`, `--amber-soft`, `--orange-soft`, `--info-soft`) instead of solid yellow and sky blocks
+  - no rotated stickers or stamps, no dashed borders, no "pressed" translate; feedback is a colour change
+  - numbers in Space Grotesk with tabular figures; Rubik Mono One kept for the logo wordmark only (`--font-brand`)
+- **Alternatives considered:** keeping neo-brutalism (bold and high-contrast, but read as playful rather than trustworthy for a planning tool); a UI kit such as Material (ruled out by AGENTS.md section 2, and it would hide the token system); a system font stack (saves a file, but changes the look on every device and the offline font test expects Space Grotesk).
+- **How it was done:** only `src/styles/` changed, plus one font token in `Logo.tsx` and the manifest `background_color`. Every class name stayed the same, so no screen or test changed. The opening paragraph and sections 2, 4, 5 and 7 of `DESIGN.md` now describe the new style.
+- **Evidence:**
+  - contrast computed for every new text and background pair; the lowest is dark orange on light orange, 5.21:1 (target 4.5:1)
+  - Lighthouse rerun on the new build: Accessibility and Best practices 100 on every measured page, mobile and desktop (`docs/LIGHTHOUSE.md`)
+  - lint, 28 of 28 unit test files, build and 6 of 6 e2e tests pass
+- **Environment note:** the C: drive of the measuring laptop is full, which crashes Vitest's default process pool (`ERR_IPC_CHANNEL_CLOSED`). Unit tests were run with `--pool=threads`, and Playwright and Lighthouse with temporary files on `D:\try\.foodoo-measure`. Free space on C: before running `npm test` as normal.

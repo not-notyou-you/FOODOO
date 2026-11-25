@@ -2,6 +2,7 @@
 import { createContext, useContext } from "react";
 
 export const TOAST_MS = 4_000;
+export const UNDO_MS = 10_000;
 
 export interface ToastOptions {
   actionLabel?: string;

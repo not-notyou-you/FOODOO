@@ -16,20 +16,28 @@
 
 :root {
   --navy: #003049;
+  --navy-hover: #002033;
+  --navy-soft: #e8eff4;
   --orange: #f77f00;
-  --cream: #fff1dc;
+  --orange-dark: #a14f00;
+  --orange-soft: #fff1e2;
+  --amber-soft: #fff8e1;
+  --amber-line: #d9b24c;
+  --info-soft: #eef4f8;
+  --bg: #f5f6f8;
   --paper: #ffffff;
-  --ink: #141414;
-  --muted: #4b4b4b;
-  --yellow: #ffd166;
-  --sky: #c6f1ff;
-  --mint: #d7f5c9;
+  --surface: #fafbfc;
+  --ink: #1b1f23;
+  --muted: #57606a;
+  --line: #d0d7de;
+  --line-strong: #8c959f;
   --danger: #c1121f;
-  --border: 3px solid var(--ink);
-  --shadow: 6px 6px 0 var(--ink);
-  --shadow-sm: 4px 4px 0 var(--ink);
-  --radius: 14px;
-  --radius-sm: 10px;
+  --danger-hover: #9e0e19;
+  --danger-soft: #fdecee;
+  --border: 1px solid var(--line);
+  --shadow-overlay: 0 8px 24px rgb(27 31 35 / 14%);
+  --radius: 8px;
+  --radius-sm: 6px;
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -37,5 +45,6 @@
   --space-5: 24px;
   --space-6: 32px;
   --font-ui: "Space Grotesk", system-ui, sans-serif;
-  --font-num: "Rubik Mono One", "Space Grotesk", sans-serif;
+  --font-num: "Space Grotesk", system-ui, sans-serif;
+  --font-brand: "Rubik Mono One", "Space Grotesk", sans-serif;
 }

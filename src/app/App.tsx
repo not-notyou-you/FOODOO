@@ -1,18 +1,41 @@
 // src/app/App.tsx
-import { useEffect, useRef } from "react";
+import { lazy, Suspense, useEffect, useRef } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { useT } from "../i18n/index.ts";
-import { ComingSoon } from "../screens/ComingSoon.tsx";
-import { Settings } from "../screens/Settings.tsx";
-import { SetupHours } from "../screens/SetupHours.tsx";
-import { SetupMenus } from "../screens/SetupMenus.tsx";
-import { Today } from "../screens/Today.tsx";
 import { Welcome } from "../screens/Welcome.tsx";
-import { Layout } from "./Layout.tsx";
 import { registerPwa } from "./registerPwa.ts";
 import { RequireStall } from "./RequireStall.tsx";
 import { RootRedirect } from "./RootRedirect.tsx";
 import { useToast } from "./toast.ts";
+import { Splash } from "../components/Splash.tsx";
+
+const Close = lazy(() =>
+  import("../screens/Close.tsx").then((m) => ({ default: m.Close })),
+);
+const HowItWorks = lazy(() =>
+  import("../screens/HowItWorks.tsx").then((m) => ({ default: m.HowItWorks })),
+);
+const Layout = lazy(() =>
+  import("./Layout.tsx").then((m) => ({ default: m.Layout })),
+);
+const Plan = lazy(() =>
+  import("../screens/Plan.tsx").then((m) => ({ default: m.Plan })),
+);
+const Service = lazy(() =>
+  import("../screens/Service.tsx").then((m) => ({ default: m.Service })),
+);
+const Today = lazy(() =>
+  import("../screens/Today.tsx").then((m) => ({ default: m.Today })),
+);
+const Settings = lazy(() =>
+  import("../screens/Settings.tsx").then((m) => ({ default: m.Settings })),
+);
+const SetupHours = lazy(() =>
+  import("../screens/SetupHours.tsx").then((m) => ({ default: m.SetupHours })),
+);
+const SetupMenus = lazy(() =>
+  import("../screens/SetupMenus.tsx").then((m) => ({ default: m.SetupMenus })),
+);
 
 export function App() {
   const t = useT();
@@ -39,34 +62,37 @@ export function App() {
       <a className="skip-link" href="#main">
         {t("app.skip")}
       </a>
-      <Routes>
-        <Route path="/" element={<RootRedirect />} />
-        <Route path="/welcome" element={<Welcome />} />
-        <Route
-          path="/setup/menus"
-          element={
-            <RequireStall>
-              <SetupMenus />
-            </RequireStall>
-          }
-        />
-        <Route
-          path="/setup/hours"
-          element={
-            <RequireStall>
-              <SetupHours />
-            </RequireStall>
-          }
-        />
-        <Route element={<Layout />}>
-          <Route path="/today" element={<Today />} />
-          <Route path="/plan" element={<ComingSoon title="nav.plan" />} />
-          <Route path="/service" element={<ComingSoon title="nav.service" />} />
-          <Route path="/close" element={<ComingSoon title="nav.close" />} />
-          <Route path="/settings" element={<Settings />} />
-        </Route>
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+      <Suspense fallback={<Splash />}>
+        <Routes>
+          <Route path="/" element={<RootRedirect />} />
+          <Route path="/welcome" element={<Welcome />} />
+          <Route path="/how" element={<HowItWorks />} />
+          <Route
+            path="/setup/menus"
+            element={
+              <RequireStall>
+                <SetupMenus />
+              </RequireStall>
+            }
+          />
+          <Route
+            path="/setup/hours"
+            element={
+              <RequireStall>
+                <SetupHours />
+              </RequireStall>
+            }
+          />
+          <Route element={<Layout />}>
+            <Route path="/today" element={<Today />} />
+            <Route path="/plan" element={<Plan />} />
+            <Route path="/service" element={<Service />} />
+            <Route path="/close" element={<Close />} />
+            <Route path="/settings" element={<Settings />} />
+          </Route>
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Suspense>
     </>
   );
 }

@@ -15,7 +15,6 @@ export const id: Record<keyof typeof en, string> = {
   "nav.service": "Jualan",
   "nav.close": "Tutup",
   "nav.settings": "Pengaturan",
-  "nav.soon": "Segera",
 
   "header.demo": "Data demo",
   "header.offline": "Offline. Tersimpan di perangkat ini.",
@@ -123,10 +122,87 @@ export const id: Record<keyof typeof en, string> = {
   "today.empty.menusBody":
     "Semua menu diarsipkan. Tambahkan atau pulihkan menu di Pengaturan.",
   "today.empty.menusAction": "Buka Pengaturan",
+  "today.incompleteTitle": "Hari yang belum ditutup",
+  "today.incompleteBody":
+    "Hari-hari ini tidak pernah ditutup. Tetap disimpan tetapi tidak dipakai untuk saran:",
 
-  "soon.title": "Segera hadir",
-  "soon.body": "Layar ini dibuat pada tahap prototipe berikutnya.",
-  "soon.back": "Kembali ke Hari ini",
+  "plan.title": "Rencana",
+  "plan.intro":
+    "Saran porsi untuk hari ini. Ubah angka mana saja, lalu simpan.",
+  "plan.suggested": "Saran {qty}",
+  "plan.edited": "Diubah",
+  "plan.portionsLabel": "Porsi {name}",
+  "plan.decrease": "Kurangi satu {name}",
+  "plan.increase": "Tambah satu {name}",
+  "plan.total": "Total {qty} porsi",
+  "plan.acceptAll": "Terima semua",
+  "plan.save": "Simpan rencana",
+  "plan.saved": "Rencana tersimpan",
+  "plan.savedNote":
+    "Rencana tersimpan. Anda masih bisa mengubahnya sampai ada menu yang habis.",
+  "plan.locked":
+    "Rencana dikunci karena ada menu yang habis hari ini. Batalkan tanda habis untuk mengubahnya.",
+  "plan.closedNote": "Hari ini sudah ditutup. Ini rencananya.",
+  "plan.cooked": "Dimasak {qty}",
+
+  "service.title": "Jualan",
+  "service.intro": "Ketuk menu saat menu itu habis.",
+  "service.cooked": "Dimasak {qty}",
+  "service.tapHint": "Ketuk saat habis",
+  "service.soldOutAt": "Habis {time}",
+  "service.holdHint":
+    "Tahan kotak menu atau tekan Ubah jam untuk mengganti jamnya.",
+  "service.editTime": "Ubah jam",
+  "service.editTimeLabel": "Ubah jam habis {name}",
+  "service.soldOutToast": "{name} habis pukul {time}",
+  "service.undo": "Batalkan",
+  "service.undone": "Tanda habis dibatalkan",
+  "service.timeSaved": "Jam habis tersimpan",
+  "service.cleared": "Ditandai belum habis",
+  "service.notPlannedTitle": "Buat rencana dulu",
+  "service.notPlannedBody":
+    "Layar jualan dimulai setelah porsi hari ini disimpan.",
+  "service.planAction": "Rencanakan porsi hari ini",
+  "service.closedNote":
+    "Hari ini sudah ditutup. Tanda habis tidak bisa diubah lagi.",
+
+  "soldOut.sheetTitle": "Jam habis: {name}",
+  "soldOut.timeLabel": "Jam menu habis",
+  "soldOut.clear": "Belum habis",
+  "soldOut.error.timeInvalid": "Masukkan jam dengan format JJ:MM",
+  "soldOut.error.outsideHours": "Masukkan jam antara {open} dan {close}",
+
+  "close.title": "Tutup",
+  "close.intro": "Hitung sisa setiap menu.",
+  "close.soldOutChip": "Habis {time}",
+  "close.leftoverLabel": "Sisa porsi {name}",
+  "close.cookedOf": "Dimasak {qty}",
+  "close.missedQuestion": "Kira-kira jam berapa {name} habis?",
+  "close.missedHint":
+    "Tidak ada sisa, tetapi tanda habis tidak diketuk. Jika tidak yakin, biarkan jam tutup.",
+  "close.unusual": "Hari tidak biasa",
+  "close.unusualHint":
+    "Hujan, hari libur, atau ada acara. Hari ini tetap disimpan tetapi tidak dipakai untuk saran.",
+  "close.closeDay": "Tutup hari",
+  "close.sheetTitle": "Tutup hari ini?",
+  "close.todayHeading": "Berapa yang ingin membeli tiap menu hari ini",
+  "close.tomorrowNone":
+    "Tidak ada menu aktif. Tambah atau pulihkan menu di Pengaturan.",
+  "close.tomorrowHeading": "Saran untuk besok, {date}",
+  "close.wanted": "Peminat",
+  "close.suggestedPortions": "porsi disarankan",
+  "close.confirm": "Konfirmasi dan tutup hari",
+  "close.closed": "Hari ditutup",
+  "close.closedTitle": "Hari ini sudah ditutup",
+  "close.unusualNote":
+    "Ditandai sebagai hari tidak biasa: tetap disimpan, tetapi tidak dipakai untuk saran.",
+  "close.tomorrowNote":
+    "Besok pagi layar Rencana dimulai dari angka-angka ini.",
+  "close.notPlannedTitle": "Belum ada yang bisa ditutup",
+  "close.notPlannedBody": "Rencanakan porsi hari ini dulu.",
+
+  "estimate.value": "≈ {qty} (perkiraan)",
+  "estimate.none": "Tidak tercatat",
 
   "settings.title": "Pengaturan",
   "settings.stall.title": "Warung",
@@ -182,4 +258,61 @@ export const id: Record<keyof typeof en, string> = {
   "weekday.plural.4": "Kamis",
   "weekday.plural.5": "Jumat",
   "weekday.plural.6": "Sabtu",
+  "how.title": "Cara FOODOO menghitung",
+  "how.intro":
+    "FOODOO memakai beberapa aturan tetap. Halaman ini menunjukkannya pada sebuah contoh, dihitung dengan kode yang sama yang dipakai aplikasi untuk warung Anda.",
+  "how.exampleNote":
+    "Warung contoh. Angka-angka ini hanya contoh, bukan data Anda.",
+  "how.demandTitle": "1. Berapa orang yang ingin membeli menu yang habis",
+  "how.demandSetup":
+    "Contoh: Nasi Uduk. {cooked} porsi dimasak, dan porsi terakhir terjual pukul {time}.",
+  "how.barBefore": "(sebelum {time})",
+  "how.barsCaption":
+    "Jam ramai warung contoh. Batang yang terisi adalah jam sebelum {time}.",
+  "how.demandShare":
+    "Dari jam ramai, sekitar {percent}% pembeli pada hari biasa sudah datang sebelum pukul {time}.",
+  "how.demandResult":
+    "Jadi {cooked} porsi hanya cukup untuk sekitar {percent}% pembeli hari itu. Sepanjang hari, kira-kira sebanyak ini orang yang ingin membeli:",
+  "how.ruleCounted":
+    "Jika menu tidak habis, tidak ada tebakan: peminat = dimasak − sisa.",
+  "how.ruleLate":
+    "Jika habis pada atau sangat dekat dengan jam tutup, peminat = dimasak.",
+  "how.ruleCap":
+    "Perkiraan tidak pernah lebih dari 3 kali jumlah yang dimasak ({cap} di sini).",
+  "how.ruleBusy":
+    "Jam ramai dihitung 4 kali, jam biasa 2 kali, dan jam sepi 1 kali. Anda mengaturnya di Pengaturan.",
+  "how.suggestTitle": "2. Cara porsi besok disarankan",
+  "how.suggestMoney":
+    "Setiap porsi tambahan yang terjual memberi untung {gain}. Setiap porsi yang tersisa merugikan {loss}, yaitu biaya memasaknya.",
+  "how.suggestCover":
+    "Di sini sisa merugikan lebih banyak daripada untung sebuah penjualan, jadi FOODOO tidak memasak untuk hari paling ramai. FOODOO memilih jumlah yang cukup pada sekitar {cover} dari setiap 100 hari sebelumnya.",
+  "how.suggestHistory":
+    "Pada {count} hari {weekdays} terakhir, peminatnya: {values}.",
+  "how.suggested": "Saran",
+  "how.ruleEligible":
+    "Hanya hari biasa yang sudah ditutup yang dihitung. Hari tidak biasa dan hari yang belum ditutup tidak dipakai.",
+  "how.ruleWeekday":
+    "FOODOO melihat hari yang sama lebih dulu (paling banyak 8 terakhir). Jika kurang dari 5, dipakai 14 hari terakhir.",
+  "how.ruleColdStart":
+    "Jika riwayat kurang dari 5 hari, FOODOO mulai dari porsi biasa Anda: 10% lebih banyak setelah habis, 10% lebih sedikit jika lebih dari seperlima tersisa.",
+  "how.ruleYouDecide":
+    "Saran hanyalah titik awal. Anda bisa mengubah setiap angka sebelum memasak.",
+  "how.notTitle": "Yang tidak dilakukan FOODOO",
+  "how.notAi":
+    "Tidak memakai model AI. Setiap angka berasal dari aturan tetap di halaman ini.",
+  "how.notCloud":
+    "Tidak mengirim apa pun ke mana pun. Data Anda tetap di perangkat ini.",
+  "how.back": "Kembali ke aplikasi",
+  "close.howLink": "Bagaimana ini dihitung?",
+  "settings.about.how": "Cara FOODOO menghitung",
+  "settings.data.storageKept":
+    "Terlindungi: browser tidak akan menghapus data ini untuk mengosongkan ruang.",
+  "settings.data.storageAtRisk":
+    "Belum terlindungi: browser bisa menghapus data ini jika ruang penyimpanan ponsel hampir penuh.",
+  "settings.data.storageUnknown":
+    "Browser ini tidak memberi tahu apakah data dilindungi.",
+  "settings.data.keep": "Simpan data saya",
+  "settings.data.keepGranted": "Browser akan menyimpan data Anda",
+  "settings.data.keepRefused":
+    "Browser menolak untuk saat ini. Menambahkan FOODOO ke layar utama biasanya membantu.",
 };

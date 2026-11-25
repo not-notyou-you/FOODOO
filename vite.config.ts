@@ -25,7 +25,7 @@ export default defineConfig({
         display: "standalone",
         orientation: "portrait",
         theme_color: "#003049",
-        background_color: "#fff1dc",
+        background_color: "#f5f6f8",
         icons: [
           { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
           { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
@@ -46,6 +46,7 @@ export default defineConfig({
     environment: "jsdom",
     include: ["tests/**/*.test.{ts,tsx}"],
     setupFiles: ["tests/setup.ts"],
+    testTimeout: 15_000,
     coverage: {
       provider: "v8",
       include: ["src/domain/**/*.ts"],

@@ -37,6 +37,18 @@ describe("summarizeDay", () => {
     });
   });
 
+  it("does not count a menu planned with 0 portions as planned", () => {
+    const summary = summarizeDay(
+      [
+        makeMenuDay("2026-03-02", { cookedQty: 0 }),
+        makeMenuDay("2026-03-02", { menuId: "b", cookedQty: 30 }),
+      ],
+      undefined,
+    );
+    expect(summary.plannedCount).toBe(1);
+    expect(summary.portions).toBe(30);
+  });
+
   it("treats a missing day record as not closed", () => {
     expect(summarizeDay([], undefined)).toEqual({
       plannedCount: 0,

@@ -4,9 +4,13 @@ import { Button } from "../components/Button.tsx";
 import { EmptyState } from "../components/EmptyState.tsx";
 import { LoopProgress } from "../components/LoopProgress.tsx";
 import { Screen } from "../components/Screen.tsx";
-import { useMenus, useStall, useTodayState } from "../db/hooks.ts";
+import { useHistory, useMenus, useStall, useTodayState } from "../db/hooks.ts";
+import { incompleteDays } from "../domain/close.ts";
 import { summarizeDay, todayPhase, type Phase } from "../domain/phase.ts";
-import { useT, type MessageKey } from "../i18n/index.ts";
+import { formatLongDate } from "../i18n/format.ts";
+import { useI18n, type MessageKey } from "../i18n/index.ts";
+
+const MAX_INCOMPLETE_SHOWN = 3;
 
 const ACTIONS: Record<Phase, { label: MessageKey; to: string | null }> = {
   plan: { label: "today.action.plan", to: "/plan" },
@@ -16,11 +20,12 @@ const ACTIONS: Record<Phase, { label: MessageKey; to: string | null }> = {
 };
 
 export function Today() {
-  const t = useT();
+  const { t, language } = useI18n();
   const { date, time } = useLocalStamp();
   const stall = useStall();
   const menus = useMenus();
   const today = useTodayState(date);
+  const history = useHistory();
 
   if (!stall || menus === undefined || today === undefined) {
     return (
@@ -60,6 +65,10 @@ export function Today() {
     );
   }
 
+  const incomplete =
+    history === undefined
+      ? []
+      : incompleteDays(history.days, history.menuDays, date);
   const phase = todayPhase({
     ...summary,
     time,
@@ -101,6 +110,17 @@ export function Today() {
           </div>
         </dl>
       </section>
+      {incomplete.length === 0 ? null : (
+        <section className="card notice" aria-labelledby="today-incomplete">
+          <h2 id="today-incomplete">{t("today.incompleteTitle")}</h2>
+          <p>{t("today.incompleteBody")}</p>
+          <ul>
+            {incomplete.slice(0, MAX_INCOMPLETE_SHOWN).map((day) => (
+              <li key={day}>{formatLongDate(day, language)}</li>
+            ))}
+          </ul>
+        </section>
+      )}
     </Screen>
   );
 }

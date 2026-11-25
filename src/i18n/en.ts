@@ -13,7 +13,6 @@ export const en = {
   "nav.service": "Service",
   "nav.close": "Close",
   "nav.settings": "Settings",
-  "nav.soon": "Soon",
 
   "header.demo": "Demo data",
   "header.offline": "Offline. Saved on this device.",
@@ -119,10 +118,82 @@ export const en = {
   "today.empty.menusBody":
     "All menus are archived. Add or restore a menu in Settings.",
   "today.empty.menusAction": "Open Settings",
+  "today.incompleteTitle": "Days not closed",
+  "today.incompleteBody":
+    "These days were never closed. They are kept but not used for suggestions:",
 
-  "soon.title": "Coming soon",
-  "soon.body": "This screen is built in the next step of the prototype.",
-  "soon.back": "Back to Today",
+  "plan.title": "Plan",
+  "plan.intro": "Suggested portions for today. Change any number, then save.",
+  "plan.suggested": "Suggested {qty}",
+  "plan.edited": "Edited",
+  "plan.portionsLabel": "Portions of {name}",
+  "plan.decrease": "One less {name}",
+  "plan.increase": "One more {name}",
+  "plan.total": "Total {qty} portions",
+  "plan.acceptAll": "Accept all",
+  "plan.save": "Save plan",
+  "plan.saved": "Plan saved",
+  "plan.savedNote":
+    "Plan saved. You can still change it until the first menu sells out.",
+  "plan.locked":
+    "The plan is locked because a menu has sold out today. Undo the sell-out to change it.",
+  "plan.closedNote": "Today is closed. This was the plan.",
+  "plan.cooked": "Cooked {qty}",
+
+  "service.title": "Service",
+  "service.intro": "Tap a menu the moment it sells out.",
+  "service.cooked": "Cooked {qty}",
+  "service.tapHint": "Tap when sold out",
+  "service.soldOutAt": "Sold out {time}",
+  "service.holdHint": "Hold the tile or press Edit time to change the time.",
+  "service.editTime": "Edit time",
+  "service.editTimeLabel": "Edit the sold-out time of {name}",
+  "service.soldOutToast": "{name} sold out at {time}",
+  "service.undo": "Undo",
+  "service.undone": "Sell-out undone",
+  "service.timeSaved": "Sold-out time saved",
+  "service.cleared": "Marked as not sold out",
+  "service.notPlannedTitle": "Plan today first",
+  "service.notPlannedBody": "Service starts once today's portions are saved.",
+  "service.planAction": "Plan today's portions",
+  "service.closedNote": "Today is closed. Sell-outs can no longer be changed.",
+
+  "soldOut.sheetTitle": "Sold-out time: {name}",
+  "soldOut.timeLabel": "Time it sold out",
+  "soldOut.clear": "Not sold out",
+  "soldOut.error.timeInvalid": "Enter a time as HH:MM",
+  "soldOut.error.outsideHours": "Enter a time between {open} and {close}",
+
+  "close.title": "Close",
+  "close.intro": "Count what is left of each menu.",
+  "close.soldOutChip": "Sold out {time}",
+  "close.leftoverLabel": "Leftover portions of {name}",
+  "close.cookedOf": "Cooked {qty}",
+  "close.missedQuestion": "About what time did {name} run out?",
+  "close.missedHint":
+    "Nothing is left, but no sell-out was tapped. If you are not sure, keep the closing time.",
+  "close.unusual": "Unusual day",
+  "close.unusualHint":
+    "Rain, a holiday or an event. The day is kept but not used for suggestions.",
+  "close.closeDay": "Close day",
+  "close.sheetTitle": "Close today?",
+  "close.todayHeading": "How many wanted each menu today",
+  "close.tomorrowNone": "No active menus. Add or restore a menu in Settings.",
+  "close.tomorrowHeading": "Tomorrow's suggestions, {date}",
+  "close.wanted": "Wanted",
+  "close.suggestedPortions": "suggested portions",
+  "close.confirm": "Confirm and close day",
+  "close.closed": "Day closed",
+  "close.closedTitle": "Today is closed",
+  "close.unusualNote":
+    "Marked as an unusual day: kept, but not used for suggestions.",
+  "close.tomorrowNote":
+    "Tomorrow morning the Plan screen starts from these numbers.",
+  "close.notPlannedTitle": "Nothing to close yet",
+  "close.notPlannedBody": "Plan today's portions first.",
+
+  "estimate.value": "≈ {qty} (estimate)",
+  "estimate.none": "Not recorded",
 
   "settings.title": "Settings",
   "settings.stall.title": "Stall",
@@ -178,4 +249,60 @@ export const en = {
   "weekday.plural.4": "Thursdays",
   "weekday.plural.5": "Fridays",
   "weekday.plural.6": "Saturdays",
+  "how.title": "How FOODOO calculates",
+  "how.intro":
+    "FOODOO uses a few fixed rules. This page shows them on an example, worked out by the same code the app uses for your stall.",
+  "how.exampleNote":
+    "Example stall. These numbers are an example, not your data.",
+  "how.demandTitle": "1. How many people wanted a menu that sold out",
+  "how.demandSetup":
+    "Example: Nasi Uduk. {cooked} portions were cooked, and the last one was sold at {time}.",
+  "how.barBefore": "(before {time})",
+  "how.barsCaption":
+    "Busy hours of the example stall. Filled bars are the hours before {time}.",
+  "how.demandShare":
+    "From the busy hours, about {percent}% of a normal day's customers had arrived by {time}.",
+  "how.demandResult":
+    "So {cooked} portions were enough for only about {percent}% of the day's customers. Over the whole day, about this many people would have wanted it:",
+  "how.ruleCounted":
+    "If a menu did not sell out, nothing is guessed: wanted = cooked − leftover.",
+  "how.ruleLate":
+    "If it sold out at or very close to closing time, wanted = cooked.",
+  "how.ruleCap":
+    "The guess is never more than 3 times what was cooked ({cap} here).",
+  "how.ruleBusy":
+    "A busy hour counts 4 times, a normal hour 2 times and a quiet hour once. You set them in Settings.",
+  "how.suggestTitle": "2. How tomorrow's portions are suggested",
+  "how.suggestMoney":
+    "Each extra portion sold earns {gain}. Each portion left over loses {loss}, what it cost to cook.",
+  "how.suggestCover":
+    "Here a leftover loses more than a sale earns, so FOODOO does not cook for the busiest day. It picks the amount that would have been enough on about {cover} of every 100 past days.",
+  "how.suggestHistory":
+    "On the last {count} {weekdays}, people wanted: {values}.",
+  "how.suggested": "Suggested",
+  "how.ruleEligible":
+    "Only closed, normal days count. Unusual days and days not closed are left out.",
+  "how.ruleWeekday":
+    "It looks at the same weekday first (up to the last 8). With fewer than 5 of those, it uses the last 14 days.",
+  "how.ruleColdStart":
+    "With fewer than 5 days of history, it starts from your usual portions: 10% more after a sell-out, 10% less when more than a fifth was left over.",
+  "how.ruleYouDecide":
+    "A suggestion is only a starting point. You can change every number before cooking.",
+  "how.notTitle": "What FOODOO does not do",
+  "how.notAi":
+    "It uses no AI model. Every number comes from the fixed rules on this page.",
+  "how.notCloud": "It sends nothing anywhere. Your data stays on this device.",
+  "how.back": "Back to the app",
+  "close.howLink": "How is this worked out?",
+  "settings.about.how": "How FOODOO calculates",
+  "settings.data.storageKept":
+    "Protected: the browser will not clear this data to free up space.",
+  "settings.data.storageAtRisk":
+    "Not protected yet: the browser may clear this data if the phone runs low on space.",
+  "settings.data.storageUnknown":
+    "This browser does not say whether it protects the data.",
+  "settings.data.keep": "Keep my data",
+  "settings.data.keepGranted": "The browser will keep your data",
+  "settings.data.keepRefused":
+    "The browser said no for now. Adding FOODOO to the home screen often helps.",
 } as const;

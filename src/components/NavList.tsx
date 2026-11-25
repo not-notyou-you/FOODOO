@@ -18,12 +18,6 @@ export function NavList({ items, className }: NavListProps) {
           <NavLink to={item.to} className="nav-link">
             <NavIconFor icon={item.icon} />
             <span className="nav-link__label">{t(item.label)}</span>
-            {item.soon ? (
-              <>
-                {" "}
-                <span className="nav-link__soon">{t("nav.soon")}</span>
-              </>
-            ) : null}
           </NavLink>
         </li>
       ))}

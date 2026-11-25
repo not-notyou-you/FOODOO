@@ -127,11 +127,22 @@ describe("Today", () => {
     expect(screen.getByRole("link", { name: "Open Settings" })).toBeTruthy();
   });
 
-  it("labels the unbuilt loop screens as coming soon", async () => {
+  it("CL-6: lists past days that were planned but never closed", async () => {
     await loadDemo(db, TODAY);
-    renderApp({ db, path: "/service" });
-    expect(await screen.findByText("Coming soon")).toBeTruthy();
-    expect(screen.getAllByText("Soon").length).toBeGreaterThanOrEqual(3);
+    await db.days.update("2026-03-01", { closed: false });
+    renderApp({ db, path: "/today" });
+    const notice = await screen.findByRole("region", {
+      name: "Days not closed",
+    });
+    expect(within(notice).getByText("Sunday 1 March")).toBeTruthy();
+  });
+
+  it("has no unfinished loop screens left in the navigation", async () => {
+    await loadDemo(db, TODAY);
+    renderApp({ db, path: "/today" });
+    await screen.findByRole("heading", { level: 1, name: "Today" });
+    expect(screen.queryByText("Soon")).toBeNull();
+    expect(screen.queryByText("Coming soon")).toBeNull();
   });
 
   it("sends a visitor with no data from an app route to Welcome", async () => {

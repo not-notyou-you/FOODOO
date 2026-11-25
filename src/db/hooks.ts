@@ -3,9 +3,11 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { createContext, useContext } from "react";
 import type { ISODate, Menu } from "../domain/types.ts";
 import {
+  getHistory,
   getStall,
   getTodayState,
   listMenus,
+  type History,
   type TodayState,
 } from "./repositories.ts";
 import type { FoodooDb, StallRow } from "./schema.ts";
@@ -28,6 +30,11 @@ export function useStall(): StallRow | null | undefined {
 export function useMenus(): Menu[] | undefined {
   const db = useDb();
   return useLiveQuery(() => listMenus(db), [db]);
+}
+
+export function useHistory(): History | undefined {
+  const db = useDb();
+  return useLiveQuery(() => getHistory(db), [db]);
 }
 
 export function useTodayState(date: ISODate): TodayState | undefined {

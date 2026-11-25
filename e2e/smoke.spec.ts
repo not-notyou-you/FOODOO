@@ -30,6 +30,16 @@ test("demo stall loads, installs its service worker, and survives an offline rel
   await expect(page.getByText("Offline. Saved on this device.")).toBeVisible();
 });
 
+test("Chromium reports no installability errors", async ({ page }) => {
+  await page.goto("/");
+  await page.evaluate(async () => {
+    await navigator.serviceWorker.ready;
+  });
+  const cdp = await page.context().newCDPSession(page);
+  const result = await cdp.send("Page.getInstallabilityErrors");
+  expect(result.installabilityErrors).toEqual([]);
+});
+
 test("web manifest is installable", async ({ page, request }) => {
   await page.goto("/");
   const href = await page.locator('link[rel="manifest"]').getAttribute("href");

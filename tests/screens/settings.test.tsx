@@ -145,3 +145,69 @@ describe("Settings", () => {
     expect(Object.keys(stall?.settings.busyProfile ?? {})).toHaveLength(7);
   });
 });
+
+describe("Settings storage protection (DM-5)", () => {
+  afterEach(() => {
+    Reflect.deleteProperty(navigator, "storage");
+  });
+
+  function stubStorage(granted: boolean) {
+    let persisted = false;
+    const persist = vi.fn(() => {
+      persisted = granted;
+      return Promise.resolve(granted);
+    });
+    Object.defineProperty(navigator, "storage", {
+      configurable: true,
+      value: { persisted: () => Promise.resolve(persisted), persist },
+    });
+    return persist;
+  }
+
+  it("shows that data is not protected yet and asks the browser on request", async () => {
+    const persist = stubStorage(true);
+    await loadDemo(db, TODAY);
+    renderApp({ db, path: "/settings" });
+    expect(
+      await screen.findByText(
+        "Not protected yet: the browser may clear this data if the phone runs low on space.",
+      ),
+    ).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Keep my data" }));
+    expect(
+      await screen.findByText("The browser will keep your data"),
+    ).toBeTruthy();
+    expect(
+      await screen.findByText(
+        "Protected: the browser will not clear this data to free up space.",
+      ),
+    ).toBeTruthy();
+    expect(persist).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole("button", { name: "Keep my data" })).toBeNull();
+  });
+
+  it("says so honestly when the browser refuses", async () => {
+    stubStorage(false);
+    await loadDemo(db, TODAY);
+    renderApp({ db, path: "/settings" });
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Keep my data" }),
+    );
+    expect(
+      await screen.findByText(
+        "The browser said no for now. Adding FOODOO to the home screen often helps.",
+      ),
+    ).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Keep my data" })).toBeTruthy();
+  });
+
+  it("says when the browser does not report it", async () => {
+    await loadDemo(db, TODAY);
+    renderApp({ db, path: "/settings" });
+    expect(
+      await screen.findByText(
+        "This browser does not say whether it protects the data.",
+      ),
+    ).toBeTruthy();
+  });
+});

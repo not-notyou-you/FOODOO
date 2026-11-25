@@ -95,13 +95,13 @@ At the cutoff: record the final commit, fill in the README "Final Day log" (star
 | ID | Feature | Priority | Status |
 |---|---|---|---|
 | ON | Onboarding and setup | Core | Done |
-| TD | Today screen (loop view) | Core | In progress |
-| PL | Morning plan with reasons | Core | Not started |
-| SV | Service: one-tap sold out + undo | Core | Not started |
-| CL | Night close + missed sell-out + unusual day | Core | Not started |
+| TD | Today screen (loop view) | Core | Done |
+| PL | Morning plan with reasons | Core | Done |
+| SV | Service: one-tap sold out + undo | Core | Done |
+| CL | Night close + missed sell-out + unusual day | Core | Done |
 | EST | Demand estimation + suggestion logic | Core | Done |
-| DEMO | Demo stall generator + labels | Core | In progress |
-| PWA | Offline + installable | Core | In progress |
+| DEMO | Demo stall generator + labels | Core | Done |
+| PWA | Offline + installable | Core | Done |
 | I18N | English / Bahasa Indonesia | Core | Done |
 | DM-1/2/5 | Delete all, demo load/remove, persistent storage | Core | Done |
 | BT | Backtest report | Core | Done |
@@ -113,10 +113,10 @@ Allowed status values: `Not started`, `In progress`, `Done`, `Reserved for Final
 
 ## 5. Final Day readiness checklist
 
-- [ ] Deployed URL reachable; demo data loads from the first screen
-- [ ] `npm ci && npm run build && npm run preview` works offline on a clean machine
-- [ ] README: setup, dependencies, supported environment, demo access, third-party resources, AI assistance, known limitations, simulated items
-- [ ] No secrets in the repo history
+- [x] Deployed URL reachable; demo data loads from the first screen (smoke e2e against https://foodoo-d5h.pages.dev, 2026-11-25; it still serves the pre-F2 build until the team pushes)
+- [ ] `npm ci && npm run build && npm run preview` works offline on a clean machine (verified in a clean copy with non-local requests blocked; a run with the network adapter off is still to do)
+- [x] README: setup, dependencies, supported environment, demo access, third-party resources, AI assistance, known limitations, simulated items
+- [x] No secrets in the repo history (file-name and content scan, 2026-11-25)
 - [ ] `final-day-start` tag created and recorded
-- [ ] `FINAL_DAY.md` lists completed features, unfinished features, and R1–R3
+- [x] `FINAL_DAY.md` lists completed features, unfinished features, and R1–R3
 - [ ] Every member has reviewed `docs/DECISIONS.md` for their module

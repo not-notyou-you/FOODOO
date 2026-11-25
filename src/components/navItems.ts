@@ -7,19 +7,17 @@ export interface NavItem {
   to: string;
   label: MessageKey;
   icon: NavIcon;
-  soon: boolean;
 }
 
 export const LOOP_NAV: readonly NavItem[] = [
-  { to: "/today", label: "nav.today", icon: "today", soon: false },
-  { to: "/plan", label: "nav.plan", icon: "plan", soon: true },
-  { to: "/service", label: "nav.service", icon: "service", soon: true },
-  { to: "/close", label: "nav.close", icon: "close", soon: true },
+  { to: "/today", label: "nav.today", icon: "today" },
+  { to: "/plan", label: "nav.plan", icon: "plan" },
+  { to: "/service", label: "nav.service", icon: "service" },
+  { to: "/close", label: "nav.close", icon: "close" },
 ];
 
 export const SETTINGS_NAV: NavItem = {
   to: "/settings",
   label: "nav.settings",
   icon: "settings",
-  soon: false,
 };

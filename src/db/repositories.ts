@@ -1,5 +1,7 @@
 // src/db/repositories.ts
-import { buildDemoRecords } from "../demo/seed.ts";
+import { closeDayRecords, type CloseEntry } from "../domain/close.ts";
+import { isPlanLocked, isPlanQty } from "../domain/plan.ts";
+import { parseHHMM, weekdayOf } from "../domain/time.ts";
 import {
   resizeProfile,
   validateHours,
@@ -13,6 +15,7 @@ import type {
   ISODate,
   Menu,
   MenuDay,
+  Reason,
   StallSettings,
 } from "../domain/types.ts";
 import { STALL_ID, type FoodooDb, type StallRow } from "./schema.ts";
@@ -30,6 +33,23 @@ export interface Hours {
 export interface TodayState {
   day: DayRecord | undefined;
   menuDays: MenuDay[];
+}
+
+export interface History {
+  days: DayRecord[];
+  menuDays: MenuDay[];
+}
+
+export interface PlanEntry {
+  menuId: string;
+  suggestedQty: number | null;
+  reason: Reason | null;
+  cookedQty: number;
+}
+
+export interface CloseInput {
+  unusual: boolean;
+  entries: CloseEntry[];
 }
 
 export function defaultSettings(): StallSettings {
@@ -182,7 +202,117 @@ export async function getTodayState(
   return { day, menuDays };
 }
 
+export async function getHistory(db: FoodooDb): Promise<History> {
+  const [days, menuDays] = await Promise.all([
+    db.days.toArray(),
+    db.menuDays.toArray(),
+  ]);
+  return { days, menuDays };
+}
+
+function assertOpenDay(day: DayRecord | undefined): void {
+  if (day?.closed === true) {
+    throw new Error("This day is already closed");
+  }
+}
+
+export async function savePlan(
+  db: FoodooDb,
+  date: ISODate,
+  entries: readonly PlanEntry[],
+): Promise<void> {
+  const weekday = weekdayOf(date);
+  const ids = new Set(entries.map((entry) => entry.menuId));
+  if (entries.length === 0 || ids.size !== entries.length) {
+    throw new RangeError("A plan needs one entry per menu");
+  }
+  for (const entry of entries) {
+    if (
+      !isPlanQty(entry.cookedQty) ||
+      (entry.suggestedQty !== null && !isPlanQty(entry.suggestedQty))
+    ) {
+      throw new RangeError(`Invalid quantity for ${entry.menuId}`);
+    }
+  }
+  await db.transaction("rw", db.days, db.menuDays, db.menus, async () => {
+    const day = await db.days.get(date);
+    assertOpenDay(day);
+    const existing = await db.menuDays.where("date").equals(date).toArray();
+    if (isPlanLocked(existing)) {
+      throw new Error("The plan is locked after the first sell-out");
+    }
+    const known = await db.menus.bulkGet([...ids]);
+    if (known.some((menu) => menu === undefined)) {
+      throw new Error("The plan names an unknown menu");
+    }
+    const removed = existing
+      .filter((row) => !ids.has(row.menuId))
+      .map((row): [string, string] => [row.date, row.menuId]);
+    await db.menuDays.bulkDelete(removed);
+    await db.menuDays.bulkPut(
+      entries.map((entry) => ({
+        date,
+        menuId: entry.menuId,
+        suggestedQty: entry.suggestedQty,
+        reason: entry.reason,
+        cookedQty: entry.cookedQty,
+        soldOutAt: null,
+        leftover: null,
+        estimatedDemand: null,
+        demandIsEstimate: false,
+      })),
+    );
+    if (day === undefined) {
+      await db.days.put({ date, weekday, unusual: false, closed: false });
+    }
+  });
+}
+
+export async function setSoldOut(
+  db: FoodooDb,
+  date: ISODate,
+  menuId: string,
+  time: HHMM | null,
+): Promise<void> {
+  if (time !== null) {
+    parseHHMM(time);
+  }
+  await db.transaction("rw", db.days, db.menuDays, async () => {
+    assertOpenDay(await db.days.get(date));
+    const row = await db.menuDays.get([date, menuId]);
+    if (row === undefined || row.cookedQty === 0) {
+      throw new Error(`Nothing was cooked for ${menuId} on ${date}`);
+    }
+    await db.menuDays.put({ ...row, soldOutAt: time });
+  });
+}
+
+export async function closeDay(
+  db: FoodooDb,
+  date: ISODate,
+  input: CloseInput,
+): Promise<void> {
+  await db.transaction("rw", db.stall, db.days, db.menuDays, async () => {
+    const stall = await requireStall(db);
+    assertOpenDay(await db.days.get(date));
+    const rows = await db.menuDays.where("date").equals(date).toArray();
+    if (rows.length === 0) {
+      throw new Error("Nothing was planned for this day");
+    }
+    const closed = closeDayRecords(
+      date,
+      input.unusual,
+      rows,
+      input.entries,
+      stall.settings,
+    );
+    await db.menuDays.bulkPut(closed.menuDays);
+    await db.days.put(closed.day);
+  });
+}
+
 export async function loadDemo(db: FoodooDb, today: ISODate): Promise<void> {
+  const { buildDemoRecords } = await import("../demo/seed.ts");
   const records = buildDemoRecords(today);
   await db.transaction("rw", allTables(db), async () => {
     const existing = await db.stall.get(STALL_ID);
@@ -226,5 +356,20 @@ export async function requestPersistentStorage(
     return await storage.persist();
   } catch {
     return false;
+  }
+}
+
+export type StorageStatus = "kept" | "atRisk" | "unknown";
+
+export async function getStorageStatus(
+  storage: Pick<StorageManager, "persisted"> | undefined,
+): Promise<StorageStatus> {
+  if (storage === undefined || typeof storage.persisted !== "function") {
+    return "unknown";
+  }
+  try {
+    return (await storage.persisted()) ? "kept" : "atRisk";
+  } catch {
+    return "unknown";
   }
 }

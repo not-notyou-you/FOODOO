@@ -16,7 +16,7 @@ export function Logo({ width = 240 }: LogoProps) {
       focusable="false"
     >
       <rect width="320" height="220" rx="28" fill="#003049" />
-      <g fill="#ffffff" fontFamily="var(--font-num)" fontSize="84">
+      <g fill="#ffffff" fontFamily="var(--font-brand)" fontSize="84">
         <text x="36" y="104" textLength="64" lengthAdjust="spacingAndGlyphs">
           F
         </text>

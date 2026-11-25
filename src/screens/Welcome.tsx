@@ -7,6 +7,7 @@ import { Button } from "../components/Button.tsx";
 import { LanguageSwitch } from "../components/LanguageSwitch.tsx";
 import { Logo } from "../components/Logo.tsx";
 import { OfflinePill } from "../components/OfflinePill.tsx";
+import { Splash } from "../components/Splash.tsx";
 import { useDb, useStall } from "../db/hooks.ts";
 import {
   loadDemo,
@@ -26,7 +27,7 @@ export function Welcome() {
   const [failed, setFailed] = useState(false);
 
   if (stall === undefined) {
-    return <p role="status">{t("app.loading")}</p>;
+    return <Splash />;
   }
   if (stall !== null && stall.setupComplete) {
     return <Navigate to="/today" replace />;

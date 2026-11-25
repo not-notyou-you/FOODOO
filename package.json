@@ -17,7 +17,9 @@
     "e2e": "playwright test",
     "backtest": "node --experimental-strip-types scripts/backtest.ts",
     "seed": "node --experimental-strip-types scripts/seed.ts",
-    "icons": "node --experimental-strip-types scripts/makeIcons.ts"
+    "icons": "node --experimental-strip-types scripts/makeIcons.ts",
+    "size": "node --experimental-strip-types scripts/bundleSize.ts",
+    "lighthouse": "node --experimental-strip-types scripts/lighthouse.ts"
   },
   "dependencies": {
     "dexie": "4.4.7",

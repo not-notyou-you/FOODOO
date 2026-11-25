@@ -4,6 +4,7 @@ import {
   completeSetup,
   deleteAll,
   getStall,
+  getStorageStatus,
   getTodayState,
   listMenus,
   loadDemo,
@@ -287,5 +288,22 @@ describe("requestPersistentStorage", () => {
         persisted: () => Promise.resolve(false),
       }),
     ).toBe(false);
+  });
+});
+
+describe("getStorageStatus", () => {
+  it("DM-5: reports kept, at risk or unknown", async () => {
+    expect(await getStorageStatus(undefined)).toBe("unknown");
+    expect(
+      await getStorageStatus({ persisted: () => Promise.resolve(true) }),
+    ).toBe("kept");
+    expect(
+      await getStorageStatus({ persisted: () => Promise.resolve(false) }),
+    ).toBe("atRisk");
+    expect(
+      await getStorageStatus({
+        persisted: () => Promise.reject(new Error("blocked")),
+      }),
+    ).toBe("unknown");
   });
 });
