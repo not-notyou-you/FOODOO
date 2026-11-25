@@ -101,19 +101,12 @@ export interface Outcome {
   soldOutAt: HHMM | null;
 }
 
-export interface TruthRow {
-  date: ISODate;
-  menuId: string;
-  demand: number;
-}
-
 export interface DemoHistory {
   stallName: string;
   settings: StallSettings;
   menus: Menu[];
   days: DayRecord[];
   menuDays: MenuDay[];
-  truth: TruthRow[];
 }
 
 export function createRng(seed: string): Rng {
@@ -245,7 +238,6 @@ export function generateDemoHistory(
   const menus = DEMO_MENUS.map((menu) => ({ ...menu }));
   const days: DayRecord[] = [];
   const menuDays: MenuDay[] = [];
-  const truth: TruthRow[] = [];
   for (let back = DEMO_HISTORY_DAYS; back >= 1; back -= 1) {
     const date = addDays(today, -back);
     const draw = drawDay(rng, date, menus, settings);
@@ -258,15 +250,13 @@ export function generateDemoHistory(
     for (const menu of menus) {
       const jitter = Math.floor(rng() * (2 * OWNER_JITTER + 1)) - OWNER_JITTER;
       const cooked = Math.max(1, menu.usualQty + jitter);
-      const demand = draw.demand[menu.id] as number;
       const outcome = observeOutcome(
         cooked,
-        demand,
+        draw.demand[menu.id] as number,
         draw.arrivals[menu.id] as number[],
       );
       menuDays.push(toMenuDay(date, menu.id, outcome, settings));
-      truth.push({ date, menuId: menu.id, demand });
     }
   }
-  return { stallName: DEMO_STALL_NAME, settings, menus, days, menuDays, truth };
+  return { stallName: DEMO_STALL_NAME, settings, menus, days, menuDays };
 }

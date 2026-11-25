@@ -52,11 +52,32 @@ describe("demo generator", () => {
     expect(unusual).toBeLessThanOrEqual(14);
   });
 
-  it("keeps true demand out of the stored records", () => {
+  it("returns only what an owner could have recorded, never the true demand", () => {
     const history = generateDemoHistory("2026-03-01");
-    expect(history.truth).toHaveLength(56 * 4);
+    expect(Object.keys(history).sort()).toEqual(
+      ["days", "menuDays", "menus", "settings", "stallName"].sort(),
+    );
+    const menuDayKeys = [
+      "cookedQty",
+      "date",
+      "demandIsEstimate",
+      "estimatedDemand",
+      "leftover",
+      "menuId",
+      "reason",
+      "soldOutAt",
+      "suggestedQty",
+    ];
     for (const menuDay of history.menuDays) {
-      expect(Object.keys(menuDay)).not.toContain("trueDemand");
+      expect(Object.keys(menuDay).sort()).toEqual(menuDayKeys);
+    }
+    for (const day of history.days) {
+      expect(Object.keys(day).sort()).toEqual([
+        "closed",
+        "date",
+        "unusual",
+        "weekday",
+      ]);
     }
   });
 
