@@ -44,6 +44,7 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       include: ["src/domain/**/*.ts"],
+      exclude: ["src/domain/types.ts"],
       reporter: ["text", "html"],
       thresholds: {
         "src/domain/**/*.ts": {
