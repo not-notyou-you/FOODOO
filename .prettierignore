@@ -1,0 +1,15 @@
+dist
+coverage
+playwright-report
+test-results
+node_modules
+package-lock.json
+public/fonts
+public/icons
+docs/brand
+docs/reference
+docs/submissions
+AGENTS.md
+SPEC.md
+DESIGN.md
+PLAN.md
