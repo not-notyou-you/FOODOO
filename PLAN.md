@@ -99,12 +99,12 @@ At the cutoff: record the final commit, fill in the README "Final Day log" (star
 | PL | Morning plan with reasons | Core | Not started |
 | SV | Service: one-tap sold out + undo | Core | Not started |
 | CL | Night close + missed sell-out + unusual day | Core | Not started |
-| EST | Demand estimation + suggestion logic | Core | Not started |
-| DEMO | Demo stall generator + labels | Core | Not started |
+| EST | Demand estimation + suggestion logic | Core | Done |
+| DEMO | Demo stall generator + labels | Core | In progress |
 | PWA | Offline + installable | Core | Not started |
 | I18N | English / Bahasa Indonesia | Core | Not started |
 | DM-1/2/5 | Delete all, demo load/remove, persistent storage | Core | Not started |
-| BT | Backtest report | Core | Not started |
+| BT | Backtest report | Core | Done |
 | WS | Weekly summary | Should | Reserved for Final Day |
 | DM-3/4 | Export / import | Should | Reserved for Final Day |
 | UX-FIX | Top usability fix from owner testing | Should | Reserved for Final Day |

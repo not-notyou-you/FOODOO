@@ -102,3 +102,62 @@ All versions are exact and in the lockfile. Where we are not on the newest relea
 ### D-015 Repository state (Samuel)
 
 - **Decision:** `git init -b main` was run, with nothing staged or committed, per the team's instruction. `FOODOO_logo.png`, the abstract and proposal PDFs, and the handbook PDF were moved to `docs/brand/`, `docs/submissions/` and `docs/reference/`. No `LICENSE` file was created because the licence is the team's choice.
+
+## Phase F0 follow-up (2026-11-25)
+
+### D-016 Commits and remote (Samuel, Sonny)
+
+- **Decision:** the team asked the AI to commit and gave the GitHub remote. F0 was committed in six commits grouped by module owner, authored with the repository's configured git identity and carrying a `Co-Authored-By` trailer for the AI, as `AGENTS.md` section 4 requires. `.gitattributes` forces LF line endings so Prettier checks behave the same on Windows and in CI. The branch was pushed to `origin/main`.
+- **Alternative:** the owners commit by hand. Not chosen because the team asked otherwise.
+
+## Phase F1: Domain logic and evidence (2026-11-25)
+
+### D-017 Weekday and date conventions (Hakim)
+
+- **Decision:** weekday is `0` for Sunday to `6` for Saturday, the JavaScript convention. Date arithmetic uses UTC so it does not depend on the device time zone. `src/domain/time.ts` validates every date and time and throws `RangeError` on bad input, so a malformed value fails loudly instead of producing a wrong suggestion.
+- **Alternative:** ISO weekday (Monday is 1). Not chosen because `Date` already gives the JavaScript number.
+
+### D-018 Arrival share uses whole minutes, so the maths is exact (Hakim)
+
+- **Decision:** the profile weight of each opening hour is multiplied by the minutes of that hour the stall was open before time `t`. Both the arrived weight `A` and the total weight `W` are integers, and `share = A / W`. For opening hours on the hour this equals the formula in `SPEC.md` (for example `12/23` at 10:30). It also gives a correct answer if the owner opens at 06:30.
+- **Rounding:** demand is `cooked x W / A` rounded half up using integer arithmetic, `floor((2 x cooked x W + A) / (2 x A))`. It gives the same result as `Math.round(x + 1e-9)` from the spec, without any floating-point correction. The `share >= 0.95` test is `20 x A >= 19 x W`. Cooked 42 sold out at 10:30 gives 80.5 exactly, which rounds to 81 as required.
+- **Missing hours:** a busy-profile hour with no entry counts as normal (weight 2). If closing is not after opening, the share is 1, so the demand equals the cooked quantity and nothing divides by zero.
+
+### D-019 `estimateDemand` returns `null` when it has no information (Hakim)
+
+- **Decision:** with no sell-out time and no leftover, the function returns `null` instead of guessing. If both are present, the sell-out time wins. The Close screen must therefore collect one of them before a day can be closed.
+- **Alternative:** throw an error, or treat a missing leftover as 0. Both would silently or loudly corrupt the history.
+
+### D-020 Suggestion details the spec left open (Hakim)
+
+- **Delta:** in the `history` case the delta is the suggestion minus the cooked quantity of the most recent day in the history used. In the cold-start cases it is the suggestion minus the usual quantity.
+- **Observations:** `observations` is the number of days in the history that was actually used (at most 8 same-weekday days, or at most 14 days of any weekday).
+- **Leftover days:** a day counts as a leftover day only if its leftover is greater than 0.
+- **Critical ratio guard:** if the price is not above the salvage value, the ratio is 0.95 instead of dividing by zero or going negative. The settings screen should prevent this case.
+- **Empty quantile:** throws `RangeError`. `suggestQty` never calls it with fewer than 5 values.
+- **Cold-start rounding:** `ceil(base x 11 / 10)` is `floor((base x 11 + 9) / 10)` and the leftover test is `leftover x 100 > 20 x cooked`, so there is no floating point.
+
+### D-021 Weekly metrics window (Hakim)
+
+- **Decision:** `weeklyMetrics` takes an end date and covers that day and the six before it. Only closed, non-unusual days count, as in the proposal's metric definitions. Sell-out frequency is sell-outs divided by menu-days, lost sales sums `max(0, estimatedDemand - cookedQty)` on sold-out days, and the acceptance share is `null` when no suggestions exist, so the UI can show a dash instead of 0%.
+- **Not built:** the per-menu table and chart of the weekly summary (WS-2 and WS-3). They belong to the reserved Final Day task.
+
+### D-022 Demo generator and the true demand (Hakim)
+
+- **Decision:** the generator follows `SPEC.md` section 7 with seed `foodoo-demo`. It takes today's date as an argument, so it never reads the clock. The true demand is returned in a separate `truth` array that the app must not store. Recorded fields (`estimatedDemand`, `demandIsEstimate`) come from `estimateDemand`, which sees only what an owner would record.
+- **Unusual days:** about 10% of days are flagged unusual, but their demand is not changed, because the spec does not define a demand shock. The flag therefore only removes data in the demo.
+- **Sell-out time:** as the spec says, a menu sells out at the arrival of customer number cooked + 1. The real last portion is sold one customer earlier, so the recorded sell-out time is slightly late and the estimate slightly low. The backtest limitations say so.
+- **Reuse:** `drawDay`, `observeOutcome` and `toMenuDay` are exported so the backtest uses exactly the same demand model.
+
+### D-023 Backtest design (Hakim)
+
+- **Decision:** 3 seeds (`backtest-1` to `backtest-3`), 12 weeks each, metrics over weeks 3 to 12. Both policies face the same demand and arrival times (common random numbers), so differences come from the policy only. FOODOO sees only recorded data. Results are summed over seeds. The script writes `docs/BACKTEST.md` and replaces the block between the markers in the README, so the numbers are never typed by hand. Output contains no timestamps, so two runs give byte-identical files (checked).
+- **Result as it came out:** FOODOO has fewer leftovers, fewer lost sales and higher profit than the baseline, and more sell-out menu-days (+4.3%). The estimator error is lower than "sales = demand". The worse sell-out count is reported, not hidden.
+- **Likely reason sell-outs rise (not isolated by an experiment):** three of the four menus have a critical ratio below 0.5, so the rule cooks below the median demand for them, which trades some sell-outs for fewer leftovers. This is the newsvendor behaviour the proposal describes, but it has not been checked against owners.
+- **Alternatives:** independent random draws per policy (noisier comparison); a tool like `tsx` to run the script (not approved).
+
+### D-024 Windows drive-letter case and the coverage gate (Sonny)
+
+- **Observed:** from a shell that reports the project path as `d:/...`, Vitest's V8 coverage lists every domain file twice, the second time at 0%, and the 100% gate fails although all tests pass. From `D:\...` (PowerShell, VS Code) it reports 100%.
+- **Tried:** setting Vite `root` to the real path. It broke test discovery, so it was reverted.
+- **Decision:** documented in the README setup section. Linux CI is not affected.
