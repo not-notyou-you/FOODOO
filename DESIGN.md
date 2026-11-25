@@ -89,9 +89,11 @@ Every screen needs these states designed and built: **default, empty, demo, offl
 - An **Unusual day** checkbox with a helper text.
 - The **Close day** primary button opens a confirmation sheet listing tomorrow's suggestions.
 
-### 5.6 Weekly summary (Final Day)
-- Stat tiles: leftover portions, sell-out events, estimated lost sales (with an "estimate" tag).
-- Per-menu table and a bar chart of cooked vs demand. Bars are navy for cooked and orange for demand; the legend uses both shape and text.
+### 5.6 History (weekly summary)
+- Stat tiles: leftover portions, sell-out events, estimated lost sales (with an "estimate" tag), plans accepted as suggested. The same tiles appear on Today under "Last 7 days".
+- Content sits in cards with a heading row; status is a coloured badge (Closed mint, Unusual sky, Not closed yellow). Estimates show `≈ N` with a small sky "estimate" tag under the number.
+- Per-menu table and a bar chart of cooked vs demand, with the value above each bar and menu chips to switch. Bars are navy for cooked and orange for demand; estimated demand is a dashed orange outline on cream. The legend uses both shape and text, and a hidden table gives screen readers the numbers.
+- A list of past days opens a read-only day view.
 
 ### 5.7 Settings
 Sections: Stall (menus, hours, busy hours, salvage value), Data (export, import, load/remove demo, delete all, all destructive actions in `--danger` and confirmed), Language, About (version, licences, AI disclosure, "How FOODOO calculates" explainer page).

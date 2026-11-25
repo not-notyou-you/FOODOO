@@ -688,3 +688,46 @@ All versions are exact and in the lockfile. Where we are not on the newest relea
 - **Kept identical:** the arrival sampler now works in stall-day minutes so a night stall can be generated; for a same-day stall it makes the same random draws, so scenario 1 data and `docs/BACKTEST.md` are byte-identical (checked by `npm run backtest` and a test).
 - **Tests always use scenario 1:** Vitest and the Playwright build pin `VITE_DEMO_SCENARIO=1`, so a developer's `.env` cannot change test results. A separate test mocks the setting to `off`.
 - **Alternatives considered:** a scenario picker inside the app (more UI and strings; the team asked for an environment switch); a runtime URL parameter (anyone could change it on the deployed site); random history per load (not reproducible).
+
+### D-083 Weekly summary and export/import built before Final Day (Hakim)
+
+- **Decision:** at the team's request (Hakim, 2026-11-25), the weekly summary (R1, WS) and export/import (R2, DM-3/4) were built now instead of on Final Day. Owners asked for numbers on Today, a way to see earlier days, and spreadsheet files.
+- **Consequence:** this overrides `AGENTS.md` section 5 for R1 and R2. They no longer count as Final Day progress. The team must choose replacement Final Day tasks; none were invented. UX-FIX (R3) stays reserved. `PLAN.md`, `FINAL_DAY.md` and the README say so.
+- **Alternatives considered:** keeping them for Final Day (protects the Final Day score but leaves owners without history or backup for three weeks).
+
+### D-084 Analytics on Today and a History screen (Hakim)
+
+- **Decision:** Today shows a "Last 7 days" card with `weeklyMetrics`: leftover portions, sell-outs, estimated lost sales (always labelled estimate) and plans accepted as suggested. A new History tab adds the per-menu table, a cooked vs demand chart for one menu, and a list of every past day that opens a read-only day view.
+- **Pure helpers:** `menuTotals`, `menuSeries`, `pastDays`, `dayRows` and `soldPortions` live in `src/domain/metrics.ts` and share `countedDates` with `weeklyMetrics`: only closed, usual days in the last 7 days count, the same rule the suggestion uses. Sold portions are the cooked count on a sold-out day, otherwise cooked minus leftover. Domain coverage stays at 100%.
+- **Chart:** inline SVG with no library. Estimated demand is drawn as a dashed outline so it is never mistaken for measured demand; a visually hidden table gives the same numbers to screen readers.
+- **Alternatives considered:** a chart library (bundle size, and it hides the design system); showing the full table on Today (too much for a one-glance screen).
+
+### D-085 Export and import in JSON, CSV and XLSX (Hakim)
+
+- **Model:** every format maps to one `Backup` object (`format`, `formatVersion`, `schemaVersion`, `exportedAt`, stall, menus, days, menuDays).
+  - JSON is the backup itself.
+  - XLSX holds the same data in four sheets (Stall, Menus, Days, MenuDays); text, numbers and booleans are real cell types.
+  - CSV is one row per menu per day with the day fields repeated. It starts with a UTF-8 byte-order mark so Excel shows the text correctly, and the reader accepts both comma and semicolon, because Excel in the Indonesian locale saves with semicolons.
+- **Import rules:** JSON and XLSX replace all data, in one Dexie transaction, after a confirmation. CSV holds no stall or menu settings, so it only adds or updates menu-days for menus that already exist; an unknown menu is an error. Every field goes through the same rules as setup (`validateMenu`, `validateHours`, busy profile matching the hours) plus date, time, weekday and range checks; leftover cannot exceed cooked. Nothing is written unless the whole file is valid. Up to 20 problems are listed with their place (for example `menus[2].cost`). Values a spreadsheet app rewrites are accepted: `TRUE`/`1` for true and a time stored as a day fraction (0.4375 is 10:30).
+- **Where:** Settings → Data (export and import) and the Welcome screen (import only), because after **Delete all data** the app returns to Welcome.
+- **Alternatives considered:** CSV import that creates menus (too easy to create wrong menus from a hand-edited file); importing without confirmation (a wrong file would erase the stall).
+
+### D-086 XLSX and ZIP written without a library (Hakim)
+
+- **Decision:** `src/db/zip.ts` writes and reads ZIP files, and `src/db/xlsx.ts` writes and reads the minimal SpreadsheetML parts. Compression uses the browser's built-in `CompressionStream("deflate-raw")` and `DecompressionStream`. Reading supports the shared-string tables, rich text and missing cells that Excel and Google Sheets write. The code is loaded only when export or import runs.
+- **Why:** the plan was to add `fflate` (MIT), but the npm registry could not be reached from the build machine, and `AGENTS.md` asks to avoid new dependencies. A hand-written codec adds no dependency, and the team can explain every byte of it. The main bundle stays at 146.2 KB gzip, within the 250 KB budget.
+- **Limits:** no ZIP64 (files over 4 GB), formulas are not recalculated, and import needs `DecompressionStream` (Chrome 103+, Safari 16.4+, Firefox 113+).
+- **Alternatives considered:** SheetJS (its current builds are not published on npm); exceljs (large); `fflate` (fine, but the registry could not be reached).
+
+### D-087 Layout pass on Today, History and the day view (Hakim)
+
+- **Problem:** in team review the new screens were hard to read. "≈ 57 (estimate)" wrapped into a large highlighted block. The per-menu table was cut off on a phone. The chart stopped halfway on desktop, its date labels were oversized, and it had no numbers. The past-day list was a column of underlined links. The day view title wrapped onto two lines.
+- **Decision:**
+  - Estimates show `≈ N` with a small "estimate" tag under the number (`EstimateNumber`).
+  - The weekly tiles sit in a card with a "See history" link in its heading row. They form a 2-column grid on phones (an odd last tile spans the row) and an auto-fit grid on desktop. "Today so far" uses three equal columns.
+  - The table is compact enough to fit 360 px and carries a note that demand on sold-out days is an estimate.
+  - The chart is HTML bars with the value above each bar, so the text stays a readable size at any width. Menu chips replace the dropdown.
+  - Past days are rows with a coloured status badge and an arrow.
+  - The day view has a short title, a summary card with the full date, and a four-number strip (cooked, sold, leftover, demand) per menu.
+  - In Settings, the export and import blocks have full-width separators and three equal format options.
+- **Alternatives considered:** keeping the SVG chart with a fixed aspect ratio (text scales with width); a horizontal-scrolling table (hides columns on phones).

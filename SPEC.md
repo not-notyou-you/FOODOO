@@ -102,13 +102,16 @@ Acceptance:
 | TD-2 | One primary action, which opens the current phase |
 | TD-3 | Shows today's counts: portions planned, menus sold out, day closed yes/no |
 
-### 5.6 Weekly summary — Should (RESERVED FOR FINAL DAY)
+### 5.6 Weekly summary and history — Should (built early on 2026-11-25 by team decision, D-083)
 
 | ID | Requirement |
 |---|---|
 | WS-1 | Last 7 days: total leftover portions, number of sell-out events, estimated lost sales (sum of `estimatedDemand − cookedQty` on sold-out days) |
 | WS-2 | Per-menu table: cooked, sold, leftover, demand (estimates labelled) |
 | WS-3 | Bar chart of cooked vs demand per day for a selected menu |
+| WS-4 | List of past days (newest first) and a read-only view of one day per menu: cooked, suggested, sell-out time, leftover, demand (estimates labelled), reason |
+
+WS-1 is shown on the Today screen and on the History screen; WS-2 to WS-4 are on the History screen.
 
 ### 5.7 Data management — Core (export) / Should (import)
 
@@ -116,8 +119,8 @@ Acceptance:
 |---|---|---|
 | DM-1 | Delete all data, with confirmation | Core |
 | DM-2 | Load demo stall / remove demo stall | Core |
-| DM-3 | Export JSON (full) and CSV (menu-days) | Should, RESERVED FOR FINAL DAY |
-| DM-4 | Import JSON with schema validation | Should, RESERVED FOR FINAL DAY |
+| DM-3 | Export JSON (full), CSV (menu-days) and XLSX (full, four sheets) | Should, built early (D-083) |
+| DM-4 | Import with schema validation: JSON and XLSX replace all data after confirmation; CSV adds or updates menu-days for existing menus. Nothing is written unless the whole file is valid | Should, built early (D-083) |
 | DM-5 | Request persistent storage (`navigator.storage.persist`) | Core |
 
 ### 5.8 Settings — Core

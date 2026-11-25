@@ -19,6 +19,8 @@ Every Core row in `PLAN.md` section 4 is Done. Each one meets its acceptance cri
 | I18N     | English and Bahasa Indonesia                     | `tests/i18n/messages.test.ts`                                      |
 | DM-1/2/5 | Delete all, demo load/remove, persistent storage | `tests/db/repositories.test.ts`, `tests/screens/settings.test.tsx` |
 | BT       | Backtest report                                  | `npm run backtest` regenerates `docs/BACKTEST.md` byte for byte    |
+| WS       | Weekly summary + history (built early, D-083)    | `tests/screens/history.test.tsx`, `tests/screens/today.test.tsx`   |
+| DM-3/4   | Export / import (built early, D-083)             | `tests/db/exportImport.test.ts`, `e2e/exportImport.spec.ts`        |
 
 Also built in F3 and not a separate status row:
 
@@ -32,8 +34,6 @@ Also built in F3 and not a separate status row:
 
 | Item                                                | State                                                 | Why                                                      |
 | --------------------------------------------------- | ----------------------------------------------------- | -------------------------------------------------------- |
-| R1 Weekly summary (WS)                              | Reserved for Final Day                                | Reserved by `PLAN.md` F4                                 |
-| R2 Export / import (DM-3, DM-4)                     | Reserved for Final Day                                | Reserved by `PLAN.md` F4                                 |
 | R3 Top usability fix from owner testing (UX-FIX)    | Reserved for Final Day, **blocked on owner findings** | No owner testing has been done yet (see section 3, R3)   |
 | Owner testing (PLAN F3 item 1)                      | Not done                                              | No findings were available during F3. None are invented. |
 | Physical phone install                              | Not done                                              | Only Chromium's installability report is checked         |
@@ -43,40 +43,9 @@ Also built in F3 and not a separate status row:
 
 None of these is started or scaffolded in the repository. Work begins only after the `final-day-start` tag exists.
 
-### R1 Weekly summary (`SPEC.md` 5.6, `DESIGN.md` 5.6)
+### R1 and R2: built early, replacements to be chosen
 
-- **Owner:** Vassel (screen and components), with Hakim checking the numbers.
-- **Builds on:** `weeklyMetrics(menuDays, days, endDate)` in `src/domain/metrics.ts`. It already returns leftover portions, sell-out events, estimated lost sales and the share of suggestions accepted without edit, for the whole stall and per menu. It is already tested (100% coverage).
-- **New files:**
-  - `src/screens/Summary.tsx` at route `/summary`
-  - `src/components/StatTile.tsx`
-  - `src/components/CookedDemandChart.tsx`, an inline SVG bar chart: navy bars for cooked, orange for demand, and a legend that uses both shape and text
-- **Changes:**
-  - a link from Today, and an entry in the sidebar and Settings
-  - strings in `en.ts` and `id.ts`
-- **Rules:**
-  - numbers come only from stored data
-  - estimated lost sales and estimated demand carry the "estimate" label (`EstimateValue`)
-  - an empty state shows when there are no closed days in the last 7
-- **Done when:**
-  - WS-1, WS-2 and WS-3 pass as component tests in `tests/screens/summary.test.tsx`
-  - one e2e step opens the summary after the core loop
-  - lint, test, build and e2e are green
-- **Time box:** first half of the session.
-
-### R2 Export and import (`SPEC.md` 5.7 DM-3, DM-4)
-
-- **Owner:** Samuel.
-- **New file:** `src/db/exportImport.ts`.
-  - `exportJson(db)` covers every table, with a format version and the schema version.
-  - `exportCsv(db)` writes one row per menu-day.
-  - `parseImport(text)` validates every field with the same rules as `src/domain/setup.ts`. It refuses unknown versions and any data that breaks a rule. Nothing is written until the whole file is valid.
-  - `importJson(db, data)` runs in one Dexie transaction and refuses to overwrite an owner's stall without confirmation.
-- **UI:** Settings → Data gets **Export (JSON)**, **Export (CSV)** and **Import**. Files are saved through a download link, so no new dependency is needed.
-- **Done when:**
-  - unit tests cover a valid file, each kind of invalid file, and the round trip
-  - an e2e test runs export → delete all → import and restores identical data (the `PLAN.md` F4 criterion)
-- **Time box:** second half of the session, in parallel with R1.
+On 2026-11-25 the team decided to build the weekly summary (R1) and export/import (R2) before the `final-day-start` tag (decision D-083). They are Done and no longer count as Final Day work. The team still has to choose replacement Final Day tasks; this file does not invent them.
 
 ### R3 Top usability fix from owner testing
 
@@ -96,15 +65,15 @@ None of these is started or scaffolded in the repository. Work begins only after
 
 The committee announces the session hours, so slots are relative to the start.
 
-| Slot            | What                                                                                 | Who                           |
-| --------------- | ------------------------------------------------------------------------------------ | ----------------------------- |
-| Start           | Check in, record the starting commit, create and push `final-day-start` (section 6)  | Sonny                         |
-| Start + 15 min  | Show this file to the committee                                                      | All                           |
-| First half      | R1 and R2 in parallel, R3 if findings exist                                          | Vassel + Hakim, Samuel, Sonny |
-| Midpoint        | Merge, run `npm run lint && npm test && npm run build && npm run e2e`                | Sonny                         |
-| Second half     | Finish R2's e2e round trip, then polish, then the status table                       | All                           |
-| Cutoff − 30 min | Freeze features; update `PLAN.md` section 4, the README status and the Final Day log | Sonny, all                    |
-| Cutoff          | Record the final commit; stop modifying the code                                     | All                           |
+| Slot            | What                                                                                 | Who            |
+| --------------- | ------------------------------------------------------------------------------------ | -------------- |
+| Start           | Check in, record the starting commit, create and push `final-day-start` (section 6)  | Sonny          |
+| Start + 15 min  | Show this file to the committee                                                      | All            |
+| First half      | Replacement tasks (to be chosen by the team), R3 if findings exist                   | To be assigned |
+| Midpoint        | Merge, run `npm run lint && npm test && npm run build && npm run e2e`                | Sonny          |
+| Second half     | Finish the replacement tasks, then polish, then the status table                     | All            |
+| Cutoff − 30 min | Freeze features; update `PLAN.md` section 4, the README status and the Final Day log | Sonny, all     |
+| Cutoff          | Record the final commit; stop modifying the code                                     | All            |
 
 ## 5. Setup checklist (before travelling and at the venue)
 
