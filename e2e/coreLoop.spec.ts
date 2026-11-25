@@ -27,7 +27,7 @@ async function goOfflineAfterFirstLoad(page: Page, context: BrowserContext) {
   await context.setOffline(true);
   await page.reload();
   await expect(
-    page.getByRole("heading", { level: 1, name: "Welcome to FOODOO" }),
+    page.getByRole("heading", { level: 1, name: /Cook the right amount/ }),
   ).toBeVisible();
   await expect(page.getByText("Offline. Saved on this device.")).toBeVisible();
 }
@@ -155,7 +155,7 @@ test.describe("core loop", () => {
     await page.clock.setFixedTime(at("09:00"));
     await page.goto("/");
     await expect(
-      page.getByRole("heading", { level: 1, name: "Welcome to FOODOO" }),
+      page.getByRole("heading", { level: 1, name: /Cook the right amount/ }),
     ).toBeVisible();
   });
 

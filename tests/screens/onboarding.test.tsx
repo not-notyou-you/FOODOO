@@ -55,7 +55,7 @@ describe("onboarding", () => {
     expect(
       await screen.findByRole("heading", {
         level: 1,
-        name: "Welcome to FOODOO",
+        name: /Cook the right amount/,
       }),
     ).toBeTruthy();
     expect(screen.getByRole("button", { name: "Start setup" })).toBeTruthy();

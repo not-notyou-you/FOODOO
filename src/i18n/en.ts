@@ -33,7 +33,6 @@ export const en = {
   "lang.en": "English",
   "lang.id": "Bahasa Indonesia",
 
-  "welcome.title": "Welcome to FOODOO",
   "welcome.start": "Start setup",
   "welcome.continue": "Continue setup",
   "welcome.demo": "Try demo stall",
@@ -305,4 +304,54 @@ export const en = {
   "settings.data.keepGranted": "The browser will keep your data",
   "settings.data.keepRefused":
     "The browser said no for now. Adding FOODOO to the home screen often helps.",
+  "landing.pillOffline": "Works offline",
+  "landing.pillNoAccount": "No account",
+  "landing.pillLocal": "Data stays on your phone",
+  "landing.problemTitle": "Every morning is a guess",
+  "landing.problemWasteTitle": "Too much",
+  "landing.problemWasteBody":
+    "Unsold portions go to waste, and so does the money spent cooking them.",
+  "landing.problemEarlyTitle": "Too little",
+  "landing.problemEarlyBody":
+    "A dish sells out before noon and later customers walk away.",
+  "landing.problemHiddenTitle": "Sold out hides demand",
+  "landing.problemHiddenBody":
+    "Sales stop when the pot is empty, so your records never show how many people really wanted it.",
+  "landing.loopTitle": "A daily loop that takes minutes",
+  "landing.loopPlanTitle": "Plan in the morning",
+  "landing.loopPlanBody":
+    "See a suggested portion for each dish, then change any number you like.",
+  "landing.loopServiceTitle": "Mark sold-out times",
+  "landing.loopServiceBody": "Tap when a dish runs out. FOODOO keeps the time.",
+  "landing.loopCloseTitle": "Close the day",
+  "landing.loopCloseBody":
+    "Enter what is left. FOODOO estimates how many people wanted each dish.",
+  "landing.loopNextTitle": "Better tomorrow",
+  "landing.loopNextBody":
+    "Tomorrow's suggestion learns from today, including the customers you missed.",
+  "landing.exampleBadge": "Example",
+  "landing.whyTitle": "Why FOODOO is different",
+  "landing.whyHiddenTitle": "Counts missed customers",
+  "landing.whyHiddenBody":
+    "It uses the sell-out time and your busy hours to estimate the demand a sold-out day hides.",
+  "landing.whyRulesTitle": "Rules you can check",
+  "landing.whyRulesBody":
+    "No AI model. Every number comes from fixed rules you can read in the app.",
+  "landing.whyOfflineTitle": "Built for the stall",
+  "landing.whyOfflineBody":
+    "Installs like an app and works with no signal, on an ordinary phone.",
+  "landing.whyPrivateTitle": "Private by design",
+  "landing.whyPrivateBody":
+    "No login, no server, no customer data. Export or delete everything at any time.",
+  "landing.closingTitle": "Ready to try it?",
+  "landing.closingBody":
+    "Start with the demo stall at the top of this page, or set up your own menus.",
+  "landing.installHint":
+    "Tip: use your browser's “Add to Home screen” to open FOODOO like an app.",
+  "settings.about.landing": "About FOODOO",
+  "landing.headline": "Cook the right amount.",
+  "landing.headlineAccent": "No piles of leftovers, no turning customers away.",
+  "landing.exampleTitle": "What you will see",
+  "landing.exampleCooked": "Cooked",
+  "landing.exampleSoldOut": "Sold out at",
 } as const;

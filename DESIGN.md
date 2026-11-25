@@ -1,39 +1,32 @@
 # DESIGN.md — FOODOO Interface Specification
 
-Visual style: **clean and formal**. That means thin 1 px borders in neutral grey, flat surfaces with no decorative shadows, small corner radii (6–8 px), a neutral grey page background with white cards, and restrained colour: navy for primary actions and selection, orange only as a status accent. The team chose it over the earlier soft neo-brutalism (thick outlines, offset shadows, rotated stickers) because it reads as more trustworthy and professional, keeps attention on the numbers, and still renders cheaply on low-end phones. Elevation (`--shadow-overlay`) is used only for layers that float above the page: toast, sheet and the sticky action bar.
+Visual style: **clean and formal**. That means thin 1 px borders in neutral grey, flat surfaces with no decorative shadows, small corner radii (6–8 px), a neutral grey page background with white cards, and the original FOODOO colours kept exactly: cream page, white cards, orange primary buttons and status fills with ink text, navy for done states and the toast, yellow for highlights and selection, sky blue for info. The team chose it over the earlier soft neo-brutalism (thick outlines, offset shadows, rotated stickers) because it reads as more trustworthy and professional, keeps attention on the numbers, and still renders cheaply on low-end phones. Elevation (`--shadow-overlay`) is used only for layers that float above the page: toast, sheet and the sticky action bar.
 
 ## 1. Brand
 
 - **Logo:** "F∞ / DOO". The word is stacked on two lines; the "OO" of FOO is drawn as an infinity loop. White letters, orange loop, on deep navy.
 - **App icon / favicon:** "FO / OD". F top-left, D bottom-right, one diagonal infinity loop through the centre. Navy rounded square, orange loop, white letters.
 - **Meaning:** the infinity loop is the daily loop of plan, sell and record. It also stands for the customers a sold-out menu hides, still being counted.
-- Build both as SVG components (`src/components/Logo.tsx`, `src/components/AppIcon.tsx`). Generate PWA icons at 192, 512 and maskable 512 from the icon SVG.
+- Build both as SVG components (`src/components/Logo.tsx`, `src/components/AppIcon.tsx`). The letters are Rubik Mono One glyph outlines stored as paths (no font is loaded at runtime), sized to match `docs/brand/FOODOO_logo.png`: in the logo, F is narrowed to about 0.93× and DOO widened to about 1.15× of the natural glyph width; in the icon both letters keep near-natural width. Both marks use one shared infinity path (`BRAND_LOOP`, stroke 50, crossing at about 41°), scaled for the logo and rotated −45° for the icon. Generate PWA icons at 192, 512 and maskable 512 from the icon SVG.
 
 ## 2. Tokens (`src/styles/tokens.css`)
 
 ```css
 :root {
   --navy: #003049;
-  --navy-hover: #002033;
-  --navy-soft: #e8eff4;
   --orange: #f77f00;
-  --orange-dark: #a14f00;
-  --orange-soft: #fff1e2;
-  --amber-soft: #fff8e1;
-  --amber-line: #d9b24c;
-  --info-soft: #eef4f8;
-  --bg: #f5f6f8;
+  --cream: #fff1dc;
   --paper: #ffffff;
-  --surface: #fafbfc;
-  --ink: #1b1f23;
-  --muted: #57606a;
+  --ink: #141414;
+  --muted: #4b4b4b;
+  --yellow: #ffd166;
+  --sky: #c6f1ff;
+  --mint: #d7f5c9;
+  --danger: #c1121f;
   --line: #d0d7de;
   --line-strong: #8c959f;
-  --danger: #c1121f;
-  --danger-hover: #9e0e19;
-  --danger-soft: #fdecee;
   --border: 1px solid var(--line);
-  --shadow-overlay: 0 8px 24px rgb(27 31 35 / 14%);
+  --shadow-overlay: 0 8px 24px rgb(20 20 20 / 14%);
   --radius: 8px;
   --radius-sm: 6px;
   --space-1: 4px;
@@ -44,13 +37,12 @@ Visual style: **clean and formal**. That means thin 1 px borders in neutral grey
   --space-6: 32px;
   --font-ui: "Space Grotesk", system-ui, sans-serif;
   --font-num: "Space Grotesk", system-ui, sans-serif;
-  --font-brand: "Rubik Mono One", "Space Grotesk", sans-serif;
 }
 ```
 
-- Fonts: Space Grotesk (500, 700) for all UI text and numbers, and Rubik Mono One for the logo wordmark only (`--font-brand`). Both are **self-hosted** in `public/fonts/` so the app works offline, and both are under the SIL Open Font License.
+- Fonts: Space Grotesk (500, 700) for all UI text and numbers, **self-hosted** in `public/fonts/` so the app works offline. The logo letters are Rubik Mono One outlines converted to SVG paths, so that font is not loaded at runtime. Both are under the SIL Open Font License.
 - Type scale: 12 (tags) / 14 / 16 (body) / 20 / 24 / 32. Portion numbers use `--font-num` (Space Grotesk 700, tabular figures) at 28–32 px.
-- **Press and hover feedback:** a colour change only, never movement. Secondary controls get a light navy tint (`--navy-soft`) on `:active` and a darker border on hover; primary and danger buttons darken.
+- **Press and hover feedback:** a colour change only, never movement. Controls get a darker border on hover and a slight darkening on `:active`.
 - Respect `prefers-reduced-motion`: no translate or toast slide animations.
 
 ## 3. Language
@@ -63,7 +55,7 @@ Visual style: **clean and formal**. That means thin 1 px borders in neutral grey
 
 - **Mobile first** (360–430 px): single column, bottom tab bar with 4 tabs (Today, Plan, Service, Close) and Settings in the header.
 - **Desktop** (≥ 1024 px): left sidebar with the same items. Content max-width 1120 px. Cards use `grid-template-columns: repeat(auto-fill, minmax(300px, 1fr))`.
-- Header on every screen: app icon, screen title, date, and a **Demo data** badge (small uppercase label, light amber fill, thin amber border, not rotated) when demo data is loaded. A thin divider line separates the header from the content.
+- Header on every screen: app icon, screen title, date, and a **Demo data** badge (yellow, thin border, not rotated) when demo data is loaded. A thin divider line separates the header from the content.
 
 ## 5. Screens
 
@@ -72,7 +64,7 @@ Every screen needs these states designed and built: **default, empty, demo, offl
 ### 5.1 Onboarding
 - Welcome: logo, one-line value statement ("Daily portion planning that counts the customers a sold-out menu hides"), buttons **Start setup** (primary) and **Try demo stall** (secondary).
 - Step 1, Menus: list of menu cards plus **Add menu**. The add/edit sheet has labelled inputs with inline validation.
-- Step 2, Hours: open and close time inputs, and the busy-hour strip (one tappable cell per hour; colours quiet = white, normal = light amber, busy = light orange with an orange border, and **each cell also shows its label text**).
+- Step 2, Hours: open and close time inputs, and the busy-hour strip (one tappable cell per hour; colours quiet = paper, normal = yellow, busy = orange, and **each cell also shows its label text**).
 - A progress indicator: "Step 1 of 2".
 
 ### 5.2 Today (home)
@@ -86,14 +78,14 @@ Every screen needs these states designed and built: **default, empty, demo, offl
 
 ### 5.4 Service
 - A two-column grid of large tiles (minimum 150 px tall).
-- Available tile: white background, menu name, "Cooked 42", and the hint "Tap when sold out".
-- Sold-out tile: light orange background with an orange border and an outlined label "SOLD OUT 10:32" in dark orange. The status text must always be present, never colour alone.
+- Available tile: paper background, menu name, "Cooked 42", and the hint "Tap when sold out".
+- Sold-out tile: orange background with a white label "SOLD OUT 10:32". The status text must always be present, never colour alone.
 - Undo toast: navy bar at the bottom with an **Undo** button, for 10 s.
 - Offline pill: "Offline. Saved on this device."
 
 ### 5.5 Close (night)
 - One row per menu: a sold-out time chip with **Edit**, or a leftover stepper.
-- The missed-sell-out prompt appears inline (light amber box with a time input).
+- The missed-sell-out prompt appears inline (yellow box with a time input).
 - An **Unusual day** checkbox with a helper text.
 - The **Close day** primary button opens a confirmation sheet listing tomorrow's suggestions.
 
@@ -114,7 +106,7 @@ A plain-language explanation with the worked example "Sold out at 10:30 → abou
 ## 7. Accessibility targets (must be measured)
 
 - Lighthouse Accessibility ≥ 95 and Best Practices ≥ 95 on Today, Plan and Service, in both mobile and desktop presets. Record the scores in the README.
-- Text contrast ≥ 4.5:1 (orange `#F77F00` is used only as a large graphic, such as the loop segment, never for text; small orange text uses `--orange-dark` `#A14F00`, which is 5.2:1 on `--orange-soft` and 5.8:1 on white).
+- Text contrast ≥ 4.5:1 (orange `#F77F00` is used only as a background with ink text, or as a large graphic, never for small text on cream or white).
 - Tap targets ≥ 48 × 48 px.
 - Real `<button>`, `<input>` with `<label>`, and `<a href>`. `aria-label` on icon-only buttons. `aria-live="polite"` on the toast.
 - Full keyboard operation on desktop with a visible focus ring (3 px navy outline with 2 px offset).

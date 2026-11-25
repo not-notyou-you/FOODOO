@@ -38,7 +38,7 @@ describe("App shell", () => {
     expect(
       await screen.findByRole("heading", {
         level: 1,
-        name: "Welcome to FOODOO",
+        name: /Cook the right amount/,
       }),
     ).toBeTruthy();
     await db.delete();

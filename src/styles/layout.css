@@ -97,20 +97,20 @@
   padding: var(--space-2) var(--space-3);
   border: 1px solid transparent;
   border-radius: var(--radius-sm);
-  color: var(--muted);
+  color: var(--ink);
   font-weight: 600;
   text-decoration: none;
 }
 
 .nav-link:hover {
-  background: var(--surface);
+  background: var(--cream);
   color: var(--ink);
 }
 
 .nav-link[aria-current="page"] {
-  border-color: var(--line);
-  background: var(--navy-soft);
-  color: var(--navy);
+  border-color: var(--line-strong);
+  background: var(--yellow);
+  color: var(--ink);
   font-weight: 700;
 }
 
@@ -136,6 +136,213 @@
   display: grid;
   gap: var(--space-3);
   width: 100%;
+}
+
+.landing {
+  display: grid;
+  gap: var(--space-6);
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: var(--space-4) var(--space-4) var(--space-6);
+}
+
+.landing__pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.landing__section {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.landing__section h2 {
+  margin: 0;
+  color: var(--navy);
+}
+
+.landing__grid {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.feature-card {
+  gap: var(--space-2);
+  align-content: start;
+}
+
+.feature-card__icon {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  background: var(--yellow);
+  color: var(--ink);
+}
+
+.feature-card__title {
+  margin: 0;
+  font-size: 18px;
+}
+
+.feature-card p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.landing__closing {
+  padding: var(--space-5) var(--space-4);
+  border-radius: var(--radius);
+  background: var(--sky);
+}
+
+.landing__closing p {
+  margin: 0;
+}
+
+@media (min-width: 720px) {
+  .landing__grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+}
+
+.landing__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.landing__top .segmented legend {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.landing__top .segmented__options {
+  flex-wrap: nowrap;
+  gap: var(--space-1);
+}
+
+.landing__top .segmented__option {
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  font-size: 14px;
+}
+
+.landing__top .segmented__option {
+  white-space: nowrap;
+}
+
+.landing__top .segmented__option input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.landing__top .segmented__option:has(input:focus-visible) {
+  outline: 3px solid var(--navy);
+  outline-offset: 2px;
+}
+
+.landing__hero {
+  display: grid;
+  gap: var(--space-4);
+  justify-items: center;
+  padding: var(--space-5) 0;
+  text-align: center;
+}
+
+.landing__headline {
+  max-width: 20ch;
+  margin: 0;
+  color: var(--navy);
+  font-size: 30px;
+  line-height: 1.15;
+}
+
+.landing__lead {
+  max-width: 52ch;
+  margin: 0;
+  font-size: 18px;
+}
+
+.landing__actions {
+  display: grid;
+  gap: var(--space-3);
+  width: 100%;
+  max-width: 440px;
+}
+
+.landing__actions .field__hint {
+  margin: 0;
+}
+
+.landing__hero .landing__pills {
+  justify-content: center;
+}
+
+.landing__example {
+  max-width: 480px;
+}
+
+.landing__example-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  font-size: 18px;
+}
+
+.landing__example-rows {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.landing__example-rows div {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: var(--border);
+}
+
+.landing__example-rows dd {
+  margin: 0;
+  font-weight: 700;
+}
+
+@media (min-width: 720px) {
+  .landing__hero {
+    padding: 48px 0;
+  }
+
+  .landing__headline {
+    font-size: 44px;
+  }
+
+  .landing__actions {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .landing__actions .field__hint,
+  .landing__actions .form__failure {
+    grid-column: 1 / -1;
+  }
 }
 
 @media (min-width: 1024px) {

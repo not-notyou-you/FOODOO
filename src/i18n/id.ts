@@ -35,7 +35,6 @@ export const id: Record<keyof typeof en, string> = {
   "lang.en": "English",
   "lang.id": "Bahasa Indonesia",
 
-  "welcome.title": "Selamat datang di FOODOO",
   "welcome.start": "Mulai pengaturan",
   "welcome.continue": "Lanjutkan pengaturan",
   "welcome.demo": "Coba warung demo",
@@ -315,4 +314,54 @@ export const id: Record<keyof typeof en, string> = {
   "settings.data.keepGranted": "Browser akan menyimpan data Anda",
   "settings.data.keepRefused":
     "Browser menolak untuk saat ini. Menambahkan FOODOO ke layar utama biasanya membantu.",
+  "landing.pillOffline": "Jalan tanpa internet",
+  "landing.pillNoAccount": "Tanpa akun",
+  "landing.pillLocal": "Data tetap di HP Anda",
+  "landing.problemTitle": "Setiap pagi selalu menebak",
+  "landing.problemWasteTitle": "Kebanyakan",
+  "landing.problemWasteBody":
+    "Porsi yang tidak laku terbuang, begitu juga uang untuk memasaknya.",
+  "landing.problemEarlyTitle": "Kekurangan",
+  "landing.problemEarlyBody":
+    "Menu habis sebelum siang dan pembeli yang datang belakangan pulang.",
+  "landing.problemHiddenTitle": "Habis menyembunyikan permintaan",
+  "landing.problemHiddenBody":
+    "Penjualan berhenti saat panci kosong, jadi catatan Anda tidak pernah menunjukkan berapa orang yang sebenarnya ingin membeli.",
+  "landing.loopTitle": "Rutinitas harian hanya beberapa menit",
+  "landing.loopPlanTitle": "Rencana pagi",
+  "landing.loopPlanBody":
+    "Lihat saran porsi tiap masakan, lalu ubah angka mana pun sesuka Anda.",
+  "landing.loopServiceTitle": "Tandai jam habis",
+  "landing.loopServiceBody": "Ketuk saat menu habis. FOODOO mencatat jamnya.",
+  "landing.loopCloseTitle": "Tutup hari",
+  "landing.loopCloseBody":
+    "Isi sisa masakan. FOODOO memperkirakan berapa orang yang ingin tiap menu.",
+  "landing.loopNextTitle": "Besok lebih tepat",
+  "landing.loopNextBody":
+    "Saran besok belajar dari hari ini, termasuk pembeli yang tidak kebagian.",
+  "landing.exampleBadge": "Contoh",
+  "landing.whyTitle": "Kenapa FOODOO berbeda",
+  "landing.whyHiddenTitle": "Menghitung pembeli yang terlewat",
+  "landing.whyHiddenBody":
+    "Memakai jam habis dan jam ramai Anda untuk memperkirakan permintaan yang tersembunyi saat menu habis.",
+  "landing.whyRulesTitle": "Aturan yang bisa dicek",
+  "landing.whyRulesBody":
+    "Tanpa model AI. Setiap angka berasal dari aturan tetap yang bisa Anda baca di aplikasi.",
+  "landing.whyOfflineTitle": "Dibuat untuk warung",
+  "landing.whyOfflineBody":
+    "Bisa dipasang seperti aplikasi dan jalan tanpa sinyal, di HP biasa.",
+  "landing.whyPrivateTitle": "Privasi sejak awal",
+  "landing.whyPrivateBody":
+    "Tanpa login, tanpa server, tanpa data pelanggan. Ekspor atau hapus semua kapan saja.",
+  "landing.closingTitle": "Siap mencoba?",
+  "landing.closingBody":
+    "Mulai dengan warung demo di bagian atas halaman ini, atau atur menu Anda sendiri.",
+  "landing.installHint":
+    "Tips: pakai “Tambahkan ke layar utama” di browser untuk membuka FOODOO seperti aplikasi.",
+  "settings.about.landing": "Tentang FOODOO",
+  "landing.headline": "Masak pas.",
+  "landing.headlineAccent": "Tidak kebanyakan, tidak kehabisan.",
+  "landing.exampleTitle": "Yang akan Anda lihat",
+  "landing.exampleCooked": "Dimasak",
+  "landing.exampleSoldOut": "Habis jam",
 };

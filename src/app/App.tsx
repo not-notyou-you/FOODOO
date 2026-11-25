@@ -67,6 +67,7 @@ export function App() {
           <Route path="/" element={<RootRedirect />} />
           <Route path="/welcome" element={<Welcome />} />
           <Route path="/how" element={<HowItWorks />} />
+          <Route path="/about" element={<Welcome about />} />
           <Route
             path="/setup/menus"
             element={

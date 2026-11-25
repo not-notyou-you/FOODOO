@@ -200,6 +200,11 @@ export function Settings() {
         <p>{t("settings.about.version", { version: __APP_VERSION__ })}</p>
         <p>{t("settings.about.body")}</p>
         <p>
+          <Link className="link-target" to="/about">
+            {t("settings.about.landing")}
+          </Link>
+        </p>
+        <p>
           <Link className="link-target" to="/how">
             {t("settings.about.how")}
           </Link>

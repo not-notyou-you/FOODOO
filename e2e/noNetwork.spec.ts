@@ -23,7 +23,7 @@ test("local fallback: every screen works with all non-local requests blocked", a
 
   await page.goto("/");
   await expect(
-    page.getByRole("heading", { level: 1, name: "Welcome to FOODOO" }),
+    page.getByRole("heading", { level: 1, name: /Cook the right amount/ }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Try demo stall" }).click();
   await expect(

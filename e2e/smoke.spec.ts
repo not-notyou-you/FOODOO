@@ -7,7 +7,7 @@ test("demo stall loads, installs its service worker, and survives an offline rel
 }) => {
   await page.goto("/");
   await expect(
-    page.getByRole("heading", { level: 1, name: "Welcome to FOODOO" }),
+    page.getByRole("heading", { level: 1, name: /Cook the right amount/ }),
   ).toBeVisible();
   await expect(page.getByRole("button", { name: "Start setup" })).toBeVisible();
 
@@ -58,4 +58,23 @@ test("web manifest is installable", async ({ page, request }) => {
     "512x512",
     "512x512",
   ]);
+});
+
+test("landing page tells the story and fits a 360 px phone", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 360, height: 740 });
+  await page.goto("/");
+  for (const name of [
+    "Every morning is a guess",
+    "A daily loop that takes minutes",
+    "What you will see",
+    "Why FOODOO is different",
+  ]) {
+    await expect(page.getByRole("heading", { level: 2, name })).toBeVisible();
+  }
+  const overflow = await page.evaluate(
+    () => document.documentElement.scrollWidth > window.innerWidth,
+  );
+  expect(overflow).toBe(false);
 });

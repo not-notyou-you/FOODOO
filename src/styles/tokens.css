@@ -6,36 +6,21 @@
   src: url("/fonts/SpaceGrotesk-latin.woff2") format("woff2");
 }
 
-@font-face {
-  font-family: "Rubik Mono One";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("/fonts/RubikMonoOne-latin.woff2") format("woff2");
-}
-
 :root {
   --navy: #003049;
-  --navy-hover: #002033;
-  --navy-soft: #e8eff4;
   --orange: #f77f00;
-  --orange-dark: #a14f00;
-  --orange-soft: #fff1e2;
-  --amber-soft: #fff8e1;
-  --amber-line: #d9b24c;
-  --info-soft: #eef4f8;
-  --bg: #f5f6f8;
+  --cream: #fff1dc;
   --paper: #ffffff;
-  --surface: #fafbfc;
-  --ink: #1b1f23;
-  --muted: #57606a;
+  --ink: #141414;
+  --muted: #4b4b4b;
+  --yellow: #ffd166;
+  --sky: #c6f1ff;
+  --mint: #d7f5c9;
+  --danger: #c1121f;
   --line: #d0d7de;
   --line-strong: #8c959f;
-  --danger: #c1121f;
-  --danger-hover: #9e0e19;
-  --danger-soft: #fdecee;
   --border: 1px solid var(--line);
-  --shadow-overlay: 0 8px 24px rgb(27 31 35 / 14%);
+  --shadow-overlay: 0 8px 24px rgb(20 20 20 / 14%);
   --radius: 8px;
   --radius-sm: 6px;
   --space-1: 4px;
@@ -46,5 +31,4 @@
   --space-6: 32px;
   --font-ui: "Space Grotesk", system-ui, sans-serif;
   --font-num: "Space Grotesk", system-ui, sans-serif;
-  --font-brand: "Rubik Mono One", "Space Grotesk", sans-serif;
 }

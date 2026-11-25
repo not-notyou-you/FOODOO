@@ -624,3 +624,34 @@ All versions are exact and in the lockfile. Where we are not on the newest relea
   - Lighthouse rerun on the new build: Accessibility and Best practices 100 on every measured page, mobile and desktop (`docs/LIGHTHOUSE.md`)
   - lint, 28 of 28 unit test files, build and 6 of 6 e2e tests pass
 - **Environment note:** the C: drive of the measuring laptop is full, which crashes Vitest's default process pool (`ERR_IPC_CHANNEL_CLOSED`). Unit tests were run with `--pool=threads`, and Playwright and Lighthouse with temporary files on `D:\try\.foodoo-measure`. Free space on C: before running `npm test` as normal.
+
+### D-074 Logo and app icon rebuilt to match the team's brand sheet (Vassel, Sonny)
+
+- **Decision:** the logo and app icon now follow `docs/brand/FOODOO_logo.png` closely, replacing the D-046 approximation:
+  - the sheet was measured in pixels (letter boxes, loop extents, stroke thickness) and mapped into each mark's coordinate space
+  - one infinity curve (`BRAND_LOOP` in `AppIcon.tsx`, four cubic Bézier segments per lobe pair) was fitted to the measured centre line; the largest error is about 1 px in the 512 icon space. The logo uses it scaled by 0.9415; the icon uses it rotated by −45°. Stroke 50 in both, as on the sheet
+  - the letters are Rubik Mono One glyph outlines converted to SVG paths with the measured scale: in the logo F is narrowed and DOO widened, as on the sheet; in the icon F and D keep near-natural width
+  - Rubik Mono One is therefore no longer loaded at runtime: its `@font-face`, its token and the woff2 file were removed. The OFL licence text stays, because the outlines come from it
+  - `public/icons/icon.svg` uses the same paths, and `npm run icons` re-rendered the 192, 512 and maskable PNGs. The maskable mark stays inside the safe zone
+- **Alternatives considered:** keeping `<text>` with `textLength` (D-046), which distorted the glyphs and depended on the font loading; embedding the PNG (blurry at small sizes, heavier, and not themeable); tracing the PNG automatically (rough edges and a heavy path).
+- **Not copied:** the sheet's "PLAN · SELL · RECORD" line and labels belong to the presentation card, not to the mark, so they are not part of `Logo`.
+- **Evidence:** a side-by-side render against the sheet; lint, 28 of 28 unit test files and 6 of 6 e2e tests pass.
+
+### D-075 Original colours restored on the clean style (Vassel)
+
+- **Decision:** the team kept the thin-border, flat, small-radius style of D-073 but asked for the original colours exactly. Every element now has its earlier fill and text colour: cream page, orange primary buttons, current phase, sold-out tiles and busy cells with ink text; navy done states and toast; yellow sticker, active tab, selected options, edited tag, prompts and notices; sky info notes, step pill and estimate label. The pale tints and dark-orange text from D-073 were removed.
+- **What stays from D-073:** 1 px grey borders, no offset shadows, no rotation or press translate, 6 to 8 px radii, Space Grotesk numbers.
+- **Accessibility:** these are the colour pairs that already scored 100 in the earlier Lighthouse runs; ink on orange is above 4.5:1.
+
+### D-076 Landing page replaces the small welcome card (Vassel, Sonny)
+
+- **Decision:** a new user opening FOODOO now sees a scrolling landing page, not a small card. It has six parts: a top bar with a small logo and the language switch, then a cream hero with the headline, the start and demo buttons side by side on wider screens, and three pills, three problem cards, the four-step daily loop, an example card, four reasons FOODOO is different, and a closing call to action. Users who have finished setup still go straight to Today. Settings links to `/about`, which shows the same page with a "Back to the app" button, for demos to judges.
+- **No invented numbers:** the example card shows `workedExample()` values from `src/domain/explain.ts`, labelled "Example", and the demand uses the "estimate" label. The page has no user counts, testimonials or typed-in backtest figures.
+- **Alternatives considered:** a separate marketing site, which would need network access and a second deploy; a page that shows every time, which would slow the stall owner's morning routine.
+- **Evidence:** lint passes, 28 of 28 unit test files pass, and 7 of 7 e2e tests pass. The new e2e test checks the section headings and confirms there is no horizontal scroll at 360 px.
+
+### D-077 Figure-8 graphic removed from Today; landing top bar compacted (Vassel)
+
+- **Decision:** the figure-8 drawing above the phase steps on Today was removed. Team review found it hard to read: the right loop was split into Service (top) and Close (bottom) with no arrows, and it repeated the three step boxes below it. `LoopProgress` now shows only the Plan, Service and Close boxes with Done, Now and Next. The figure-8 stays in the logo.
+- **Landing layout:** the logo is smaller and shares one row with a compact language switch. Its legend and radio dots are hidden visually but stay available to screen readers and the keyboard. The hero content is centred. No content was added.
+- **Alternatives considered:** a linear Plan → Service → Close arrow strip (it would still repeat the boxes); keeping the drawing as a brand element (it was not understood).

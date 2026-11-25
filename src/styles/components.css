@@ -28,14 +28,14 @@
 }
 
 .btn--primary {
-  border-color: var(--navy);
-  background: var(--navy);
-  color: var(--paper);
+  border-color: var(--orange);
+  background: var(--orange);
+  color: var(--ink);
 }
 
 .btn--primary:hover:not(:disabled) {
-  border-color: var(--navy-hover);
-  background: var(--navy-hover);
+  border-color: var(--ink);
+  background: var(--orange);
 }
 
 .btn--secondary {
@@ -45,7 +45,7 @@
 
 .btn--secondary:hover:not(:disabled) {
   border-color: var(--line-strong);
-  background: var(--surface);
+  background: var(--paper);
 }
 
 .btn--danger {
@@ -55,8 +55,8 @@
 }
 
 .btn--danger:hover:not(:disabled) {
-  border-color: var(--danger-hover);
-  background: var(--danger-hover);
+  border-color: var(--ink);
+  background: var(--danger);
 }
 
 .btn--wide {
@@ -69,7 +69,7 @@
 }
 
 .btn--secondary:active:not(:disabled) {
-  background: var(--navy-soft);
+  filter: brightness(0.95);
 }
 
 .btn--primary:active:not(:disabled),
@@ -79,7 +79,7 @@
 
 .btn:disabled {
   border-color: var(--line);
-  background: var(--bg);
+  background: var(--cream);
   color: var(--muted);
   cursor: not-allowed;
 }
@@ -99,11 +99,11 @@
 
 .icon-btn:hover {
   border-color: var(--line-strong);
-  background: var(--surface);
+  background: var(--paper);
 }
 
 .icon-btn:active {
-  background: var(--navy-soft);
+  filter: brightness(0.95);
 }
 
 .icon {
@@ -113,9 +113,9 @@
 .sticker {
   flex: none;
   padding: 2px var(--space-2);
-  border: 1px solid var(--amber-line);
+  border: 1px solid var(--line-strong);
   border-radius: var(--radius-sm);
-  background: var(--amber-soft);
+  background: var(--yellow);
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -135,7 +135,7 @@
 }
 
 .pill--offline {
-  background: var(--info-soft);
+  background: var(--sky);
 }
 
 .toast-region {
@@ -173,14 +173,15 @@
   padding: var(--space-2) var(--space-4);
   border: 1px solid var(--paper);
   border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--paper);
+  background: var(--yellow);
+  color: var(--ink);
   font-weight: 700;
   cursor: pointer;
 }
 
 .toast__action:hover {
-  background: rgb(255 255 255 / 12%);
+  background: var(--yellow);
+  filter: brightness(0.95);
 }
 
 body:has(.action-bar) .toast-region {
@@ -260,9 +261,9 @@ body:has(.action-bar) .toast-region {
 
 .form__failure {
   padding: var(--space-3);
-  border: 1px solid var(--danger);
+  border: var(--border);
   border-radius: var(--radius-sm);
-  background: var(--danger-soft);
+  background: var(--paper);
   color: var(--danger);
   font-weight: 600;
 }
@@ -355,13 +356,13 @@ body:has(.action-bar) .toast-region {
 }
 
 .busy__cell--normal {
-  border-color: var(--amber-line);
-  background: var(--amber-soft);
+  border-color: var(--line);
+  background: var(--yellow);
 }
 
 .busy__cell--busy {
-  border-color: var(--orange-dark);
-  background: var(--orange-soft);
+  border-color: var(--line);
+  background: var(--orange);
 }
 
 .busy__hour {
@@ -397,9 +398,9 @@ body:has(.action-bar) .toast-region {
 }
 
 .segmented__option:has(input:checked) {
-  border-color: var(--navy);
-  background: var(--navy-soft);
-  color: var(--navy);
+  border-color: var(--line-strong);
+  background: var(--yellow);
+  color: var(--ink);
 }
 
 .segmented__option input {
@@ -466,11 +467,13 @@ body:has(.action-bar) .toast-region {
 
 .step {
   width: fit-content;
-  color: var(--muted);
+  color: var(--ink);
   font-size: 14px;
   font-weight: 600;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
+  padding: var(--space-1) var(--space-3);
+  border: var(--border);
+  border-radius: 999px;
+  background: var(--sky);
 }
 
 .empty-state {
@@ -503,52 +506,6 @@ body:has(.action-bar) .toast-region {
   margin: 0;
 }
 
-.loop__graphic {
-  width: 100%;
-  max-width: 420px;
-  margin: 0 auto;
-}
-
-.loop__outline {
-  fill: none;
-  stroke: var(--line-strong);
-  stroke-width: 18;
-  stroke-linecap: butt;
-}
-
-.loop__fill {
-  fill: none;
-  stroke-width: 16;
-  stroke-linecap: butt;
-}
-
-.loop__segment--done .loop__fill {
-  stroke: var(--navy);
-}
-
-.loop__segment--done .loop__outline {
-  stroke: var(--navy);
-}
-
-.loop__segment--current .loop__fill {
-  stroke: var(--orange);
-}
-
-.loop__segment--current .loop__outline {
-  stroke: var(--orange-dark);
-}
-
-.loop__segment--next .loop__fill {
-  stroke: var(--paper);
-}
-
-.loop__label {
-  fill: var(--ink);
-  font-family: var(--font-ui);
-  font-size: 15px;
-  font-weight: 600;
-}
-
 .loop__steps {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -575,12 +532,12 @@ body:has(.action-bar) .toast-region {
 }
 
 .loop__step--current {
-  border-color: var(--orange-dark);
-  background: var(--orange-soft);
+  border-color: var(--line);
+  background: var(--orange);
 }
 
 .loop__step--next {
-  color: var(--muted);
+  color: var(--ink);
 }
 
 .loop__step-name {
@@ -613,7 +570,7 @@ body:has(.action-bar) .toast-region {
 }
 
 .counts__item dt {
-  color: var(--muted);
+  color: var(--ink);
   font-size: 14px;
   font-weight: 600;
 }
@@ -631,16 +588,14 @@ body:has(.action-bar) .toast-region {
 .note--info {
   padding: var(--space-3) var(--space-4);
   border: var(--border);
-  border-left: 3px solid var(--navy);
   border-radius: var(--radius-sm);
-  background: var(--info-soft);
+  background: var(--sky);
   font-weight: 500;
 }
 
 .notice {
-  border-color: var(--amber-line);
-  border-left: 3px solid var(--amber-line);
-  background: var(--amber-soft);
+  border-color: var(--line);
+  background: var(--yellow);
 }
 
 .notice ul {
@@ -677,8 +632,8 @@ body:has(.action-bar) .toast-region {
   height: 48px;
   border: var(--border);
   border-radius: var(--radius-sm);
-  background: var(--bg);
-  color: var(--muted);
+  background: var(--cream);
+  color: var(--ink);
   font-family: var(--font-ui);
   font-size: 20px;
   font-weight: 700;
@@ -713,7 +668,7 @@ body:has(.action-bar) .toast-region {
   padding: 0 var(--space-2);
   border: var(--border);
   border-radius: var(--radius-sm);
-  color: var(--muted);
+  color: var(--ink);
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.02em;
@@ -721,8 +676,8 @@ body:has(.action-bar) .toast-region {
 }
 
 .tag--edited {
-  border-color: var(--amber-line);
-  background: var(--amber-soft);
+  border-color: var(--line);
+  background: var(--yellow);
   color: var(--ink);
 }
 
@@ -749,15 +704,15 @@ body:has(.action-bar) .toast-region {
 
 .stepper__btn:hover:not(:disabled) {
   border-color: var(--line-strong);
-  background: var(--surface);
+  background: var(--paper);
 }
 
 .stepper__btn:active:not(:disabled) {
-  background: var(--navy-soft);
+  filter: brightness(0.95);
 }
 
 .stepper__btn:disabled {
-  background: var(--bg);
+  background: var(--cream);
   color: var(--muted);
   cursor: not-allowed;
 }
@@ -835,7 +790,7 @@ body:has(.action-bar) .toast-region {
 }
 
 .service-tile:active:not(:disabled) {
-  background: var(--navy-soft);
+  filter: brightness(0.95);
 }
 
 .service-tile:disabled {
@@ -843,8 +798,8 @@ body:has(.action-bar) .toast-region {
 }
 
 .service-tile--soldout {
-  border-color: var(--orange-dark);
-  background: var(--orange-soft);
+  border-color: var(--line);
+  background: var(--orange);
 }
 
 .service-tile__name {
@@ -858,7 +813,6 @@ body:has(.action-bar) .toast-region {
 }
 
 .service-tile__hint {
-  color: var(--muted);
   font-size: 14px;
 }
 
@@ -868,10 +822,10 @@ body:has(.action-bar) .toast-region {
 
 .stamp {
   padding: 2px var(--space-2);
-  border: 1px solid var(--orange-dark);
+  border: var(--border);
   border-radius: var(--radius-sm);
   background: var(--paper);
-  color: var(--orange-dark);
+  color: var(--ink);
   font-size: 14px;
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -906,9 +860,9 @@ body:has(.action-bar) .toast-region {
 
 .chip {
   padding: var(--space-1) var(--space-3);
-  border: 1px solid var(--orange-dark);
+  border: var(--border);
   border-radius: 999px;
-  background: var(--orange-soft);
+  background: var(--orange);
   font-weight: 600;
 }
 
@@ -916,10 +870,9 @@ body:has(.action-bar) .toast-region {
   display: grid;
   gap: var(--space-2);
   padding: var(--space-3);
-  border: 1px solid var(--amber-line);
-  border-left-width: 3px;
+  border: var(--border);
   border-radius: var(--radius-sm);
-  background: var(--amber-soft);
+  background: var(--yellow);
 }
 
 .prompt .field__hint {
@@ -1015,7 +968,7 @@ body:has(.action-bar) .toast-region {
   padding: 0 var(--space-2);
   border: var(--border);
   border-radius: var(--radius-sm);
-  background: var(--info-soft);
+  background: var(--sky);
 }
 
 @media (min-width: 600px) {
@@ -1077,7 +1030,7 @@ body:has(.action-bar) .toast-region {
   padding: var(--space-3) var(--space-4);
   border: var(--border);
   border-radius: var(--radius-sm);
-  background: var(--surface);
+  background: var(--cream);
   font-weight: 600;
 }
 
