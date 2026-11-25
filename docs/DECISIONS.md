@@ -161,3 +161,55 @@ All versions are exact and in the lockfile. Where we are not on the newest relea
 - **Observed:** from a shell that reports the project path as `d:/...`, Vitest's V8 coverage lists every domain file twice, the second time at 0%, and the 100% gate fails although all tests pass. From `D:\...` (PowerShell, VS Code) it reports 100%.
 - **Tried:** setting Vite `root` to the real path. It broke test discovery, so it was reverted.
 - **Decision:** documented in the README setup section. Linux CI is not affected.
+
+## Phase F1 review (Stage 2, 2026-11-25)
+
+### D-025 Health check and review outcome (Hakim, Sonny)
+
+- **Checked first:** `npm run lint`, `npm run test:coverage` (66 tests, 100% on `src/domain`), type-check of both TypeScript projects, and `npm run build` all passed before any change. Nothing was broken.
+- **Reviewed:** every function in `src/domain/` against `SPEC.md` section 6, the generator against section 7, the backtest against section 8, and the metrics against section 9 and proposal section 6.1. The rounding, integer arithmetic, history selection, cold start and clamping match the spec. No T1 to T16 expected value changed.
+- **Fixed:** the true demand could reach the app through the demo object (D-029), weekly metrics had no per-menu breakdown (D-030), and `estimateDemand` accepted impossible inputs (D-031). Added a diagnostic and a per-menu table to the backtest (D-032). The coverage report no longer lists `types.ts`, which holds only types and showed a misleading "0" row; the 100% gate is unchanged.
+
+### D-026 How the generator samples arrival times (Hakim)
+
+- **Decision:** for each customer, pick an opening hour with probability equal to its busy weight divided by the total weight, then a uniform minute inside that hour. Sort the times. Customer number cooked + 1 sets the sell-out time.
+- **Why:** this is exactly the "weights per hour, even spread inside the hour" model that `arrivalShare` assumes, so the demo and the estimator describe the same world. The backtest limitations say plainly that this flatters the estimator.
+- **Known gap:** an opening time that is not on the hour (for example 06:30) is not scaled by open minutes in the generator. The demo profile is on the hour, so it has no effect.
+
+### D-027 What "delta" is compared against (Hakim)
+
+- **Decision (unchanged from D-020, explained):** in the `history` case, delta = suggestion minus the cooked quantity of the newest day in the history actually used. With same-weekday history this is last week's same weekday, so "Sold out on 3 of the last 6 Mondays, +5" means "5 more than last Monday". With the 14-day fallback it is the most recent eligible day. In the cold-start cases it is the suggestion minus the usual quantity.
+- **Alternative:** compare with yesterday. Rejected because yesterday may be a different weekday from the history the sentence talks about.
+
+### D-028 How the backtest's FOODOO policy builds its history (Hakim)
+
+- **Decision:** FOODOO starts with no history, like a new user, so it runs the cold-start rule at first. Weeks 1 and 2 are warm-up and are not scored. After each simulated day it stores only what the app would record: cooked, leftover, sell-out time, and the `estimateDemand` result from those. It never reads the true demand. It always cooks exactly its suggestion. Unusual days are flagged, skipped by `suggestQty`, and still scored.
+- **Alternative:** start FOODOO with the 56-day demo history. Rejected because that history was made with knowledge of the generator and would hide the cold-start period.
+
+### D-029 True demand removed from the demo history object (Hakim)
+
+- **Decision:** `generateDemoHistory` now returns only `stallName`, `settings`, `menus`, `days` and `menuDays`, exactly what an owner could have recorded. The true demand exists only inside `drawDay`, which only the backtest script uses. A test fails if any other key appears.
+- **Why:** the F2 seeder will store this object. Before, it also carried a `truth` array, so a careless seeder could have written the true demand into IndexedDB.
+
+### D-030 Weekly metric definitions (Hakim)
+
+- **Window:** the chosen end date and the 6 days before it, counting only closed, normal days. `SPEC.md` WS-1 says "last 7 days"; the proposal says "7 closed, normal days". The spec has higher authority, so a week with 2 unclosed days has 5 counted days, not 7 reached further back.
+- **Definitions:** leftovers = sum of recorded leftovers. Sell-out frequency = menu-days with a sell-out time divided by menu-days. Estimated lost sales = sum of max(0, estimated demand minus cooked) on sold-out days. Acceptance = menu-days where cooked equals suggested, divided by menu-days that had a suggestion (`null` when there were none, so the UI shows a dash, not 0%).
+- **Per menu:** `weeklyMetrics` now returns the same figures per menu in `byMenu`, as proposal section 6.1 promises ("per menu and in total"). The weekly summary screen (R1) is still untouched for Final Day.
+- **Input time** is measured during owner testing, not computed by the domain.
+
+### D-031 `estimateDemand` rejects impossible inputs (Hakim)
+
+- **Decision:** a cooked quantity that is negative or not an integer, or a leftover outside 0 to cooked, throws `RangeError`.
+- **Why:** before, leftover 15 of 10 cooked produced a demand of minus 5 that would enter the history silently. This follows D-017: bad data fails loudly. The Close screen limits the stepper to 0 to cooked anyway (CL-2).
+
+### D-032 Backtest diagnostic and per-menu tables (Hakim)
+
+- **Decision:** the main table stays Baseline vs FOODOO, as `SPEC.md` section 8 asks. A third policy, "FOODOO without sell-out correction", runs the same rule on the same days but records a sold-out day as demand = sales. A per-menu table shows where gains and losses come from.
+- **Why:** the product's central claim is that correcting sold-out days matters. Comparing FOODOO with the same rule without the correction measures that claim directly. It is a diagnostic in the report, not a product feature.
+- **What it showed:** with the correction, FOODOO loses fewer sales, sells out on fewer menu-days and makes more profit, but has clearly more leftovers than the uncorrected rule. Both are reported; the exact figures live only in the generated `docs/BACKTEST.md`. Per menu, FOODOO is ahead of Baseline on profit for all four menus but worse on some single metrics (for example more Nasi Uduk leftovers, more Ayam Goreng and Sayur Lodeh sell-outs).
+
+### D-033 Open item for F2: reason wording on the 14-day fallback (Vassel, Sonny)
+
+- **Problem:** the spec's text "Sold out on {n} of the last {m} {weekday}s" is wrong when `suggestQty` fell back to the latest 14 days of any weekday. The `Reason` type in `SPEC.md` section 6.1 has no field saying which history was used.
+- **Not changed now:** fixing it means adding a field to a type the spec defines exactly. The team should decide before F2, for example by adding `scope: "weekday" | "recent"` to `Reason` and updating `SPEC.md`.
