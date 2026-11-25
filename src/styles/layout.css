@@ -1,0 +1,179 @@
+.layout {
+  min-height: 100vh;
+}
+
+.layout__content {
+  padding-bottom: 96px;
+}
+
+.screen {
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: var(--space-4);
+}
+
+.screen--narrow {
+  max-width: 720px;
+}
+
+.screen__main {
+  display: grid;
+  gap: var(--space-5);
+  padding-top: var(--space-5);
+}
+
+.header {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.header__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.header__titles {
+  flex: 1;
+  min-width: 0;
+}
+
+.header__date {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.header__settings {
+  margin-left: auto;
+}
+
+.tab-bar {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 20;
+  border-top: var(--border);
+  background: var(--paper);
+}
+
+.tab-bar__list {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  margin: 0;
+  padding: var(--space-1);
+  list-style: none;
+}
+
+.tab-bar .nav-link {
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  min-height: 64px;
+  font-size: 14px;
+}
+
+.sidebar {
+  display: none;
+}
+
+.sidebar__list {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nav-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 48px;
+  padding: var(--space-2);
+  border: 3px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.nav-link[aria-current="page"] {
+  border-color: var(--ink);
+  background: var(--yellow);
+}
+
+.nav-link__soon {
+  padding: 0 var(--space-1);
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  background: var(--paper);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.welcome {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  padding: var(--space-4);
+}
+
+.welcome__card {
+  justify-items: center;
+  width: 100%;
+  max-width: 480px;
+  text-align: center;
+}
+
+.welcome__title {
+  font-size: 24px;
+}
+
+.welcome__actions {
+  display: grid;
+  gap: var(--space-3);
+  width: 100%;
+}
+
+@media (min-width: 1024px) {
+  .layout {
+    display: grid;
+    grid-template-columns: 248px 1fr;
+  }
+
+  .layout__content {
+    padding-bottom: var(--space-6);
+  }
+
+  .tab-bar {
+    display: none;
+  }
+
+  .sidebar {
+    position: sticky;
+    top: 0;
+    display: grid;
+    align-content: start;
+    gap: var(--space-5);
+    height: 100vh;
+    padding: var(--space-5) var(--space-4);
+    border-right: var(--border);
+    background: var(--paper);
+  }
+
+  .header .header__settings,
+  .layout .header .app-icon {
+    display: none;
+  }
+
+  .screen {
+    padding: var(--space-5) var(--space-6);
+  }
+
+  h1 {
+    font-size: 32px;
+  }
+}

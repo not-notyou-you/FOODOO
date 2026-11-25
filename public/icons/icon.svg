@@ -1,15 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="FOODOO">
-  <rect width="512" height="512" rx="96" fill="#003049" />
+  <rect width="512" height="512" rx="112" fill="#003049" />
   <path
     d="M256 256 C 300 190, 410 190, 410 256 C 410 322, 300 322, 256 256 C 212 190, 102 190, 102 256 C 102 322, 212 322, 256 256 Z"
     fill="none"
     stroke="#f77f00"
-    stroke-width="26"
+    stroke-width="44"
     stroke-linejoin="round"
-    transform="rotate(-35 256 256)"
+    transform="rotate(-45 256 256)"
   />
-  <g fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="130">
-    <text x="48" y="168">FO</text>
-    <text x="268" y="464">OD</text>
-  </g>
+  <path d="M88 80 H236 V132 H146 V158 H216 V206 H146 V244 H88 Z" fill="#ffffff" />
+  <path
+    d="M292 296 H352 A76 76 0 0 1 352 448 H292 Z M340 340 H352 A32 32 0 0 1 352 404 H340 Z"
+    fill="#ffffff"
+    fill-rule="evenodd"
+  />
 </svg>
