@@ -1,0 +1,41 @@
+@font-face {
+  font-family: "Space Grotesk";
+  font-style: normal;
+  font-weight: 500 700;
+  font-display: swap;
+  src: url("/fonts/SpaceGrotesk-latin.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Rubik Mono One";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/RubikMonoOne-latin.woff2") format("woff2");
+}
+
+:root {
+  --navy: #003049;
+  --orange: #f77f00;
+  --cream: #fff1dc;
+  --paper: #ffffff;
+  --ink: #141414;
+  --muted: #4b4b4b;
+  --yellow: #ffd166;
+  --sky: #c6f1ff;
+  --mint: #d7f5c9;
+  --danger: #c1121f;
+  --border: 3px solid var(--ink);
+  --shadow: 6px 6px 0 var(--ink);
+  --shadow-sm: 4px 4px 0 var(--ink);
+  --radius: 14px;
+  --radius-sm: 10px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --font-ui: "Space Grotesk", system-ui, sans-serif;
+  --font-num: "Rubik Mono One", "Space Grotesk", sans-serif;
+}
