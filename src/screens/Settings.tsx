@@ -7,6 +7,7 @@ import { useToast } from "../app/toast.ts";
 import { Button } from "../components/Button.tsx";
 import { HoursEditor } from "../components/HoursEditor.tsx";
 import { LanguageSwitch } from "../components/LanguageSwitch.tsx";
+import { ExportImportPanel } from "../components/ExportImportPanel.tsx";
 import { MenuManager } from "../components/MenuManager.tsx";
 import { Screen } from "../components/Screen.tsx";
 import { Sheet } from "../components/Sheet.tsx";
@@ -148,6 +149,8 @@ export function Settings() {
         <h2 id="set-data">{t("settings.data.title")}</h2>
         <p>{t("settings.data.onDevice")}</p>
         <StorageStatus />
+        <ExportImportPanel />
+        <h3 className="transfer__head">{t("transfer.manage.title")}</h3>
         <div className="settings-actions">
           {isDemo ? (
             <>

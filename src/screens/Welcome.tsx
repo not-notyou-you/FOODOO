@@ -5,6 +5,7 @@ import { useLocalStamp } from "../app/clock.ts";
 import { DEMO_SCENARIO } from "../app/demoConfig.ts";
 import { useToast } from "../app/toast.ts";
 import { Button } from "../components/Button.tsx";
+import { ExportImportPanel } from "../components/ExportImportPanel.tsx";
 import { EstimateValue } from "../components/EstimateValue.tsx";
 import { FeatureCard } from "../components/FeatureCard.tsx";
 import { ClockIcon } from "../components/icons/ClockIcon.tsx";
@@ -120,6 +121,7 @@ export function Welcome({ about = false }: WelcomeProps) {
           {t("common.saveFailed")}
         </p>
       ) : null}
+      <ExportImportPanel showExport={false} />
     </div>
   );
 

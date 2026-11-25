@@ -1,6 +1,13 @@
 // tests/domain/metrics.test.ts
 import { describe, expect, it } from "vitest";
-import { weeklyMetrics } from "../../src/domain/metrics.ts";
+import {
+  dayRows,
+  menuSeries,
+  menuTotals,
+  pastDays,
+  soldPortions,
+  weeklyMetrics,
+} from "../../src/domain/metrics.ts";
 import { makeDay, makeMenuDay } from "../helpers.ts";
 
 describe("weeklyMetrics", () => {
@@ -133,5 +140,166 @@ describe("weeklyMetrics", () => {
     expect(weeklyMetrics(menuDays, days, "2026-02-10").estimatedLostSales).toBe(
       0,
     );
+  });
+});
+
+describe("soldPortions", () => {
+  it("counts every cooked portion as sold on a sold-out day", () => {
+    expect(
+      soldPortions(
+        makeMenuDay("2026-02-10", { cookedQty: 42, soldOutAt: "10:30" }),
+      ),
+    ).toBe(42);
+  });
+
+  it("subtracts the leftover, and is unknown when the leftover is missing", () => {
+    expect(
+      soldPortions(makeMenuDay("2026-02-10", { cookedQty: 31, leftover: 3 })),
+    ).toBe(28);
+    expect(
+      soldPortions(makeMenuDay("2026-02-10", { leftover: null })),
+    ).toBeNull();
+  });
+});
+
+describe("WS-2 menuTotals", () => {
+  it("sums closed usual days in the window per menu and flags estimates", () => {
+    const days = [
+      makeDay("2026-02-03", 2),
+      makeDay("2026-02-09", 1),
+      makeDay("2026-02-10", 2),
+      makeDay("2026-02-08", 0, { unusual: true }),
+    ];
+    const menuDays = [
+      makeMenuDay("2026-02-03", { cookedQty: 99, leftover: 9 }),
+      makeMenuDay("2026-02-08", { cookedQty: 99, leftover: 9 }),
+      makeMenuDay("2026-02-09", {
+        cookedQty: 40,
+        leftover: 4,
+        estimatedDemand: 36,
+      }),
+      makeMenuDay("2026-02-10", {
+        cookedQty: 42,
+        soldOutAt: "10:30",
+        leftover: 0,
+        estimatedDemand: 81,
+        demandIsEstimate: true,
+      }),
+      makeMenuDay("2026-02-10", {
+        menuId: "ayam-goreng",
+        cookedQty: 30,
+        leftover: null,
+        estimatedDemand: null,
+      }),
+    ];
+    expect(menuTotals(menuDays, days, "2026-02-10")).toEqual({
+      "nasi-uduk": {
+        days: 2,
+        cooked: 82,
+        sold: 78,
+        leftover: 4,
+        demand: 117,
+        demandHasEstimate: true,
+      },
+      "ayam-goreng": {
+        days: 1,
+        cooked: 30,
+        sold: 0,
+        leftover: 0,
+        demand: 0,
+        demandHasEstimate: false,
+      },
+    });
+  });
+});
+
+describe("WS-3 menuSeries", () => {
+  it("returns one row per counted day for the menu, oldest first", () => {
+    const days = [
+      makeDay("2026-02-10", 2),
+      makeDay("2026-02-09", 1),
+      makeDay("2026-02-08", 0, { closed: false }),
+    ];
+    const menuDays = [
+      makeMenuDay("2026-02-10", {
+        cookedQty: 42,
+        soldOutAt: "10:30",
+        estimatedDemand: 81,
+        demandIsEstimate: true,
+      }),
+      makeMenuDay("2026-02-09", { cookedQty: 40, leftover: 2 }),
+      makeMenuDay("2026-02-08", { cookedQty: 40 }),
+      makeMenuDay("2026-02-10", { menuId: "ayam-goreng" }),
+    ];
+    expect(menuSeries(menuDays, days, "nasi-uduk", "2026-02-10")).toEqual([
+      {
+        date: "2026-02-09",
+        cooked: 40,
+        sold: 38,
+        leftover: 2,
+        soldOutAt: null,
+        demand: 40,
+        isEstimate: false,
+      },
+      {
+        date: "2026-02-10",
+        cooked: 42,
+        sold: 42,
+        leftover: 0,
+        soldOutAt: "10:30",
+        demand: 81,
+        isEstimate: true,
+      },
+    ]);
+  });
+
+  it("does not flag a missing demand as an estimate", () => {
+    expect(
+      dayRows([
+        makeMenuDay("2026-02-10", {
+          estimatedDemand: null,
+          demandIsEstimate: true,
+        }),
+      ])[0]?.isEstimate,
+    ).toBe(false);
+  });
+});
+
+describe("pastDays", () => {
+  it("lists every recorded day up to the end date, newest first", () => {
+    const days = [
+      makeDay("2026-02-09", 1),
+      makeDay("2026-02-10", 2, { closed: false, unusual: true }),
+      makeDay("2026-02-12", 4),
+    ];
+    const menuDays = [
+      makeMenuDay("2026-02-09", { cookedQty: 40, soldOutAt: "10:00" }),
+      makeMenuDay("2026-02-09", { menuId: "ayam-goreng", cookedQty: 30 }),
+      makeMenuDay("2026-02-11", { cookedQty: 12 }),
+      makeMenuDay("2026-02-12", { cookedQty: 50 }),
+    ];
+    expect(pastDays(days, menuDays, "2026-02-11")).toEqual([
+      {
+        date: "2026-02-11",
+        closed: false,
+        unusual: false,
+        portions: 12,
+        soldOutCount: 0,
+      },
+      {
+        date: "2026-02-10",
+        closed: false,
+        unusual: true,
+        portions: 0,
+        soldOutCount: 0,
+      },
+      {
+        date: "2026-02-09",
+        closed: true,
+        unusual: false,
+        portions: 70,
+        soldOutCount: 1,
+      },
+    ]);
   });
 });
