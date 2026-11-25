@@ -2,6 +2,7 @@
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLocalStamp } from "../app/clock.ts";
+import { DEMO_SCENARIO } from "../app/demoConfig.ts";
 import { useToast } from "../app/toast.ts";
 import { Button } from "../components/Button.tsx";
 import { HoursEditor } from "../components/HoursEditor.tsx";
@@ -30,6 +31,7 @@ export const README_URL = "https://github.com/not-notyou-you/FOODOO#readme";
 type Confirm = "delete" | "removeDemo" | null;
 
 export function Settings() {
+  const demoScenario = DEMO_SCENARIO;
   const t = useT();
   const db = useDb();
   const toast = useToast();
@@ -149,18 +151,20 @@ export function Settings() {
         <div className="settings-actions">
           {isDemo ? (
             <>
-              <Button
-                variant="secondary"
-                disabled={busy}
-                onClick={() => {
-                  void attempt(
-                    () => loadDemo(db, date),
-                    t("settings.data.demoLoaded"),
-                  );
-                }}
-              >
-                {t("settings.data.resetDemo")}
-              </Button>
+              {demoScenario === null ? null : (
+                <Button
+                  variant="secondary"
+                  disabled={busy}
+                  onClick={() => {
+                    void attempt(
+                      () => loadDemo(db, date, demoScenario),
+                      t("settings.data.demoLoaded"),
+                    );
+                  }}
+                >
+                  {t("settings.data.resetDemo")}
+                </Button>
+              )}
               <Button
                 variant="danger"
                 onClick={() => {
@@ -170,7 +174,7 @@ export function Settings() {
                 {t("settings.data.removeDemo")}
               </Button>
             </>
-          ) : (
+          ) : demoScenario === null ? null : (
             <>
               <Button
                 variant="secondary"

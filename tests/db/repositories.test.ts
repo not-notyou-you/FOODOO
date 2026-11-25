@@ -226,6 +226,20 @@ describe("demo stall", () => {
     expect(await db.days.get(TODAY)).toBeUndefined();
   });
 
+  it("loads the selected demo scenario", async () => {
+    await loadDemo(db, TODAY, 3);
+    const stall = await getStall(db);
+    expect(stall?.name).toBe("Demo Angkringan Malam");
+    expect(stall?.settings.openAt).toBe("18:00");
+    expect(stall?.settings.closeAt).toBe("02:00");
+    expect(stall?.settings.isDemo).toBe(true);
+    expect(await db.menus.get("nasi-kucing")).toBeDefined();
+    await loadDemo(db, TODAY, 4);
+    expect((await getStall(db))?.name).toBe("Demo Warung Baru Buka");
+    expect(await db.menus.get("nasi-kucing")).toBeUndefined();
+    expect(await db.days.count()).toBe(4);
+  });
+
   it("reloads the demo from scratch when the demo is already stored", async () => {
     await loadDemo(db, TODAY);
     await db.days.put(makeDay(TODAY, 1, { closed: false }));

@@ -8,7 +8,9 @@ import type {
   Reason,
   StallSettings,
 } from "../domain/types.ts";
-import { generateDemoHistory } from "./generator.ts";
+import { generateScenarioHistory } from "./generator.ts";
+import { DEFAULT_DEMO_SCENARIO, type DemoScenarioId } from "./scenarioId.ts";
+import { demoScenario } from "./scenarios.ts";
 
 export interface DemoRecords {
   stall: StallRow;
@@ -74,8 +76,11 @@ export function pickMenuDay(item: MenuDay): MenuDay {
   };
 }
 
-export function buildDemoRecords(today: ISODate): DemoRecords {
-  const history = generateDemoHistory(today);
+export function buildDemoRecords(
+  today: ISODate,
+  scenario: DemoScenarioId = DEFAULT_DEMO_SCENARIO,
+): DemoRecords {
+  const history = generateScenarioHistory(today, demoScenario(scenario));
   return {
     stall: {
       id: STALL_ID,

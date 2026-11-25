@@ -223,6 +223,8 @@ Deterministic with a fixed seed (`seedrandom`, seed `"foodoo-demo"`).
 - 56 days of history ending yesterday; about 1 day in 10 marked unusual.
 - The true demand is kept **only** in the generator for the backtest. It is never stored in the app database.
 
+**Extra demo scenarios** (`src/demo/scenarios.ts`, approved by the team on 2026-11-25). The stall above is scenario 1. Three more synthetic stalls use the same model with their own seed, hours, busy profile, menus, weekday factors and history length: 2 *Demo Warung Makan Kantor* (10:00–15:00, quiet weekends), 3 *Demo Angkringan Malam* (18:00–02:00, crosses midnight), 4 *Demo Warung Baru Buka* (07:00–13:00, 4 days of history, a menu with salvage value). Every name contains "Demo". The build-time variable `VITE_DEMO_SCENARIO` selects `off` (no demo offered) or `1`–`4`; missing means `1`. The backtest uses scenario 1 only.
+
 ## 8. Backtest (`scripts/backtest.ts`, `npm run backtest`)
 
 The backtest is evidence for the judges, so it must be honest and reproducible.

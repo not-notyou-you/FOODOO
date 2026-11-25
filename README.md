@@ -124,7 +124,7 @@ npm run preview        # serve the production build on http://localhost:4173
 npx playwright install chromium   # once, before the first e2e run
 npm run e2e            # end-to-end tests against the production build
 npm run backtest       # simulate both policies; rewrites docs/BACKTEST.md and the README table
-npm run seed           # stub that exits with an error; load the demo in the app instead
+npm run seed           # rewrites docs/DEMO_SCENARIOS.md from the four demo scenarios
 npm run icons          # re-render the placeholder PWA icons (needs Chromium)
 npm run size           # gzip size of the production JavaScript; fails above 250 KB
 npm run lighthouse     # with npm run preview running: Lighthouse scores into docs/LIGHTHOUSE.md and section 12
@@ -132,13 +132,24 @@ npm run lighthouse     # with npm run preview running: Lighthouse scores into do
 
 **Windows note.** Run the test commands from a terminal whose path starts with an upper-case drive letter (`D:\...`, the default in PowerShell and VS Code). From a shell that reports `d:/...`, the coverage report lists every file twice and the 100% gate fails even though the tests pass. Linux and macOS are not affected, and CI runs on Linux.
 
+**Demo setting.** `VITE_DEMO_SCENARIO` chooses which demo stall the app offers. Copy `.env.example` to `.env` and set it to `off` (no demo button anywhere), or `1`, `2`, `3` or `4` (see section 4). A missing or empty value means `1`. The value is fixed at build time, so rebuild after changing it; any other value stops the build with an error. Unit and end-to-end tests always use `1`. On Cloudflare Pages, set the same variable in the project's environment variables. `.env` is git-ignored and holds no secrets.
+
 **Dependencies.** Runtime and development dependencies are listed with versions and licences in section 7. All versions are pinned exactly and the lockfile is committed.
 
 ## 4. Demo access
 
 - Deployed URL: https://foodoo-d5h.pages.dev (Cloudflare Pages, deployed automatically from `main`). It serves the last pushed commit. Until the team commits and pushes the F2 and F3 work, it still shows the earlier build, where Plan, Service and Close say "Coming soon".
 - Walk the loop: **Try demo stall** → **Plan today's portions** → **Accept all** or **Save plan** → **Service**, tap a menu when it sells out (**Undo** for 10 seconds) → **Close**, enter leftovers → **Close day** → **Confirm and close day**. Tomorrow's suggestions are then shown on the Close screen. **How is this worked out?** there, or **Settings → About → How FOODOO calculates**, opens the explanation page.
-- Load demo data: on the first screen, press **Try demo stall**. The demo is a made-up stall, "Warung Demo", with 4 menus and 56 days of synthetic history ending yesterday, generated with the fixed seed `foodoo-demo`.
+- Load demo data: on the first screen, press **Try demo stall**. The build offers one of four made-up stalls, chosen with `VITE_DEMO_SCENARIO` (section 3). Each has 4 menus and synthetic history ending yesterday, generated with a fixed seed. Details and generated numbers: `docs/DEMO_SCENARIOS.md`.
+
+  | Value | Demo stall               | Hours          | What it shows                                                                   |
+  | ----- | ------------------------ | -------------- | ------------------------------------------------------------------------------- |
+  | `1`   | Warung Demo (default)    | 06:00 to 14:00 | Two rush hours; Nasi Uduk sells out most days, so demand is corrected (56 days) |
+  | `2`   | Demo Warung Makan Kantor | 10:00 to 15:00 | Lunch peak, quiet weekends; suggestions differ by weekday (56 days)             |
+  | `3`   | Demo Angkringan Malam    | 18:00 to 02:00 | Night stall whose day crosses midnight (56 days)                                |
+  | `4`   | Demo Warung Baru Buka    | 07:00 to 13:00 | New stall with 4 days of history: cold-start suggestions, a salvage value       |
+  | `off` | none                     |                | The demo button is hidden; only **Start setup** is offered                      |
+
 - Reset demo data: **Settings → Data → Reset demo data** reloads the demo history from scratch. **Remove demo stall** deletes it and returns to the first screen.
 - The demo cannot be loaded over an owner's own data; Settings explains that the own data must be deleted first.
 
@@ -226,6 +237,7 @@ Per the competition rules, material AI assistance is disclosed here with the too
 | 2026-11-25 | Claude Code (Claude Opus 5.5)   | Colours: `src/styles/`, `DESIGN.md`                                                                                                                      | At the team's request, restored the original colour use element by element (cream, orange, navy, yellow, sky) while keeping the thin-border flat style; decision D-075. Not committed.                                                                                                                                                                                                                                                                                                                                                         | Pending owner review (Vassel)                       |
 | 2026-11-25 | Claude Code (Claude Opus 5.5)   | Landing page: `src/screens/Welcome.tsx`, `src/components/`, `src/i18n/`, `e2e/`                                                                          | Proposed and built the landing page that new users see first, with EN and ID copy, new icons, an `/about` route and tests; decision D-076. Not committed.                                                                                                                                                                                                                                                                                                                                                                                      | Pending owner review (Vassel)                       |
 | 2026-11-25 | Claude Code (Claude Opus 5.5)   | Data-correctness fixes: `src/domain/`, `src/screens/`, `src/components/`, `src/app/`, `src/i18n/`, tests, e2e                                            | Found and fixed four issues at the team's request: an unfilled leftover was stored as a sell-out at closing time; past unclosed days could not be closed; stalls closing after midnight were refused; a sell-out tapped right after opening was stored without a check. Added tests; decisions D-078 to D-081. Not committed.                                                                                                                                                                                                                  | Pending owner review (Hakim, Vassel)                |
+| 2026-11-25 | Claude Code (Claude Opus 5.5)   | Demo scenarios: `src/demo/`, `src/app/demoConfig.ts`, `src/screens/Welcome.tsx`, `src/screens/Settings.tsx`, `scripts/seed.ts`, config, tests            | At the team's request, added three more synthetic demo stalls (office lunch, night stall, new stall) and the `VITE_DEMO_SCENARIO` setting (`off`, 1 to 4); made `npm run seed` write `docs/DEMO_SCENARIOS.md`; kept scenario 1 and the backtest byte-identical; added tests; decision D-082. Not committed.                                                                                                                                                                                                                                    | Pending owner review (Hakim, Vassel)                |
 
 ## 9. Known limitations
 
@@ -238,7 +250,8 @@ Per the competition rules, material AI assistance is disclosed here with the too
 - Menu cards have a photo placeholder only; photos cannot be added.
 - The app has not been tested with real warung owners yet. ON-5 (setup in under 3 minutes) and the under-one-minute daily input target have not been timed with an owner.
 - Installation has been checked with Chromium's installability report only, not on a physical Android phone.
-- `npm run seed` is still a stub that exits with an error. The demo is loaded inside the app instead.
+- Demo scenarios 2 to 4 are covered by unit and database tests only; the end-to-end suite runs scenario 1. Each build offers one scenario; switching needs a rebuild.
+- With `VITE_DEMO_SCENARIO=off`, a demo stall stored earlier on a device stays until it is removed in Settings; it can no longer be reset.
 - There is no `LICENSE` file yet.
 - The app icon and logo are redrawn from the brand sheet as plain shapes; the team should confirm they match the intended mark.
 - Only Chromium is covered by end-to-end tests.

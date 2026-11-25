@@ -1,7 +1,13 @@
 // src/demo/generator.ts
 import seedrandom from "seedrandom";
 import { estimateDemand, hourWeight } from "../domain/estimate.ts";
-import { addDays, formatHHMM, parseHHMM, weekdayOf } from "../domain/time.ts";
+import {
+  addDays,
+  closeMinute,
+  formatHHMM,
+  openMinute,
+  weekdayOf,
+} from "../domain/time.ts";
 import type {
   DayRecord,
   HHMM,
@@ -12,6 +18,8 @@ import type {
 } from "../domain/types.ts";
 
 export type Rng = () => number;
+
+const MINUTES_PER_DAY = 1440;
 
 export const DEMO_SEED = "foodoo-demo";
 export const DEMO_STALL_NAME = "Warung Demo";
@@ -85,6 +93,32 @@ export const DEMO_TRUE_MEANS: Readonly<Record<string, number>> = {
   "tempe-orek": 29,
 };
 
+export interface DemoScenario {
+  id: number;
+  seed: string;
+  stallName: string;
+  settings: StallSettings;
+  menus: readonly Menu[];
+  trueMeans: Readonly<Record<string, number>>;
+  weekdayFactors: readonly number[];
+  historyDays: number;
+  unusualChance: number;
+  ownerJitter: number;
+}
+
+export const DEMO_SCENARIO_1: DemoScenario = {
+  id: 1,
+  seed: DEMO_SEED,
+  stallName: DEMO_STALL_NAME,
+  settings: DEMO_SETTINGS,
+  menus: DEMO_MENUS,
+  trueMeans: DEMO_TRUE_MEANS,
+  weekdayFactors: WEEKDAY_FACTORS,
+  historyDays: DEMO_HISTORY_DAYS,
+  unusualChance: UNUSUAL_DAY_CHANCE,
+  ownerJitter: OWNER_JITTER,
+};
+
 export interface DayDraw {
   date: ISODate;
   weekday: number;
@@ -129,13 +163,13 @@ export function sampleArrivalMinutes(
   count: number,
   settings: StallSettings,
 ): number[] {
-  const open = parseHHMM(settings.openAt);
-  const close = parseHHMM(settings.closeAt);
+  const open = openMinute(settings);
+  const close = closeMinute(settings);
   const firstHour = Math.floor(open / 60);
   const lastHour = Math.ceil(close / 60) - 1;
   const weights: number[] = [];
   for (let hour = firstHour; hour <= lastHour; hour += 1) {
-    weights.push(hourWeight(settings, hour));
+    weights.push(hourWeight(settings, hour % 24));
   }
   const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
   const minutes: number[] = [];
@@ -158,15 +192,17 @@ export function drawDay(
   menus: readonly Menu[],
   settings: StallSettings,
   trueMeans: Readonly<Record<string, number>> = DEMO_TRUE_MEANS,
+  weekdayFactors: readonly number[] = WEEKDAY_FACTORS,
+  unusualChance: number = UNUSUAL_DAY_CHANCE,
 ): DayDraw {
   const weekday = weekdayOf(date);
-  const unusual = rng() < UNUSUAL_DAY_CHANCE;
+  const unusual = rng() < unusualChance;
   const demand: Record<string, number> = {};
   const arrivals: Record<string, number[]> = {};
   for (const menu of menus) {
     const mean =
       (trueMeans[menu.id] ?? menu.usualQty) *
-      (WEEKDAY_FACTORS[weekday] as number);
+      (weekdayFactors[weekday] as number);
     const count = samplePoisson(rng, mean);
     demand[menu.id] = count;
     arrivals[menu.id] = sampleArrivalMinutes(rng, count, settings);
@@ -185,7 +221,9 @@ export function observeOutcome(
       demand,
       sold: cooked,
       leftover: 0,
-      soldOutAt: formatHHMM(arrivalMinutes[cooked] as number),
+      soldOutAt: formatHHMM(
+        (arrivalMinutes[cooked] as number) % MINUTES_PER_DAY,
+      ),
     };
   }
   return {
@@ -229,18 +267,28 @@ export function toMenuDay(
 export function generateDemoHistory(
   today: ISODate,
   seed: string = DEMO_SEED,
+  scenario: DemoScenario = DEMO_SCENARIO_1,
 ): DemoHistory {
   const rng = createRng(seed);
   const settings: StallSettings = {
-    ...DEMO_SETTINGS,
-    busyProfile: { ...DEMO_SETTINGS.busyProfile },
+    ...scenario.settings,
+    busyProfile: { ...scenario.settings.busyProfile },
   };
-  const menus = DEMO_MENUS.map((menu) => ({ ...menu }));
+  const menus = scenario.menus.map((menu) => ({ ...menu }));
   const days: DayRecord[] = [];
   const menuDays: MenuDay[] = [];
-  for (let back = DEMO_HISTORY_DAYS; back >= 1; back -= 1) {
+  const jitterSpan = 2 * scenario.ownerJitter + 1;
+  for (let back = scenario.historyDays; back >= 1; back -= 1) {
     const date = addDays(today, -back);
-    const draw = drawDay(rng, date, menus, settings);
+    const draw = drawDay(
+      rng,
+      date,
+      menus,
+      settings,
+      scenario.trueMeans,
+      scenario.weekdayFactors,
+      scenario.unusualChance,
+    );
     days.push({
       date,
       weekday: draw.weekday,
@@ -248,7 +296,7 @@ export function generateDemoHistory(
       closed: true,
     });
     for (const menu of menus) {
-      const jitter = Math.floor(rng() * (2 * OWNER_JITTER + 1)) - OWNER_JITTER;
+      const jitter = Math.floor(rng() * jitterSpan) - scenario.ownerJitter;
       const cooked = Math.max(1, menu.usualQty + jitter);
       const outcome = observeOutcome(
         cooked,
@@ -258,5 +306,12 @@ export function generateDemoHistory(
       menuDays.push(toMenuDay(date, menu.id, outcome, settings));
     }
   }
-  return { stallName: DEMO_STALL_NAME, settings, menus, days, menuDays };
+  return { stallName: scenario.stallName, settings, menus, days, menuDays };
+}
+
+export function generateScenarioHistory(
+  today: ISODate,
+  scenario: DemoScenario,
+): DemoHistory {
+  return generateDemoHistory(today, scenario.seed, scenario);
 }

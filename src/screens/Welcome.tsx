@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useLocalStamp } from "../app/clock.ts";
+import { DEMO_SCENARIO } from "../app/demoConfig.ts";
 import { useToast } from "../app/toast.ts";
 import { Button } from "../components/Button.tsx";
 import { EstimateValue } from "../components/EstimateValue.tsx";
@@ -36,6 +37,7 @@ interface WelcomeProps {
 }
 
 export function Welcome({ about = false }: WelcomeProps) {
+  const demoScenario = DEMO_SCENARIO;
   const t = useT();
   const db = useDb();
   const toast = useToast();
@@ -91,24 +93,28 @@ export function Welcome({ about = false }: WelcomeProps) {
   ) : (
     <div className="landing__actions">
       {startButton(t(started ? "welcome.continue" : "welcome.start"))}
-      <Button
-        wide
-        variant="secondary"
-        disabled={busy || started}
-        aria-describedby="welcome-demo-note"
-        onClick={() => {
-          void run(async () => {
-            await loadDemo(db, date);
-            toast.show(t("settings.data.demoLoaded"));
-            void requestPersistentStorage(navigator.storage);
-          }, "/today");
-        }}
-      >
-        {t("welcome.demo")}
-      </Button>
-      <p id="welcome-demo-note" className="field__hint">
-        {t(started ? "welcome.demoBlocked" : "welcome.demoNote")}
-      </p>
+      {demoScenario === null ? null : (
+        <>
+          <Button
+            wide
+            variant="secondary"
+            disabled={busy || started}
+            aria-describedby="welcome-demo-note"
+            onClick={() => {
+              void run(async () => {
+                await loadDemo(db, date, demoScenario);
+                toast.show(t("settings.data.demoLoaded"));
+                void requestPersistentStorage(navigator.storage);
+              }, "/today");
+            }}
+          >
+            {t("welcome.demo")}
+          </Button>
+          <p id="welcome-demo-note" className="field__hint">
+            {t(started ? "welcome.demoBlocked" : "welcome.demoNote")}
+          </p>
+        </>
+      )}
       {failed ? (
         <p className="form__failure" role="alert">
           {t("common.saveFailed")}
