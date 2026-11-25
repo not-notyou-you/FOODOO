@@ -94,16 +94,16 @@ At the cutoff: record the final commit, fill in the README "Final Day log" (star
 
 | ID | Feature | Priority | Status |
 |---|---|---|---|
-| ON | Onboarding and setup | Core | Not started |
-| TD | Today screen (loop view) | Core | Not started |
+| ON | Onboarding and setup | Core | Done |
+| TD | Today screen (loop view) | Core | In progress |
 | PL | Morning plan with reasons | Core | Not started |
 | SV | Service: one-tap sold out + undo | Core | Not started |
 | CL | Night close + missed sell-out + unusual day | Core | Not started |
 | EST | Demand estimation + suggestion logic | Core | Done |
 | DEMO | Demo stall generator + labels | Core | In progress |
-| PWA | Offline + installable | Core | Not started |
-| I18N | English / Bahasa Indonesia | Core | Not started |
-| DM-1/2/5 | Delete all, demo load/remove, persistent storage | Core | Not started |
+| PWA | Offline + installable | Core | In progress |
+| I18N | English / Bahasa Indonesia | Core | Done |
+| DM-1/2/5 | Delete all, demo load/remove, persistent storage | Core | Done |
 | BT | Backtest report | Core | Done |
 | WS | Weekly summary | Should | Reserved for Final Day |
 | DM-3/4 | Export / import | Should | Reserved for Final Day |

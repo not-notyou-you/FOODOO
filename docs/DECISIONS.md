@@ -213,3 +213,100 @@ All versions are exact and in the lockfile. Where we are not on the newest relea
 
 - **Problem:** the spec's text "Sold out on {n} of the last {m} {weekday}s" is wrong when `suggestQty` fell back to the latest 14 days of any weekday. The `Reason` type in `SPEC.md` section 6.1 has no field saying which history was used.
 - **Not changed now:** fixing it means adding a field to a type the spec defines exactly. The team should decide before F2, for example by adding `scope: "weekday" | "recent"` to `Reason` and updating `SPEC.md`.
+
+## Phase F2, first half (Stage 3, 2026-11-25)
+
+### D-034 Scope and starting state (all owners)
+
+- **Checked first:** `npm run lint`, `npm test` (70 tests) and `npm run build` passed before any change.
+- **Built:** the Dexie data layer, i18n with a persisted toggle, design-system components, the app layout, and the Onboarding, Today and Settings screens. Plan, Service and Close are the next stage; their routes exist and say "Coming soon" (D-044).
+- **Not started on purpose:** export and import (DM-3, DM-4) and the weekly summary. They are reserved for Final Day and are not rendered anywhere.
+
+### D-035 How "now" reaches the screens without making the domain impure (Sonny, Hakim)
+
+- **Decision:** a `ClockProvider` (`src/app/ClockProvider.tsx`) holds a `now()` function, `new Date()` by default. `useNow()` re-reads it every 30 seconds. `toLocalStamp(date)` (`src/app/localStamp.ts`) turns a `Date` into the local `"YYYY-MM-DD"`, `"HH:MM"` and weekday. Domain functions only ever receive those strings.
+- **Why:** `AGENTS.md` bans `Date.now()` in `src/domain/`. Tests pass a fixed `now` (Monday 2 March 2026, 09:00), so the phase and the date header are deterministic. Playwright can use its own clock API in Stage 4, so the app has no test-only switch.
+- **Alternatives:** read the clock inside each screen (untestable); a URL parameter to fake the time (a test hook that ships to users).
+- **Local time:** the date and time come from the device's local clock, because the stall works in local time (`AGENTS.md` section 6). Domain date arithmetic stays in UTC (D-017), which is safe because it only handles date strings.
+
+### D-036 Which phase of the day is "now" (Hakim)
+
+- **Rule (`todayPhase` in `src/domain/phase.ts`):** day closed â†’ done. Otherwise, nothing planned for today â†’ Plan, even after closing time, so a forgotten morning can still be recorded. Otherwise, every planned menu sold out, or the time is at or after closing â†’ Close. Otherwise â†’ Service, including before opening once the plan is saved.
+- **"Planned"** means at least one menu-day row exists for today, so no extra schema field is needed. Plan (Stage 4) writes those rows when the owner accepts the plan.
+- **Why pure:** the rule is part of the 100% coverage gate and is easy to explain: "the app shows the first step you have not done yet, and Close once the stall is closed or empty".
+- **Display:** the loop graphic fills the current segment orange, done segments navy and upcoming ones white. Below it, a list says "Done", "Now" or "Next" in words, so the state never depends on colour.
+
+### D-037 How screens read and write data (Samuel)
+
+- **Decision:** one `FoodooDb` instance is supplied through a React context (`DbProvider`). Screens read with live queries (`useStall`, `useMenus`, `useTodayState` in `src/db/hooks.ts`), so every screen updates by itself after a write. All writes are plain async functions in `src/db/repositories.ts` that take the database as their first argument and validate before writing.
+- **Why:** repositories are unit-tested without React, and component tests give each test its own fresh database. There is no global store to keep in sync with IndexedDB.
+- **Alternatives:** a state library (not approved, and it would duplicate IndexedDB); calling Dexie directly from components (validation would be spread across screens).
+
+### D-038 Schema v1, designed for migrations (Samuel)
+
+- **Tables:** `stall` (one row with id `"stall"`: name, settings, `setupComplete`), `menus` (key `id`), `days` (key `date`), `menuDays` (compound key `[date+menuId]`, indexes `date` and `menuId`).
+- **Why a compound key:** a menu can only have one record per day, so saving the plan twice replaces it instead of duplicating it (tested).
+- **Migrations:** versions live in a list, `SCHEMA_VERSIONS`, and `createDb(name, versions)` applies them. A test opens a v1 database, writes a row, reopens it with an extra v2 step, and checks that the upgrade ran. A later real migration adds one list entry and one test like that one. A second test pins the exact v1 tables and indexes, so an accidental schema change fails CI.
+- **Stall name:** stored and editable in Settings (optional, at most 40 characters). The spec does not require it; it exists because the demo stall has a name, "Warung Demo".
+
+### D-039 Demo seeding and its safety rules (Samuel, Hakim)
+
+- **Decision:** `buildDemoRecords(today)` (`src/demo/seed.ts`) copies the generator's history into database rows field by field, listing each field by name. Anything not in the domain types is dropped, even if the generator gains a field later (tested with an injected `trueDemand` field). The true demand cannot reach the database (see also D-029).
+- **Rules:** the demo can be loaded only when there is no stall or the stall is already the demo; it never overwrites an owner's own data (tested). Loading again resets the demo. Removing the demo, or deleting all data, clears every table.
+- **History:** 56 days ending yesterday, relative to the device date when it is loaded, so the demo always looks current. Today starts empty, in the Plan phase.
+
+### D-040 Input validation lives in the domain (Hakim)
+
+- **Decision:** `validateMenu` and `validateHours` in `src/domain/setup.ts` return error codes, not text. The screens turn codes into messages through i18n, for example "Cost must be lower than price". Repositories call the same functions and refuse invalid data, so the rules hold even if a screen forgets them.
+- **Rules:** name 1 to 40 characters after trimming; price a whole number of rupiah above 0; cost a whole number from 0 to below the price; leftover (salvage) value a whole number from 0 to below the price; usual portions from 1 to 999; closing time after opening on the same day.
+- **Salvage below price:** this guarantees that `criticalRatio` never hits the guard in D-020.
+- **Busy hours:** one cell per opening hour (`profileHours`). Changing the hours keeps the levels of hours that remain and sets new hours to normal (`resizeProfile`). A tap cycles quiet, normal, busy (`nextBusyLevel`).
+- **Number entry:** a field accepts `8000`, `8.000` or `8 000`; dots and spaces are read as thousands separators, as owners write them.
+
+### D-041 i18n design (Sonny)
+
+- **Decision:** `translate(language, key, params)` replaces `{name}` placeholders. `useT()` returns a translator for the current language. The language lives in `localStorage` (`foodoo.language`), is read synchronously at start so the first screen is never in the wrong language, and also sets `<html lang>`. Reads and writes are wrapped so a blocked storage falls back to English.
+- **Language is a device preference, not stall data,** so **Delete all data** keeps it.
+- **Tests enforce:** identical keys, no empty strings, and identical placeholders in both languages.
+- **Formatting:** `formatRupiah` writes `Rp 8.000` with plain integer grouping in both languages, so the output never depends on the browser's locale data. Long dates use the browser's `Intl` with `en-GB` or `id-ID`. A delta is shown as `+5`, `âˆ’3` (a true minus sign) or `0`.
+- **Reason text:** `renderReason` (`src/i18n/reason.ts`) turns a stored `Reason` into the sentence from `SPEC.md` section 6.5, for every code and both scopes (D-042), in both languages. Plan uses it in Stage 4.
+- **Language switch** sits in Settings and on the Welcome screen, so an owner can switch before setup starts.
+
+### D-042 `Reason.scope` closes D-033 (Hakim)
+
+- **Decision (approved by the team in this session):** `Reason` gains `scope: "weekday" | "recent"`. `suggestQty` sets `"weekday"` when it used the same-weekday history and `"recent"` when it fell back to the latest 14 days. A cold start is always `"recent"`. `SPEC.md` sections 6.1 and 6.5 were updated to match.
+- **Effect:** "Sold out on 3 of the last 6 Mondays" is shown only when the history really is Mondays; otherwise "Sold out on 2 of the last 14 days".
+- **Checked:** no quantity changes. `npm run backtest` regenerates `docs/BACKTEST.md` and the README block byte for byte (`git diff` is empty). T1 to T16 are unchanged; two tests now also check the scope.
+
+### D-043 `fake-indexeddb` for database tests (Samuel, Sonny)
+
+- **Decision (approved by the team in this session):** dev dependency `fake-indexeddb` 6.2.8 (Apache-2.0), loaded by `tests/setup.ts`. It gives Node an in-memory IndexedDB, so the real Dexie schema, repositories and migration test run in Vitest. It is never part of the app bundle.
+- **Alternative:** test the database only through Playwright (slow, and migration tests would need a real browser).
+
+### D-044 Unbuilt screens are visible but clearly unfinished (Vassel)
+
+- **Decision:** the Plan, Service and Close tabs exist, so the layout and navigation can be tested now. Each tab carries a "Soon" tag, and each screen shows "Coming soon. This screen is built in the next step of the prototype." with a link back to Today.
+- **Why:** `AGENTS.md` rule 3.4 requires unfinished UI to be hidden or labelled. Hiding the tabs would make the Today primary action a dead end with no explanation.
+
+### D-045 Accessibility decisions made while building (Vassel)
+
+- **Dialogs:** `Sheet` is a `role="dialog"` with `aria-modal`. It traps Tab, closes on Escape, moves focus to the first field and returns focus to the button that opened it. A native `<dialog>` was not used because jsdom does not support `showModal`, so it could not be component-tested.
+- **Bug found by the tests:** busy-hour cells, loop steps and "Soon" tags were announced as "06:00Normal" and "PlanNow", because adjacent spans had no space between them. Explicit spaces were added, and the tests now query those buttons by the spoken name, for example "06:00 Normal".
+- **Other rules applied:**
+  - every input has a `<label>`; errors are linked with `aria-describedby` and marked with `aria-invalid`; the first invalid field gets focus after a failed save
+  - toasts are in a polite live region
+  - navigation uses `aria-current="page"`
+  - one `h1` per screen and a skip link
+  - 48 px minimum targets and the 3 px navy focus ring
+  - orange only behind ink text; danger buttons are white on `#C1121F`
+  - error borders are thicker and errors start with "!", so they do not rely on colour
+- **Not done yet:** Lighthouse scores (PLAN F3 item 4).
+
+### D-046 Logo and app icon (Vassel, Sonny)
+
+- **Decision:**
+  - `AppIcon` draws "FO / OD" with F and D as plain paths, so it renders the same without any font: F top-left, D bottom-right, one diagonal orange loop.
+  - `public/icons/icon.svg` uses the same three paths, and `npm run icons` re-rendered the 192, 512 and maskable PNGs.
+  - `Logo` draws "Fâˆž / DOO" using the self-hosted Rubik Mono One, with `textLength` so its width is stable while the font loads.
+- **Source:** `docs/brand/FOODOO_logo.png` was used only as a visual reference; nothing was traced or embedded.
+- **Known gap:** the icon SVG file and the component share the geometry by copy, not by import. Changing one means changing the other.
