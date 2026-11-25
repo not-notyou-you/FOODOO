@@ -111,6 +111,34 @@ describe("estimateDemand", () => {
     });
   });
 
+  it("rejects an invalid cooked quantity", () => {
+    expect(() => estimateDemand(-1, 0, null, referenceSettings)).toThrow(
+      RangeError,
+    );
+    expect(() => estimateDemand(2.5, 0, null, referenceSettings)).toThrow(
+      RangeError,
+    );
+  });
+
+  it("rejects a leftover outside 0 to cooked", () => {
+    expect(() => estimateDemand(10, 15, null, referenceSettings)).toThrow(
+      RangeError,
+    );
+    expect(() => estimateDemand(10, -1, null, referenceSettings)).toThrow(
+      RangeError,
+    );
+    expect(() => estimateDemand(10, 1.5, null, referenceSettings)).toThrow(
+      RangeError,
+    );
+  });
+
+  it("accepts zero cooked with zero leftover", () => {
+    expect(estimateDemand(0, 0, null, referenceSettings)).toEqual({
+      demand: 0,
+      isEstimate: false,
+    });
+  });
+
   it("returns cooked when the closing time is not after opening", () => {
     const broken: StallSettings = {
       ...referenceSettings,

@@ -39,12 +39,25 @@ export function arrivalShare(settings: StallSettings, at: HHMM): number {
   return total === 0 ? 1 : arrived / total;
 }
 
+function assertQuantities(cooked: number, leftover: number | null): void {
+  if (!Number.isInteger(cooked) || cooked < 0) {
+    throw new RangeError(`Invalid cooked quantity: ${cooked}`);
+  }
+  if (
+    leftover !== null &&
+    (!Number.isInteger(leftover) || leftover < 0 || leftover > cooked)
+  ) {
+    throw new RangeError(`Invalid leftover: ${leftover} of ${cooked}`);
+  }
+}
+
 export function estimateDemand(
   cooked: number,
   leftover: number | null,
   soldOutAt: HHMM | null,
   settings: StallSettings,
 ): DemandEstimate | null {
+  assertQuantities(cooked, leftover);
   if (soldOutAt === null) {
     return leftover === null
       ? null

@@ -14,7 +14,59 @@ describe("weeklyMetrics", () => {
       suggestedCount: 0,
       acceptedWithoutEdit: 0,
       acceptanceShare: null,
+      byMenu: {},
     });
+  });
+
+  it("breaks the same totals down per menu", () => {
+    const days = [makeDay("2026-02-09", 1), makeDay("2026-02-10", 2)];
+    const menuDays = [
+      makeMenuDay("2026-02-09", {
+        suggestedQty: 40,
+        cookedQty: 40,
+        leftover: 4,
+      }),
+      makeMenuDay("2026-02-10", {
+        suggestedQty: 42,
+        cookedQty: 42,
+        soldOutAt: "10:30",
+        leftover: 0,
+        estimatedDemand: 81,
+        demandIsEstimate: true,
+      }),
+      makeMenuDay("2026-02-09", {
+        menuId: "ayam-goreng",
+        suggestedQty: 30,
+        cookedQty: 31,
+        leftover: 3,
+        estimatedDemand: 28,
+      }),
+    ];
+    const result = weeklyMetrics(menuDays, days, "2026-02-10");
+    expect(Object.keys(result.byMenu)).toEqual(["nasi-uduk", "ayam-goreng"]);
+    expect(result.byMenu["nasi-uduk"]).toEqual({
+      menuDayCount: 2,
+      leftoverPortions: 4,
+      sellOutEvents: 1,
+      sellOutFrequency: 0.5,
+      estimatedLostSales: 39,
+      suggestedCount: 2,
+      acceptedWithoutEdit: 2,
+      acceptanceShare: 1,
+    });
+    expect(result.byMenu["ayam-goreng"]).toEqual({
+      menuDayCount: 1,
+      leftoverPortions: 3,
+      sellOutEvents: 0,
+      sellOutFrequency: 0,
+      estimatedLostSales: 0,
+      suggestedCount: 1,
+      acceptedWithoutEdit: 0,
+      acceptanceShare: 0,
+    });
+    expect(result.leftoverPortions).toBe(7);
+    expect(result.estimatedLostSales).toBe(39);
+    expect(result.acceptanceShare).toBeCloseTo(2 / 3, 10);
   });
 
   it("sums leftovers, sell-outs, lost sales and acceptance over closed normal days in the window", () => {
