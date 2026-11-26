@@ -100,6 +100,12 @@ describe("pos domain", () => {
     ).toBe(16_100);
   });
 
+  it("treats a missing leftover and an unknown menu as zero", () => {
+    const open = makeMenuDay("2026-03-02", { cookedQty: 10, leftover: null });
+    expect(engineSold(open)).toBe(10);
+    expect(dayRevenue("simple", [open], [], [])).toBe(0);
+  });
+
   it("marks and clears a sell-out with its source", () => {
     const marked = markSoldOut(row, "10:30", "auto_pos");
     expect(marked).toMatchObject({
