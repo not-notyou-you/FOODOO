@@ -464,7 +464,6 @@ export const id: Record<keyof typeof en, string> = {
     "Di sini sisa merugikan lebih banyak daripada untung sebuah penjualan, jadi FOODOO tidak memasak untuk hari paling ramai. FOODOO memilih jumlah yang cukup pada sekitar {cover} dari setiap 100 hari sebelumnya.",
   "how.suggestHistory":
     "Pada {count} hari {weekdays} terakhir, peminatnya: {values}.",
-  "how.suggested": "Saran",
   "how.ruleEligible":
     "Hanya hari biasa yang sudah ditutup yang dihitung. Hari tidak biasa dan hari yang belum ditutup tidak dipakai.",
   "how.ruleWeekday":
@@ -532,7 +531,7 @@ export const id: Record<keyof typeof en, string> = {
     "Tanpa login, tanpa server, tanpa data pelanggan. Ekspor atau hapus semua kapan saja.",
   "landing.closingTitle": "Siap mencoba?",
   "landing.closingBody":
-    "Mulai dengan warung demo di bagian atas halaman ini, atau atur menu Anda sendiri.",
+    "Lihat-lihat warung demo berdata buatan, atau atur menu Anda sendiri. Tanpa akun.",
   "landing.installHint":
     "Tips: pakai “Tambahkan ke layar utama” di browser untuk membuka FOODOO seperti aplikasi.",
   "settings.about.landing": "Tentang FOODOO",
@@ -541,4 +540,54 @@ export const id: Record<keyof typeof en, string> = {
   "landing.exampleTitle": "Yang akan Anda lihat",
   "landing.exampleCooked": "Dimasak",
   "landing.exampleSoldOut": "Habis jam",
+  "landing.pageTitle": "Rencana porsi harian",
+  "landing.eyebrow": "Untuk warung dan usaha makanan kecil",
+  "landing.nav.label": "Bagian halaman",
+  "landing.nav.menu": "Menu",
+  "landing.nav.problem": "Masalah",
+  "landing.nav.loop": "Cara kerja",
+  "landing.nav.demo": "Demo",
+  "landing.nav.team": "Tim",
+  "landing.nav.seeDemo": "Lihat demo",
+  "landing.nav.openApp": "Buka aplikasi",
+  "landing.problemLead":
+    "Masak kebanyakan, uang terbuang. Masak kekurangan, pembeli pergi, dan catatan tidak pernah menunjukkan berapa orang.",
+  "landing.loopLead":
+    "Empat momen singkat sehari, masing-masing hanya beberapa ketukan.",
+  "landing.seeEyebrow": "Dari panci ke rencana",
+  "landing.seeLead":
+    "Satu menu yang habis, diikuti dari jam jualan sampai pagi berikutnya. Angkanya contoh, dihitung dengan aturan aplikasi ini sendiri.",
+  "landing.preview.service": "Satu ketukan saat panci kosong.",
+  "landing.preview.close":
+    "Malam hari FOODOO memperkirakan berapa orang yang menginginkannya.",
+  "landing.preview.next":
+    "Saran berikutnya belajar dari perkiraan ini, bukan hanya {cooked} porsi yang terjual.",
+  "landing.whyEyebrow": "Yang membedakan",
+  "landing.explorer.title": "Habis jam berapa?",
+  "landing.explorer.cooked": "{cooked} porsi dimasak",
+  "landing.explorer.legendSold": "Pembeli sebelum habis",
+  "landing.explorer.legendMissed": "Pembeli sesudahnya: tidak tercatat",
+  "landing.explorer.arrived": "Pembeli yang sudah datang",
+  "landing.explorer.hint":
+    "Geser penggesernya. Aturannya sama dengan aplikasi, pada warung contoh.",
+  "landing.demoTitle": "Jelajahi warung demo",
+  "landing.demoOpen": "Buka demo",
+  "landing.demoOpenLabel": "Buka demo: {name}",
+  "landing.teamTitle": "Tim di balik FOODOO",
+  "landing.teamBody":
+    "Calon Mantu Idaman, membangun untuk STACK 2026 oleh GDGoC ITB, Kasus 2: Stronger Communities and Everyday Services.",
+  "landing.team.domain": "Perkiraan permintaan, saran porsi, dan backtest",
+  "landing.team.data": "Data di perangkat, ekspor dan impor",
+  "landing.team.screens": "Layar dan komponen",
+  "landing.team.platform":
+    "Aplikasi offline, bahasa, aksesibilitas, pengujian, dan deployment",
+  "landing.closingSetup": "Atur warung saya",
+  "landing.closingDemo": "Pilih warung demo",
+  "landing.footerNote":
+    "Data demo adalah data buatan dan diberi label. Isian Anda tetap di perangkat Anda.",
+  "landing.footerLinks": "Tentang FOODOO lebih lanjut",
+  "today.hint.plan": "Periksa tiap angka saran, ubah sesuka Anda, lalu simpan.",
+  "today.hint.service": "Saat menu habis, ketuk agar jamnya tercatat.",
+  "today.hint.close":
+    "Hitung sisanya supaya saran berikutnya belajar dari hari ini.",
 };

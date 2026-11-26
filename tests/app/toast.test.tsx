@@ -55,6 +55,36 @@ describe("ToastProvider", () => {
     expect(screen.queryByRole("button", { name: "Undo" })).toBeNull();
   });
 
+  it("keeps the Undo toast when a background notice arrives", () => {
+    function Notice() {
+      const toast = useToast();
+      return (
+        <button
+          type="button"
+          onClick={() => {
+            toast.show("Ready to work offline.", { background: true });
+          }}
+        >
+          Notice
+        </button>
+      );
+    }
+    render(
+      <ToastProvider>
+        <Trigger onUndo={() => undefined} />
+        <Notice />
+      </ToastProvider>,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Mark" }));
+    fireEvent.click(screen.getByRole("button", { name: "Notice" }));
+    expect(screen.getByRole("button", { name: "Undo" })).toBeTruthy();
+    act(() => {
+      vi.advanceTimersByTime(UNDO_MS);
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Notice" }));
+    expect(screen.getByText("Ready to work offline.")).toBeTruthy();
+  });
+
   it("runs the action once and closes the toast when Undo is pressed", () => {
     const onUndo = vi.fn();
     render(

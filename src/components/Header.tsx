@@ -24,7 +24,9 @@ export function Header({ title, showSettings = true }: HeaderProps) {
       <div className="header__row">
         <AppIcon size={40} />
         <div className="header__titles">
-          <h1 className="header__title">{title}</h1>
+          <h1 className="header__title" tabIndex={-1}>
+            {title}
+          </h1>
           <p className="header__date">{formatLongDate(date, language)}</p>
         </div>
         {isDemo ? <Sticker>{t("header.demo")}</Sticker> : null}

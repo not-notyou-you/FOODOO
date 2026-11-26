@@ -31,6 +31,7 @@ interface Result {
   performance: number;
   fcpMs: number;
   lcpMs: number;
+  cls: number;
   failed: string[];
 }
 
@@ -129,6 +130,7 @@ function toResult(
     lcpMs: Math.round(
       report.audits["largest-contentful-paint"]?.numericValue ?? 0,
     ),
+    cls: report.audits["cumulative-layout-shift"]?.numericValue ?? 0,
     failed: failedAudits(report),
   };
 }
@@ -170,6 +172,7 @@ async function startDemoBrowser(): Promise<ChildProcess> {
   const page = await context.newPage();
   await page.goto(`${BASE}/`);
   await page.getByRole("button", { name: "Try demo stall" }).click();
+  await page.getByRole("button", { name: /^Warung Demo/ }).click();
   await page.getByRole("heading", { level: 1, name: "Today" }).waitFor();
   await page.goto(`${BASE}/plan`);
   await page.getByRole("button", { name: "Accept all" }).click();
@@ -186,11 +189,11 @@ function seconds(ms: number): string {
 function table(results: readonly Result[]): string {
   const rows = results.map(
     (item) =>
-      `| ${item.page} | ${item.preset} | ${item.state} | ${item.accessibility} | ${item.bestPractices} | ${item.performance} | ${seconds(item.fcpMs)} | ${seconds(item.lcpMs)} |`,
+      `| ${item.page} | ${item.preset} | ${item.state} | ${item.accessibility} | ${item.bestPractices} | ${item.performance} | ${seconds(item.fcpMs)} | ${seconds(item.lcpMs)} | ${item.cls.toFixed(3)} |`,
   );
   return [
-    "| Page | Preset | State | Accessibility | Best practices | Performance | First contentful paint | Largest contentful paint |",
-    "| --- | --- | --- | --- | --- | --- | --- | --- |",
+    "| Page | Preset | State | Accessibility | Best practices | Performance | First contentful paint | Largest contentful paint | Layout shift |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
     ...rows,
   ].join("\n");
 }

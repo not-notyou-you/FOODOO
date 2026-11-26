@@ -6,6 +6,7 @@ import {
   type SegmentStatus,
 } from "../domain/phase.ts";
 import { useT } from "../i18n/index.ts";
+import { BRAND_LOOP } from "./AppIcon.tsx";
 
 interface LoopProgressProps {
   phase: Phase;
@@ -20,6 +21,24 @@ export function LoopProgress({ phase }: LoopProgressProps) {
   };
   return (
     <figure className="loop">
+      <svg
+        className="loop__graphic"
+        viewBox="-226 -95 452 190"
+        aria-hidden="true"
+        focusable="false"
+      >
+        {LOOP_PHASES.map((segment, index) => (
+          <path
+            key={segment}
+            className={`loop__arc loop__arc--${segmentStatus(phase, segment)}`}
+            d={BRAND_LOOP}
+            transform="scale(-1 1)"
+            pathLength={300}
+            strokeDasharray="96 204"
+            strokeDashoffset={-100 * index}
+          />
+        ))}
+      </svg>
       <figcaption>
         <h2 className="visually-hidden">{t("today.loopTitle")}</h2>
         <ol className="loop__steps">

@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { useStallStamp } from "../app/useStallStamp.ts";
 import { Button } from "../components/Button.tsx";
 import { EstimateNumber } from "../components/EstimateNumber.tsx";
+import { ChevronIcon } from "../components/icons/ChevronIcon.tsx";
 import { Screen } from "../components/Screen.tsx";
 import { StatusBadge } from "../components/StatusBadge.tsx";
 import { useHistory, useMenus, useTodayState } from "../db/hooks.ts";
@@ -36,6 +37,7 @@ export function DayDetail() {
 
   const back = (
     <Link className="link-target back-link" to="/history">
+      <ChevronIcon />
       {t("day.back")}
     </Link>
   );

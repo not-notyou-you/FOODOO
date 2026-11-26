@@ -3,6 +3,7 @@ import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLocalStamp } from "../app/clock.ts";
 import { DEMO_ENABLED } from "../app/demoConfig.ts";
+import { README_URL } from "../app/links.ts";
 import { useToast } from "../app/toast.ts";
 import { Button } from "../components/Button.tsx";
 import { DemoPicker } from "../components/DemoPicker.tsx";
@@ -36,8 +37,6 @@ import {
 import { modeOf } from "../domain/pos.ts";
 import { validateHours, type HoursErrors } from "../domain/setup.ts";
 import { useT } from "../i18n/index.ts";
-
-export const README_URL = "https://github.com/not-notyou-you/FOODOO#readme";
 
 type Confirm = "delete" | "removeDemo" | null;
 

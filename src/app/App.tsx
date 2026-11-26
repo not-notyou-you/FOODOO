@@ -48,12 +48,12 @@ export function App() {
   const toast = useToast();
 
   const announce = useRef(() => {
-    toast.show(t("app.offlineReady"));
+    toast.show(t("app.offlineReady"), { background: true });
   });
 
   useEffect(() => {
     announce.current = () => {
-      toast.show(t("app.offlineReady"));
+      toast.show(t("app.offlineReady"), { background: true });
     };
   }, [toast, t]);
 

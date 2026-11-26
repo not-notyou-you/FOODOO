@@ -83,8 +83,13 @@ export function Today() {
   return (
     <Screen title={t("today.title")}>
       <section className="card today">
+        <div className="today__intro">
+          {stall.name === "" ? null : <p className="eyebrow">{stall.name}</p>}
+          <p className="today__hint">
+            {t(phase === "done" ? "today.doneNote" : `today.hint.${phase}`)}
+          </p>
+        </div>
         <LoopProgress phase={phase} />
-        {phase === "done" ? <p>{t("today.doneNote")}</p> : null}
         {action.to === null ? (
           <Button wide disabled>
             {t(action.label)}

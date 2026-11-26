@@ -8,6 +8,7 @@ export interface ToastOptions {
   actionLabel?: string;
   onAction?: () => void;
   durationMs?: number;
+  background?: boolean;
 }
 
 export interface ToastMessage extends ToastOptions {

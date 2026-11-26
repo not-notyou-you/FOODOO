@@ -61,9 +61,14 @@ export function RegisterTile({
             total: cooked,
           })}
         >
-          <span className="stockbar__fill" style={{ width: `${percent}%` }} />
+          <span
+            className="stockbar__fill"
+            style={{ transform: `scaleX(${percent / 100})` }}
+          />
         </span>
-        {inCart > 0 ? <span className="chip num">{`× ${inCart}`}</span> : null}
+        {inCart > 0 ? (
+          <span key={inCart} className="chip num">{`× ${inCart}`}</span>
+        ) : null}
       </button>
       {soldOutAt === null && !disabled ? (
         <button

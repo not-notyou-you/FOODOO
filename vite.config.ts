@@ -28,8 +28,8 @@ export default defineConfig(({ mode }) => {
           scope: "/",
           display: "standalone",
           orientation: "portrait",
-          theme_color: "#003049",
-          background_color: "#fff1dc",
+          theme_color: "#00212f",
+          background_color: "#f7f4ef",
           icons: [
             { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
             { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
@@ -51,6 +51,8 @@ export default defineConfig(({ mode }) => {
       include: ["tests/**/*.test.{ts,tsx}"],
       setupFiles: ["tests/setup.ts"],
       testTimeout: 15_000,
+      maxWorkers: "50%",
+      minWorkers: 1,
       env: { VITE_DEMO: "on" },
       coverage: {
         provider: "v8",

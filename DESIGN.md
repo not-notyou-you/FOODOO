@@ -1,6 +1,6 @@
 # DESIGN.md — FOODOO Interface Specification
 
-Visual style: **clean and formal**. That means thin 1 px borders in neutral grey, flat surfaces with no decorative shadows, small corner radii (6–8 px), a neutral grey page background with white cards, and the original FOODOO colours kept exactly: cream page, white cards, orange primary buttons and status fills with ink text, navy for done states and the toast, yellow for highlights and selection, sky blue for info. The team chose it over the earlier soft neo-brutalism (thick outlines, offset shadows, rotated stickers) because it reads as more trustworthy and professional, keeps attention on the numbers, and still renders cheaply on low-end phones. Elevation (`--shadow-overlay`) is used only for layers that float above the page: toast, sheet and the sticky action bar.
+Visual style: **calm, confident and warm**. The two brand colours from the logo, navy and orange, carry the identity: navy for the dark surfaces that frame the product (landing hero, sidebar, the Today loop card, the toast), orange for the one primary action and for sold-out states, always with dark text. Everything else is a warm off-white page, white cards, warm hairline borders and soft shadows, so the numbers stay in focus. Semantic tints (green, blue, amber, red) are used only for status. The earlier saturated cream page and the yellow, sky and mint accents were replaced on 2026-11-26 (D-095). There are no background blurs and no endless animations in the app, so it still renders cheaply on low-end phones.
 
 ## 1. Brand
 
@@ -11,39 +11,23 @@ Visual style: **clean and formal**. That means thin 1 px borders in neutral grey
 
 ## 2. Tokens (`src/styles/tokens.css`)
 
-```css
-:root {
-  --navy: #003049;
-  --orange: #f77f00;
-  --cream: #fff1dc;
-  --paper: #ffffff;
-  --ink: #141414;
-  --muted: #4b4b4b;
-  --yellow: #ffd166;
-  --sky: #c6f1ff;
-  --mint: #d7f5c9;
-  --danger: #c1121f;
-  --line: #d0d7de;
-  --line-strong: #8c959f;
-  --border: 1px solid var(--line);
-  --shadow-overlay: 0 8px 24px rgb(20 20 20 / 14%);
-  --radius: 8px;
-  --radius-sm: 6px;
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 24px;
-  --space-6: 32px;
-  --font-ui: "Space Grotesk", system-ui, sans-serif;
-  --font-num: "Space Grotesk", system-ui, sans-serif;
-}
-```
+The file `src/styles/tokens.css` is the source of truth. The colour roles are:
 
+| Role | Tokens |
+| --- | --- |
+| Brand | `--navy` #003049, `--navy-900` #00212f, `--navy-700` #0a4563, `--navy-100` #e4eef4 |
+| Action | `--orange` #f77f00, `--orange-600` #ea7400 (hover), `--orange-800` #8f4700 (small orange text), `--orange-100`, `--orange-50` |
+| Surfaces | `--bg` #f7f4ef, `--paper` #ffffff, `--sunken` #f1ede6, `--line` #e5ded3, `--line-strong` #75828c |
+| Text | `--ink` #10212c, `--muted` #4d5d68, `--on-dark` #ffffff, `--on-dark-muted` #b9cddb |
+| Status | `--success`, `--info`, `--warn`, `--danger`, each with a `-100` tint |
+
+- Radius 6 / 12 / 18 / 28 px and pill. Spacing 4 / 8 / 12 / 16 / 24 / 32 / 48 / 72 px.
+- `npm run contrast` checks every text and background pair in use.
 - Fonts: Space Grotesk (500, 700) for all UI text and numbers, **self-hosted** in `public/fonts/` so the app works offline. The logo letters are Rubik Mono One outlines converted to SVG paths, so that font is not loaded at runtime. Both are under the SIL Open Font License.
-- Type scale: 12 (tags) / 14 / 16 (body) / 20 / 24 / 32. Portion numbers use `--font-num` (Space Grotesk 700, tabular figures) at 28–32 px.
-- **Press and hover feedback:** a colour change only, never movement. Controls get a darker border on hover and a slight darkening on `:active`.
-- Respect `prefers-reduced-motion`: no translate or toast slide animations.
+- Type scale: 12 (tags) / 14 / 16 (body) / 20 / 24 / 32 / 44 at the default browser text size, written in `rem` so a larger text setting scales it. Portion numbers use `--font-num` (Space Grotesk 700, tabular figures) at 28–32 px. The landing page adds two fluid sizes: `--text-section` and `--text-display`.
+- **Press and hover feedback:** a colour change, plus a small press scale (0.97) and, on pointer devices, a 3 px lift for menu tiles and demo cards.
+- **Motion (`src/styles/motion.css`):** CSS only, `transform` and `opacity` (colour for hover), 120–420 ms, no animation library, nothing that delays an action. Moments: screen content rises in with a short stagger; the loop segments appear one after another; the sold-out stamp drops onto its tile; the cart count pops; chart bars grow; the stock bar shrinks smoothly; sheets slide up; the active tab pill grows; landing sections slide up as they scroll into view where the browser supports scroll-driven animations. The only repeating animation is the loading bar.
+- Respect `prefers-reduced-motion`: every motion rule sits inside `prefers-reduced-motion: no-preference`. Colour feedback stays.
 
 ## 3. Language
 
@@ -53,23 +37,24 @@ Visual style: **clean and formal**. That means thin 1 px borders in neutral grey
 
 ## 4. Layout
 
-- **Mobile first** (360–430 px): single column, bottom tab bar with 4 tabs (Today, Plan, Service, Close) and Settings in the header.
-- **Desktop** (≥ 1024 px): left sidebar with the same items. Content max-width 1120 px. Cards use `grid-template-columns: repeat(auto-fill, minmax(300px, 1fr))`.
-- Header on every screen: app icon, screen title, date, and a **Demo data** badge (yellow, thin border, not rotated) when demo data is loaded. A thin divider line separates the header from the content.
+- **Mobile first** (360–430 px): single column, a floating bottom tab bar with 5 tabs (Today, Plan, Sales, Close, History) and Settings in the header. The active tab has an orange pill behind its icon.
+- **Desktop** (≥ 1024 px): dark navy sidebar with the same items, Settings, and a link to the company page. Content max-width 1120 px (820 px for Settings). Cards use `grid-template-columns: repeat(auto-fill, minmax(300px, 1fr))`. Today puts the loop card beside today's counts from 900 px.
+- Header on every screen: app icon (phone), screen title, date, and a **Demo data** badge (amber pill with a dot) when demo data is loaded.
+- **Public pages:** the landing page has its own sticky header (section links, language, demo button; a menu button below 1000 px) and a footer.
 
 ## 5. Screens
 
 Every screen needs these states designed and built: **default, empty, demo, offline**. Add **error** where input exists.
 
 ### 5.1 Onboarding
-- Welcome: logo, one-line value statement ("Daily portion planning that counts the customers a sold-out menu hides"), buttons **Start setup** (primary) and **Try demo stall** (secondary).
+- Landing (company profile), in order: hero with headline, value statement ("Daily portion planning that counts the customers a sold-out menu hides"), **Start setup** (primary), **Try demo stall**, **Import a file**, and an interactive example "When did it sell out?" worked out by the domain code and badged **Example**; the problem; the daily loop; one sold-out dish followed to the next day; why FOODOO differs; the four demo stalls; the team; a closing call to action. Demo controls are hidden when `VITE_DEMO=off`.
 - Step 1, Menus: list of menu cards plus **Add menu**. The add/edit sheet has labelled inputs with inline validation.
-- Step 2, Hours: open and close time inputs, and the busy-hour strip (one tappable cell per hour; colours quiet = paper, normal = yellow, busy = orange, and **each cell also shows its label text**).
+- Step 2, Hours: open and close time inputs, and the busy-hour strip (one tappable cell per hour; colours quiet = paper, normal = light orange, busy = orange, and **each cell also shows its label text**).
 - A progress indicator: "Step 1 of 2".
 
 ### 5.2 Today (home)
-- A large infinity loop graphic split into three segments: **Plan**, **Service**, **Close**. The current segment is filled orange, finished segments are navy, upcoming segments are outlined.
-- Below it, one primary button for the current phase (e.g. "Plan today's portions"), plus today's counts.
+- A navy card with the stall name, one sentence saying what to do now, and a large infinity loop split into three segments: **Plan**, **Service**, **Close**. The current segment is orange, finished segments are white, upcoming segments are a muted navy; each step also shows its status as text.
+- In the same card, one primary button for the current phase (e.g. "Plan today's portions"). Today's counts sit below it (beside it on wide screens).
 - Empty state (no setup): a prompt to finish setup.
 
 ### 5.3 Plan (morning)
@@ -85,14 +70,14 @@ Every screen needs these states designed and built: **default, empty, demo, offl
 
 ### 5.5 Close (night)
 - One row per menu: a sold-out time chip with **Edit**, or a leftover stepper.
-- The missed-sell-out prompt appears inline (yellow box with a time input).
+- The missed-sell-out prompt appears inline (amber box with a time input).
 - An **Unusual day** checkbox with a helper text.
 - The **Close day** primary button opens a confirmation sheet listing tomorrow's suggestions.
 
 ### 5.6 History (weekly summary)
 - Stat tiles: leftover portions, sell-out events, estimated lost sales (with an "estimate" tag), plans accepted as suggested. The same tiles appear on Today under "Last 7 days".
-- Content sits in cards with a heading row; status is a coloured badge (Closed mint, Unusual sky, Not closed yellow). Estimates show `≈ N` with a small sky "estimate" tag under the number.
-- Per-menu table and a bar chart of cooked vs demand, with the value above each bar and menu chips to switch. Bars are navy for cooked and orange for demand; estimated demand is a dashed orange outline on cream. The legend uses both shape and text, and a hidden table gives screen readers the numbers.
+- Content sits in cards with a heading row; status is a coloured badge (Closed green, Unusual blue, Not closed amber). Estimates show `≈ N` with a small blue "estimate" tag under the number.
+- Per-menu table and a bar chart of cooked vs demand, with the value above each bar and menu chips to switch. Bars are navy for cooked and orange for demand; estimated demand is a dashed orange outline on light orange. The legend uses both shape and text, and a hidden table gives screen readers the numbers.
 - A list of past days opens a read-only day view.
 
 ### 5.7 Settings
@@ -108,7 +93,7 @@ A plain-language explanation with the worked example "Sold out at 10:30 → abou
 ## 7. Accessibility targets (must be measured)
 
 - Lighthouse Accessibility ≥ 95 and Best Practices ≥ 95 on Today, Plan and Service, in both mobile and desktop presets. Record the scores in the README.
-- Text contrast ≥ 4.5:1 (orange `#F77F00` is used only as a background with ink text, or as a large graphic, never for small text on cream or white).
+- Text contrast ≥ 4.5:1 (orange `#F77F00` is used only as a background with ink text, or as a large graphic, never for small text on the page background or white; small orange text uses `--orange-800`).
 - Tap targets ≥ 48 × 48 px.
 - Real `<button>`, `<input>` with `<label>`, and `<a href>`. `aria-label` on icon-only buttons. `aria-live="polite"` on the toast.
 - Full keyboard operation on desktop with a visible focus ring (3 px navy outline with 2 px offset).

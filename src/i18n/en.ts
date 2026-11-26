@@ -456,7 +456,6 @@ export const en = {
     "Here a leftover loses more than a sale earns, so FOODOO does not cook for the busiest day. It picks the amount that would have been enough on about {cover} of every 100 past days.",
   "how.suggestHistory":
     "On the last {count} {weekdays}, people wanted: {values}.",
-  "how.suggested": "Suggested",
   "how.ruleEligible":
     "Only closed, normal days count. Unusual days and days not closed are left out.",
   "how.ruleWeekday":
@@ -523,7 +522,7 @@ export const en = {
     "No login, no server, no customer data. Export or delete everything at any time.",
   "landing.closingTitle": "Ready to try it?",
   "landing.closingBody":
-    "Start with the demo stall at the top of this page, or set up your own menus.",
+    "Look around a demo stall with made-up data, or set up your own menus. No account needed.",
   "landing.installHint":
     "Tip: use your browser's “Add to Home screen” to open FOODOO like an app.",
   "settings.about.landing": "About FOODOO",
@@ -532,4 +531,54 @@ export const en = {
   "landing.exampleTitle": "What you will see",
   "landing.exampleCooked": "Cooked",
   "landing.exampleSoldOut": "Sold out at",
+  "landing.pageTitle": "Daily portion planning",
+  "landing.eyebrow": "For warung and small food stalls",
+  "landing.nav.label": "Page sections",
+  "landing.nav.menu": "Menu",
+  "landing.nav.problem": "The problem",
+  "landing.nav.loop": "How it works",
+  "landing.nav.demo": "Demo",
+  "landing.nav.team": "Team",
+  "landing.nav.seeDemo": "See the demo",
+  "landing.nav.openApp": "Open the app",
+  "landing.problemLead":
+    "Cook too much and money is wasted. Cook too little and customers leave, and the records never show how many.",
+  "landing.loopLead": "Four small moments a day, each only a few taps.",
+  "landing.seeEyebrow": "From pot to plan",
+  "landing.seeLead":
+    "One sold-out dish, followed from service to the next morning. The numbers are an example, worked out by the app's own rules.",
+  "landing.preview.service": "One tap the moment the pot is empty.",
+  "landing.preview.close":
+    "At night FOODOO estimates how many people wanted it.",
+  "landing.preview.next":
+    "Later suggestions learn from this estimate, not only the {cooked} portions you sold.",
+  "landing.whyEyebrow": "What sets it apart",
+  "landing.explorer.title": "When did it sell out?",
+  "landing.explorer.cooked": "{cooked} portions cooked",
+  "landing.explorer.legendSold": "Customers before the sell-out",
+  "landing.explorer.legendMissed": "Customers after: missing from sales",
+  "landing.explorer.arrived": "Customers arrived by then",
+  "landing.explorer.hint":
+    "Drag the slider. Same rules as the app, on an example stall.",
+  "landing.demoTitle": "Walk through a demo stall",
+  "landing.demoOpen": "Open demo",
+  "landing.demoOpenLabel": "Open demo: {name}",
+  "landing.teamTitle": "The team behind FOODOO",
+  "landing.teamBody":
+    "Calon Mantu Idaman, building for STACK 2026 by GDGoC ITB, Case 2: Stronger Communities and Everyday Services.",
+  "landing.team.domain": "Demand estimates, suggestions and backtest",
+  "landing.team.data": "On-device data, export and import",
+  "landing.team.screens": "Screens and components",
+  "landing.team.platform":
+    "Offline app, languages, accessibility, tests and deployment",
+  "landing.closingSetup": "Set up my stall",
+  "landing.closingDemo": "Pick a demo stall",
+  "landing.footerNote":
+    "Demo data is made up and labelled. What you enter stays on your device.",
+  "landing.footerLinks": "More about FOODOO",
+  "today.hint.plan":
+    "Check each suggested number, change what you like, then save.",
+  "today.hint.service": "When a menu runs out, tap it so the time is kept.",
+  "today.hint.close":
+    "Count what is left so later suggestions can learn from today.",
 } as const;

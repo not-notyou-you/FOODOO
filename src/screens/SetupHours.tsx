@@ -5,6 +5,7 @@ import { useToast } from "../app/toast.ts";
 import { Button } from "../components/Button.tsx";
 import { HoursEditor } from "../components/HoursEditor.tsx";
 import { Screen } from "../components/Screen.tsx";
+import { SetupProgress } from "../components/SetupProgress.tsx";
 import { useDb, useStall } from "../db/hooks.ts";
 import {
   completeSetup,
@@ -57,7 +58,7 @@ export function SetupHours() {
 
   return (
     <Screen title={t("setup.hours.title")} showSettings={false} narrow>
-      <p className="step">{t("setup.step", { step: 2, total: 2 })}</p>
+      <SetupProgress step={2} />
       <p>{t("setup.hours.intro")}</p>
       {hours === null ? (
         <p role="status">{t("app.loading")}</p>

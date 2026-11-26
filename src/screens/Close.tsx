@@ -7,6 +7,7 @@ import { Button } from "../components/Button.tsx";
 import { CloseRow } from "../components/CloseRow.tsx";
 import { CloseSummary } from "../components/CloseSummary.tsx";
 import { EmptyState } from "../components/EmptyState.tsx";
+import { CheckIcon } from "../components/icons/CheckIcon.tsx";
 import { Screen } from "../components/Screen.tsx";
 import { Sheet } from "../components/Sheet.tsx";
 import { SoldOutTimeSheet } from "../components/SoldOutTimeSheet.tsx";
@@ -118,8 +119,13 @@ export function Close() {
     const correctable = canCorrect(date, stamp.date);
     return (
       <Screen title={t("close.title")}>
-        <section className="card" aria-labelledby="close-done">
-          <h2 id="close-done">{t("close.closedTitle")}</h2>
+        <section className="card closed-card" aria-labelledby="close-done">
+          <div className="closed-card__head">
+            <span className="closed-card__mark">
+              <CheckIcon />
+            </span>
+            <h2 id="close-done">{t("close.closedTitle")}</h2>
+          </div>
           {today.day?.unusual === true ? (
             <p className="note note--info">{t("close.unusualNote")}</p>
           ) : null}

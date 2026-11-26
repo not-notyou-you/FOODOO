@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "../components/Button.tsx";
 import { MenuManager } from "../components/MenuManager.tsx";
 import { Screen } from "../components/Screen.tsx";
+import { SetupProgress } from "../components/SetupProgress.tsx";
 import { useMenus } from "../db/hooks.ts";
 import { useT } from "../i18n/index.ts";
 
@@ -16,7 +17,7 @@ export function SetupMenus() {
 
   return (
     <Screen title={t("setup.menus.title")} showSettings={false} narrow>
-      <p className="step">{t("setup.step", { step: 1, total: 2 })}</p>
+      <SetupProgress step={1} />
       <p>{t("setup.menus.intro")}</p>
       <MenuManager showSalvage={false} />
       {blocked && activeCount === 0 ? (

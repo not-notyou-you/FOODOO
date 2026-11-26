@@ -194,63 +194,70 @@ export function Register() {
       <p className={closed ? "note note--info" : "note"}>
         {closed ? t("service.closedNote") : t("register.intro")}
       </p>
-      <ul className="service-grid">
-        {rows.map((row) => (
-          <RegisterTile
-            key={row.menuId}
-            name={nameOf(row.menuId)}
-            price={byId.get(row.menuId)?.price ?? 0}
-            cooked={row.cookedQty}
-            remaining={remainingQty(row, sales)}
-            over={overPlanQty(row, sales)}
-            inCart={cart[row.menuId] ?? 0}
-            soldOutAt={row.soldOutAt}
+      <div className="register">
+        <div className="register__tiles">
+          <ul className="service-grid">
+            {rows.map((row) => (
+              <RegisterTile
+                key={row.menuId}
+                name={nameOf(row.menuId)}
+                price={byId.get(row.menuId)?.price ?? 0}
+                cooked={row.cookedQty}
+                remaining={remainingQty(row, sales)}
+                over={overPlanQty(row, sales)}
+                inCart={cart[row.menuId] ?? 0}
+                soldOutAt={row.soldOutAt}
+                disabled={closed}
+                onAdd={() => {
+                  setQty(row.menuId, (cart[row.menuId] ?? 0) + 1);
+                }}
+                onSoldOut={() => {
+                  void markSoldOut(row.menuId, toLocalStamp(clock.now()).time);
+                }}
+              />
+            ))}
+          </ul>
+          {itemCount === 0 || closed ? null : (
+            <div className="action-bar">
+              <Button
+                wide
+                onClick={() => {
+                  setCartOpen(true);
+                }}
+              >
+                {t("register.cartButton", {
+                  count: itemCount,
+                  total: formatRupiah(cartTotal(lines, menus)),
+                })}
+              </Button>
+            </div>
+          )}
+        </div>
+        <section
+          className="card panel register__side"
+          aria-labelledby="register-today"
+        >
+          <h2 id="register-today">{t("register.todayTitle")}</h2>
+          <dl className="counts__grid">
+            <div className="counts__item">
+              <dt>{t("register.revenue")}</dt>
+              <dd className="num">{formatRupiah(salesRevenue(sales))}</dd>
+            </div>
+            <div className="counts__item">
+              <dt>{t("register.count")}</dt>
+              <dd className="num">{groups.length}</dd>
+            </div>
+          </dl>
+          <SaleList
+            groups={groups}
+            nameOf={nameOf}
             disabled={closed}
-            onAdd={() => {
-              setQty(row.menuId, (cart[row.menuId] ?? 0) + 1);
-            }}
-            onSoldOut={() => {
-              void markSoldOut(row.menuId, toLocalStamp(clock.now()).time);
+            onVoid={() => {
+              setVoiding(true);
             }}
           />
-        ))}
-      </ul>
-      {itemCount === 0 || closed ? null : (
-        <div className="action-bar">
-          <Button
-            wide
-            onClick={() => {
-              setCartOpen(true);
-            }}
-          >
-            {t("register.cartButton", {
-              count: itemCount,
-              total: formatRupiah(cartTotal(lines, menus)),
-            })}
-          </Button>
-        </div>
-      )}
-      <section className="card panel" aria-labelledby="register-today">
-        <h2 id="register-today">{t("register.todayTitle")}</h2>
-        <dl className="counts__grid">
-          <div className="counts__item">
-            <dt>{t("register.revenue")}</dt>
-            <dd className="num">{formatRupiah(salesRevenue(sales))}</dd>
-          </div>
-          <div className="counts__item">
-            <dt>{t("register.count")}</dt>
-            <dd className="num">{groups.length}</dd>
-          </div>
-        </dl>
-        <SaleList
-          groups={groups}
-          nameOf={nameOf}
-          disabled={closed}
-          onVoid={() => {
-            setVoiding(true);
-          }}
-        />
-      </section>
+        </section>
+      </div>
       {cartOpen && !closed ? (
         <CartSheet
           lines={lines}

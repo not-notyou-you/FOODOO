@@ -25,7 +25,10 @@ export function ToastProvider({ children }: ToastProviderProps) {
 
   const show = useCallback((message: string, options: ToastOptions = {}) => {
     nextId.current += 1;
-    setToast({ id: nextId.current, message, ...options });
+    const next = { id: nextId.current, message, ...options };
+    setToast((current) =>
+      options.background === true && current !== null ? current : next,
+    );
   }, []);
 
   const dismiss = useCallback(() => {

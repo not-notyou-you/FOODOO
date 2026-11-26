@@ -70,31 +70,33 @@ export function CookedDemandChart({ rows, title }: CookedDemandChartProps) {
           {t("history.chart.estimate")}
         </span>
       </figcaption>
-      <table className="visually-hidden">
-        <caption>{title}</caption>
-        <thead>
-          <tr>
-            <th scope="col">{t("history.col.date")}</th>
-            <th scope="col">{t("history.chart.cooked")}</th>
-            <th scope="col">{t("history.chart.demand")}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => (
-            <tr key={row.date}>
-              <th scope="row">{row.date}</th>
-              <td>{row.cooked}</td>
-              <td>
-                {row.demand === null
-                  ? t("estimate.none")
-                  : row.isEstimate
-                    ? t("estimate.value", { qty: row.demand })
-                    : row.demand}
-              </td>
+      <div className="visually-hidden">
+        <table>
+          <caption>{title}</caption>
+          <thead>
+            <tr>
+              <th scope="col">{t("history.col.date")}</th>
+              <th scope="col">{t("history.chart.cooked")}</th>
+              <th scope="col">{t("history.chart.demand")}</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr key={row.date}>
+                <th scope="row">{row.date}</th>
+                <td>{row.cooked}</td>
+                <td>
+                  {row.demand === null
+                    ? t("estimate.none")
+                    : row.isEstimate
+                      ? t("estimate.value", { qty: row.demand })
+                      : row.demand}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </figure>
   );
 }
